@@ -12,7 +12,7 @@ public class ModelAudienceGetPeopleCountResponse : IJSONable<ModelAudienceGetPeo
 	/// <summary>
 	/// 参加者の延べ人数
 	/// </summary>
-	public int Count;
+	public int count;
 
 	/// <summary>
 	/// JSON文字列からこのインターフェースを実装するオブジェクトにデシリアライズします。

@@ -12,12 +12,15 @@
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <TargetFrameworkProfile></TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.3.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -292,7 +295,6 @@
     <Compile Include="Assets\Scripts\GameMaster.cs" />
     <Compile Include="Assets\Scripts\Library\Interface\IJSONable.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudienceGetPeopleCountResponse.cs" />
-    <Compile Include="Assets\Scripts\Library\Model\ModelAudienceIsPostableResponse.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudienceNewEventResponse.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudiencePredict.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudiencePredictList.cs" />
@@ -300,6 +302,7 @@
     <Compile Include="Assets\Scripts\Library\Model\ModelControllerB.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelControllerC.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelControllerStart.cs" />
+    <Compile Include="Assets\Scripts\Library\Model\ModelHttpRequest.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkConnector.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkController.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkGameMaster.cs" />

@@ -12,37 +12,37 @@ public class ModelAudiencePredict : IJSONable<ModelAudiencePredict> {
 	/// <summary>
 	/// 投稿ID
 	/// </summary>
-	public string Id;
+	public string id;
 
 	/// <summary>
 	/// イベントID
 	/// </summary>
-	public string EventId;
+	public string eventId;
 
 	/// <summary>
 	/// 投稿者名
 	/// </summary>
-	public string AudienceName;
+	public string nickname;
 
 	/// <summary>
 	/// 予想値
 	/// </summary>
-	public int Predict;
+	public int predict;
 
 	/// <summary>
 	/// 投稿日時
 	/// </summary>
-	public Time ReceiveDate;
+	public string receiveTime;
 
 	/// <summary>
 	/// 送信元IPアドレス
 	/// </summary>
-	public string IPAddress;
+	public string ipAddress;
 
 	/// <summary>
 	/// 送信元の機種・OS名など
 	/// </summary>
-	public string OSEnv;
+	public string osEnvironment;
 
 	/// <summary>
 	/// JSON文字列からこのインターフェースを実装するオブジェクトにデシリアライズします。

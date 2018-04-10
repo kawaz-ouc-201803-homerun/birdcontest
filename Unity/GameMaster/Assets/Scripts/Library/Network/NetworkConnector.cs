@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using UnityEngine;
 
 /// <summary>
-/// TCP/UDPの通信処理を行う基本クラス
+/// HTTP/TCP/UDPの通信処理を行う基本クラス
 /// </summary>
 public abstract class NetworkConnector {
 
@@ -32,7 +32,7 @@ public abstract class NetworkConnector {
 	/// <summary>
 	/// オーディエンス投票システムの基本URL
 	/// </summary>
-	protected const string AudienceSystemBaseURL = "http://tsownserver.dip.jp:8080/birdman/";
+	protected const string AudienceSystemBaseURL = "http://tsownserver.dip.jp:8080/GameJamAudience/";
 
 	/// <summary>
 	/// 各種操作端末のIPアドレス（決め打ち）
@@ -58,28 +58,26 @@ public abstract class NetworkConnector {
 	/// </summary>
 	/// <typeparam name="T">受信するレスポンスの型</typeparam>
 	/// <param name="url">リクエスト送信先URL</param>
-	/// <param name="parameter">リクエストとして送信するオブジェクト</param>
+	/// <param name="parameter">リクエストとして送信するパラメーター</param>
 	/// <returns>レスポンスとして受信したオブジェクト。JSON形式からのデシリアライズに失敗した場合は null を返す</returns>
-	protected T postRequestWithResponseObject<T>(string url, object parameter) where T : IJSONable<T> {
+	protected T postRequestWithResponseObject<T>(string url, ModelHttpRequest parameter) where T : IJSONable<T> {
+		if(parameter == null) {
+			throw new ArgumentNullException("parameter", "WebAPIのリクエストパラメーターは必須です。");
+		}
+
 		var httpRequest = HttpWebRequest.CreateHttp(NetworkController.AudienceSystemBaseURL + url);
 
 		// 送信するデータはJSON化する
-		string json = "";
-		if(parameter != null) {
-			json = JsonUtility.ToJson(parameter);
-		}
+		string json = JsonUtility.ToJson(parameter);
 
 		// HTTPリクエストを作成
 		httpRequest.Method = "POST";
 		httpRequest.ContentType = "application/json";
-		if(parameter != null) {
-			using(var W = new System.IO.StreamWriter(httpRequest.GetRequestStream())) {
-				W.Write(json);
-			}
+		using(var W = new System.IO.StreamWriter(httpRequest.GetRequestStream())) {
+			W.Write(json);
 		}
 
 		// HTTPリクエスト送信、サーバーからレスポンスを受け取る
-		json = "";
 		using(var httpResponse = httpRequest.GetResponse()) {
 			var buf = new System.IO.StringWriter();
 			using(var R = new System.IO.StreamReader(httpResponse.GetResponseStream())) {
@@ -103,22 +101,21 @@ public abstract class NetworkConnector {
 	/// <param name="url">リクエスト送信先URL</param>
 	/// <param name="parameter">リクエストとして送信するオブジェクト</param>
 	/// <returns>HTTPステータスコード</returns>
-	protected HttpStatusCode postRequestWithResponseCode(string url, object parameter) {
+	protected HttpStatusCode postRequestWithResponseCode(string url, ModelHttpRequest parameter) {
+		if(parameter == null) {
+			throw new ArgumentNullException("parameter", "WebAPIのリクエストパラメーターは必須です。");
+		}
+
 		var httpRequest = HttpWebRequest.CreateHttp(NetworkController.AudienceSystemBaseURL + url);
 
 		// 送信するデータはJSON化する
-		string json = "";
-		if(parameter != null) {
-			json = JsonUtility.ToJson(parameter);
-		}
+		string json = JsonUtility.ToJson(parameter);
 
 		// HTTPリクエストを作成
 		httpRequest.Method = "POST";
 		httpRequest.ContentType = "application/json";
-		if(parameter != null) {
-			using(var W = new System.IO.StreamWriter(httpRequest.GetRequestStream())) {
-				W.Write(json);
-			}
+		using(var W = new System.IO.StreamWriter(httpRequest.GetRequestStream())) {
+			W.Write(json);
 		}
 
 		// HTTPリクエスト送信、サーバーからレスポンスを受け取る

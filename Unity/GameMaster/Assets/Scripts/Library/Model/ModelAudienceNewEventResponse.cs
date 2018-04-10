@@ -12,7 +12,7 @@ public class ModelAudienceNewEventResponse : IJSONable<ModelAudienceNewEventResp
 	/// <summary>
 	/// イベントID
 	/// </summary>
-	public string EventId;
+	public string eventId;
 
 	/// <summary>
 	/// JSON文字列からこのインターフェースを実装するオブジェクトにデシリアライズします。

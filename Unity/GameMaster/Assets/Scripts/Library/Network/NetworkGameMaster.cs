@@ -1,42 +1,81 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
 
 /// <summary>
-/// ゲームマスター側のTCP/UDP通信処理を行うラッパークラス
+/// ゲームマスター側のHTTP/TCP/UDP通信処理を行うラッパークラス
 /// </summary>
 public class NetworkGameMaster : NetworkConnector {
 
 	/// <summary>
+	/// WebAPIのハンドラー名
+	/// </summary>
+	protected const string HandlerJson = "handler/GameMasterHandler.json";
+
+	/// <summary>
 	/// HTTP通信でオーディエンス予想の新しいイベントを生成します。
+	/// 既存のイベントは自動的にすべて締め切られます。
 	/// </summary>
 	/// <returns>イベントID</returns>
 	public string StartAudiencePredicts() {
-		return this.postRequestWithResponseObject<ModelAudienceNewEventResponse>("new_event", null)?.EventId;
+		return this.postRequestWithResponseObject<ModelAudienceNewEventResponse>(
+			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
+			new ModelHttpRequest() {
+				method = "newEvent",
+				param = new object[] {},
+				id = 1,
+			}
+		)?.eventId;
 	}
 
 	/// <summary>
-	/// HTTP通信で現在有効なイベントのオーディエンス予想を取り出します。
+	/// HTTP通信で指定したイベントのオーディエンス予想を取り出します。
 	/// </summary>
+	/// <param name="eventId">イベントID</param>
 	/// <returns>オーディエンス予想のリスト</returns>
-	public ModelAudiencePredictList LoadAudiencePredicts() {
-		return this.postRequestWithResponseObject<ModelAudiencePredictList>("get_posts", null);
+	public List<ModelAudiencePredict> LoadAudiencePredicts(string eventId) {
+		return this.postRequestWithResponseObject<ModelAudiencePredictList>(
+			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
+			new ModelHttpRequest() {
+				method = "getPosts",
+				param = new object[] { eventId },
+				id = 2,
+			}
+		).audiencePredicts;
 	}
 
 	/// <summary>
-	/// HTTP通信で現在のイベントのオーディエンス予想を締め切ります。
+	/// HTTP通信で指定したイベントのオーディエンス予想を締め切ります。
 	/// </summary>
-	public System.Net.HttpStatusCode CloseAudiencePredicts() {
-		return this.postRequestWithResponseCode("close", null);
+	/// <param name="eventId">イベントID</param>
+	/// <returns>HTTPレスポンスコード</returns>
+	public HttpStatusCode CloseAudiencePredicts(string eventId) {
+		return this.postRequestWithResponseCode(
+			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
+			new ModelHttpRequest() {
+				method = "close",
+				param = new object[] { eventId },
+				id = 3,
+			}
+		);
 	}
 
 	/// <summary>
 	/// HTTP通信でオーディエンスの参加延べ人数を取得します。
 	/// </summary>
-	public ModelAudienceGetPeopleCountResponse GetPeopleCount() {
-		return this.postRequestWithResponseObject<ModelAudienceGetPeopleCountResponse>("get_people_count", null);
+	/// <returns>オーディエンスの参加延べ人数</returns>
+	public int GetPeopleCount() {
+		return this.postRequestWithResponseObject<ModelAudienceGetPeopleCountResponse>(
+			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
+			new ModelHttpRequest() {
+				method = "getPeopleCount",
+				param = new object[] {},
+				id = 4,
+			}
+		).count;
 	}
 
 	/// <summary>

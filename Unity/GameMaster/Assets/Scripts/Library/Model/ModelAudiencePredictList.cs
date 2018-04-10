@@ -12,7 +12,7 @@ public class ModelAudiencePredictList : IJSONable<ModelAudiencePredictList> {
 	/// <summary>
 	/// オーディエンス予想リスト
 	/// </summary>
-	public List<ModelAudiencePredict> AudiencePredicts;
+	public List<ModelAudiencePredict> audiencePredicts;
 
 	/// <summary>
 	/// JSON文字列からこのインターフェースを実装するオブジェクトにデシリアライズします。
