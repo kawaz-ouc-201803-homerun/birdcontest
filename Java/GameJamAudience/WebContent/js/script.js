@@ -5,7 +5,7 @@
 /**
  * WebAPIのURL
  */
-var SERVERURL = "http://tsownserver.dip.jp:8080/GameJamAudience/handler/Audience.json";
+var SERVERURL = "http://tsownserver.dip.jp:8080/GameJamAudience/";
 
 
 /**
@@ -21,7 +21,7 @@ $(function() {
  */
 function CheckPostable() {
 	$.ajax({
-		url: SERVERURL,
+		url: SERVERURL + "/handler/Audience.json",
 		type: "POST",
 		async: true,
 		contentType: "application/JSON",
@@ -39,7 +39,7 @@ function CheckPostable() {
 		},
 		error: function() {
 			// 取得失敗: エラーページに飛ばす
-			location.href = "";
+			// location.href = "";
 		}
 	})
 }
@@ -50,7 +50,7 @@ function CheckPostable() {
  */
 function DoPost() {
 	$.ajax({
-		url: SERVERURL,
+		url: SERVERUSERVERURL + "/servlet/AudiencePost",
 		type: "POST",
 		async: true,
 		contentType: "application/JSON",
@@ -62,11 +62,11 @@ function DoPost() {
 		}),
 		success: function(data) {
 			// 送信完了: 送信完了ページに飛ばす
-			location.href = "";
+			// location.href = "";
 		},
 		error: function() {
 			// 取得失敗: エラーページに飛ばす
-			location.href = "";
+			// location.href = "";
 		}
 	})
 }

@@ -1,6 +1,7 @@
 package database;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -19,7 +20,7 @@ public class AudienceDAO implements DAOInterface {
 	 * GUIDを生成します。
 	 * @return GUID
 	 */
-	private String getGUID() {
+	private String createGUID() {
 		return UUID.randomUUID().toString().replace("-", "");
 	}
 
@@ -30,7 +31,7 @@ public class AudienceDAO implements DAOInterface {
 	 * @return イベントID
 	 */
 	public String newEvent() {
-		String eventId = this.getGUID();
+		String eventId = this.createGUID();
 
 		try(val con = ConnectionManager.getManager().connect(this)) {
 
@@ -87,20 +88,33 @@ public class AudienceDAO implements DAOInterface {
 	 * 投票処理
 	 *
 	 * @param data 投票データ
+	 * @throws SQLException, Exception エラー発生
 	 */
-	public void post(ModelAudiencePredict data) {
+	public void post(ModelAudiencePredict data) throws SQLException, Exception {
 		try(val con = ConnectionManager.getManager().connect(this)) {
 
 			con.setAutoCommit(false);
 
+			// 既に同じイベントに対して投稿していないかチェック
+			try(val stmt = con.prepareStatement("SELECT * FROM TPREDICT WHERE event_id = ? AND user_session_id = ?")) {
+				stmt.setString(1, data.getEventId());
+				stmt.setString(2, data.getUserSessionId());
+				val rs = stmt.executeQuery();
+
+				if(rs.next()) {
+					// 既に登録されている
+					throw new Exception("既に投稿されています。次のゲームが始まるまでお待ち下さい。");
+				}
+			}
+
 			// イベント作成
-			try(val stmt = con.prepareStatement("INSERT INTO TPREDICT VALUES (?, ?, ?, ?, datetime('now', 'localtime'), ?, ?)")) {
-				stmt.setString(1, this.getGUID());
+			try(val stmt = con.prepareStatement("INSERT INTO TPREDICT VALUES (?, ?, ?, ?, datetime('now', 'localtime'), ?)")) {
+				stmt.setString(1, this.createGUID());
 				stmt.setString(2, data.getEventId());
 				stmt.setString(3, data.getNickname());
 				stmt.setInt(4, data.getPredict());
-				stmt.setString(5, data.getIpAddress());
-				stmt.setString(5, data.getOsEnvironment());
+				stmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+				stmt.setString(6, data.getUserSessionId());
 				stmt.executeUpdate();
 			}
 
@@ -109,6 +123,11 @@ public class AudienceDAO implements DAOInterface {
 		} catch(SQLException e) {
 			e.printStackTrace();
 			System.out.println("TEVENT: レコードの追加に失敗");
+			throw e;
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.out.println("TEVENT: レコードの追加をキャンセル");
+			throw e;
 		}
 	}
 
@@ -128,12 +147,11 @@ public class AudienceDAO implements DAOInterface {
 			while(rs.next()) {
 				list.add(new ModelAudiencePredict(
 						rs.getString("id"),
-						rs.getString("event_id"),
+						eventId,
 						rs.getString("name"),
 						rs.getInt("predict"),
 						rs.getString("receive_time"),
-						rs.getString("ip_address"),
-						rs.getString("os_env")));
+						null));
 			}
 
 		} catch(SQLException e) {
@@ -198,7 +216,7 @@ public class AudienceDAO implements DAOInterface {
 	public String[] getCreateTableSQL() {
 		return new String[] {
 				"CREATE TABLE IF NOT EXISTS TEVENT (id text PRIMARY KEY, create_time datetime NOT NULL, is_closed int NOT NULL)",
-				"CREATE TABLE IF NOT EXISTS TPREDICT (id text PRIMARY KEY, event_id text NOT NULL, name text NOT NULL, predict int NOT NULL, receive_time datetime NOT NULL, ip_address text NOT NULL, os_env text)",
+				"CREATE TABLE IF NOT EXISTS TPREDICT (id text PRIMARY KEY, event_id text NOT NULL, name text NOT NULL, predict int NOT NULL, receive_time datetime NOT NULL, user_session_id text NOT NULL)",
 		};
 	}
 

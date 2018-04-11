@@ -4,7 +4,6 @@
   <welcome-file-list>
     <welcome-file>index.php</welcome-file>
   </welcome-file-list>
-
   <servlet>
     <servlet-name>rpcServlet</servlet-name>
     <servlet-class>net.arnx.jsonic.web.RPCServlet</servlet-class>
@@ -12,19 +11,16 @@
       <param-name>config</param-name>
       <param-value>
 		{
-			"debug": true,
-			"mappings": {
-				"/{package}/{class}.json": "${package}.${class}Handler",
-				"/rpc.json": "${package}.${class}Handler"
+			&quot;debug&quot;: true,
+			&quot;mappings&quot;: {
+				&quot;/{package}/{class}.json&quot;: &quot;${package}.${class}Handler&quot;
 			}
 		}
       </param-value>
     </init-param>
   </servlet>
-
   <servlet-mapping>
     <servlet-name>rpcServlet</servlet-name>
     <url-pattern>*.json</url-pattern>
   </servlet-mapping>
-
 </web-app>

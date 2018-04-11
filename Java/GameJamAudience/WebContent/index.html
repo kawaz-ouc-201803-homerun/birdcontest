@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>鳥人間コンテスト</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<!-- CSS -->
+<link href="https://fonts.googleapis.com/earlyaccess/notosansjapanese.css" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css">
+
+<!-- JS -->
+<script type="text/javascript" src="js/jquery-3.3.1.min.js" ></script>
+<script type="text/javascript" src="js/script.js" ></script>
+
+</head>
+<body>
+
+<div class="page-container">
+
+  <div class="content-box">
+    <h1 class="ttl-main">鳥人間コンテスト<span>投票ページ</span></h1>
+    <div>
+      <p class="txt">１回のゲームにつき、<br>投票できるのは１回までです。</p>
+
+      <form id="postform">
+        <div class="form-field">
+          <label class="label">ニックネーム</label>
+          <input type="text" id="name" placeholder="例： 札幌太郎">
+        </div>
+        <div class="form-field">
+          <label class="label">予想飛距離 (m)</label>
+          <input type="number" id="predict" min="0" max="99999999">
+        </div>
+
+        <button onclick="DoPost();">投票</button>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="credit">
+    photo by <a href="https://www.flickr.com/photos/kanon_7/21087510375/" target="_blank">Kanon Serizawa</a>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,152 @@
+html,body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  color: #333;
+  background: #f9f9f9;
+  font-family: "Noto Sans Japanese", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "ヒラギノ角ゴ ProN W3", Hiragino Kaku Gothic ProN, Arial, "メイリオ", Meiryo, sans-serif;
+  font-size: 1rem;
+  background: url(../img/bg.jpg) no-repeat center center;
+  background-size: cover;
+}
+
+
+a {
+  color: inherit;
+}
+
+.page-container {
+  height: 100%;
+  width: 100%;
+}
+
+.page-container .credit {
+  font-size: 0.8rem;
+  position: absolute;
+  bottom: 5px;
+  right:5px;
+  color: rgba(0,0,0,0.5);
+  font-family: Verdana, Helvetica, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.page-container .content-box {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #ececec;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%,-50%);
+          transform: translate(-50%,-50%);
+  padding: 25px;
+  max-width: 400px;
+  width:90%;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  text-align: center;
+}
+
+.page-container .content-box .ttl-main {
+  font-size: 2.5rem;
+  letter-spacing: 0.06em;
+  font-weight: normal;
+}
+
+.page-container .content-box .ttl-main span {
+  display: block;
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  color: #999;
+  margin: 5px auto 0;
+}
+
+.page-container .content-box .ttl-main::after {
+  content: "";
+  width: 40px;
+  height: 2px;
+  display: block;
+  background: #cacaca;
+  margin: 20px auto 30px;
+}
+
+.page-container .content-box .txt {
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+  margin: 0 auto 40px;
+}
+
+.form-field {
+  margin-bottom: 10px;
+  font-size: 0;
+}
+
+.form-field:nth-child(2) {
+  margin-bottom: 20px;
+}
+
+.form-field input {
+  padding: 10px;
+  -webkit-appearance:none;
+  outline: none;
+  border:1px solid #ccc;
+  border-radius: 5px;
+  width:calc(100% - 130px);
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+}
+
+.form-field .label {
+  display: inline-block;
+  font-size: 1.3rem;
+  width:120px;
+  padding-right: 10px;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  text-align: right;
+}
+
+button {
+  width: 100px;
+  padding: 10px;
+  background: #9ec540;
+  color: #fff;
+  -webkit-appearance:none;
+  outline: none;
+  border: 0;
+  border-radius: 9px;
+  font-size: 1.5rem;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: box-shadow 0.5s;
+}
+
+button:hover {
+  box-shadow: 0px 3px 7px rgba(0, 0, 0, 0.15);
+}
+
+:placeholder-shown  {
+    color: #ccc
+}
+
+::-webkit-input-placeholder  {
+    color: #ccc
+}
+
+:-moz-placeholder  {
+    color: #ccc
+}
+
+::-moz-placeholder  {
+    color: #ccc
+}
+
+:-ms-input-placeholder  {
+    color: #ccc
+}

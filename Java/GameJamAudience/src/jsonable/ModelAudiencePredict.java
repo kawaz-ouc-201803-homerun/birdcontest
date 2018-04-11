@@ -39,13 +39,8 @@ public class ModelAudiencePredict {
 	private String receiveTime;
 
 	/// <summary>
-	/// 送信元IPアドレス
+	/// ユーザーセッションID
 	/// </summary>
-	private String ipAddress;
-
-	/// <summary>
-	/// 送信元の機種・OS名など
-	/// </summary>
-	private String osEnvironment;
+	private String userSessionId;
 
 }

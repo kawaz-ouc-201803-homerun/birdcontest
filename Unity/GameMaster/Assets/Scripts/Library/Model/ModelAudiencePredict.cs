@@ -35,14 +35,9 @@ public class ModelAudiencePredict : IJSONable<ModelAudiencePredict> {
 	public string receiveTime;
 
 	/// <summary>
-	/// 送信元IPアドレス
+	/// ユーザーセッションID
 	/// </summary>
-	public string ipAddress;
-
-	/// <summary>
-	/// 送信元の機種・OS名など
-	/// </summary>
-	public string osEnvironment;
+	public string userSessionId;
 
 	/// <summary>
 	/// JSON文字列からこのインターフェースを実装するオブジェクトにデシリアライズします。
