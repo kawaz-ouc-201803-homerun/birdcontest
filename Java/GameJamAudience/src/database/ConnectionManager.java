@@ -16,7 +16,7 @@ public class ConnectionManager {
 	/**
 	 * データベースの接続文字列
 	 */
-	static private final String DB_CONNECTION_STRING = "jdbc:sqlite:/home/tomcat/.jenkins/workspace/GameJamAudience/GameJamAudience.db";
+	static private final String DB_CONNECTION_STRING = "jdbc:sqlite:/usr/local/src/tomcat/sqlite/GameJamAudience.db";
 	// static private final String DB_CONNECTION_STRING = "jdbc:sqlite:E:/GitBucket/kawaz_ouc_201803_homerun/Java/GameJamAudience.db";
 
 	/**
