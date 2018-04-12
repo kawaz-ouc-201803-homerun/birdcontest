@@ -9,6 +9,10 @@
  */
 var EventId = null;
 
+/**
+ * WebAPIの基本URL
+ */
+var SERVERURL = "http://tsownserver.dip.jp:8080/GameJamAudience/";
 
 /**
  * ページ読み込み時に実行します。
@@ -26,7 +30,7 @@ $(function(){
  * @param object 成功したときは次のテストケースの番号、失敗したときはエラー情報
  */
 function Assert(isOK, object) {
-	if(data.expect == data.result) {
+	if(isOK == true) {
 		console.log("    -> OK");
 		window.NextToTestCase(object);
 	} else {
