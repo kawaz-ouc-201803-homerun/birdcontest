@@ -96,7 +96,7 @@ TestCases = [
 	function(i) {
 		console.log("[" + i + ": 正常系 - イベント生成]");
 		$.ajax({
-			url: SERVERURL + "handler/Audience.json",
+			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
 			contentType: "application/JSON",
@@ -182,7 +182,7 @@ TestCases = [
 	function(i) {
 		console.log("[" + i + ": 正常系 - 投票データ取り出し処理]");
 		$.ajax({
-			url: SERVERURL + "handler/Audience.json",
+			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
 			contentType: "application/JSON",
@@ -210,7 +210,7 @@ TestCases = [
 	function(i) {
 		console.log("[" + i + ": 正常系 1 - 投票締め切り処理]");
 		$.ajax({
-			url: SERVERURL + "handler/Audience.json",
+			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
 			contentType: "application/JSON",
@@ -237,7 +237,7 @@ TestCases = [
 	function(i) {
 		console.log("[" + i + ": 正常系 2 - 投票締め切り処理]");
 		$.ajax({
-			url: SERVERURL + "handler/Audience.json",
+			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
 			contentType: "application/JSON",
@@ -265,7 +265,7 @@ TestCases = [
 	function(i) {
 		console.log("[" + i + ": 正常系 - 参加延べ人数取得]");
 		$.ajax({
-			url: SERVERURL + "handler/Audience.json",
+			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
 			contentType: "application/JSON",
