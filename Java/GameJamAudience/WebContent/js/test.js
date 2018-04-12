@@ -9,6 +9,10 @@
  */
 var EventId = null;
 
+/**
+ * WebAPIの基本URL
+ */
+var SERVERURL = "http://tsownserver.dip.jp:8080/GameJamAudience/";
 
 /**
  * ページ読み込み時に実行します。

@@ -3,7 +3,7 @@
 //###################################################################
 
 /**
- * WebAPIのURL
+ * WebAPIの基本URL
  */
 var SERVERURL = "http://tsownserver.dip.jp:8080/GameJamAudience/";
 // var SERVERURL = "http://localhost:8080/GameJamAudience/";
