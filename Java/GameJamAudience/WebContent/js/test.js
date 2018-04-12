@@ -56,7 +56,7 @@ function NextToTestCase(index) {
  * テストケース
  */
 TestCases = [
-	function() {
+	function(i) {
 		console.log("[" + i + ": 異常系 - 現在有効なイベントのIDを取得]");
 		$.ajax({
 			url: SERVERURL + "handler/Audience.json",
@@ -118,7 +118,7 @@ TestCases = [
 		});
 	},
 
-	function() {
+	function(i) {
 		console.log("[" + i + ": 正常系 - 現在有効なイベントのIDを取得]");
 		$.ajax({
 			url: SERVERURL + "handler/Audience.json",
@@ -151,7 +151,7 @@ TestCases = [
 		});
 	},
 
-	function() {
+	function(i) {
 		console.log("[" + i + ": 正常系 - 投票処理]");
 		$.ajax({
 			url: SERVERURL + "servlet/AudiencePost",
@@ -175,7 +175,7 @@ TestCases = [
 		});
 	},
 
-	function() {
+	function(i) {
 		console.log("[" + i + ": 正常系 - 投票データ取り出し処理]");
 		$.ajax({
 			url: SERVERURL + "handler/Audience.json",
@@ -203,7 +203,7 @@ TestCases = [
 		});
 	},
 
-	function() {
+	function(i) {
 		console.log("[" + i + ": 正常系 1 - 投票締め切り処理]");
 		$.ajax({
 			url: SERVERURL + "handler/Audience.json",
@@ -230,7 +230,7 @@ TestCases = [
 		});
 	},
 
-	function() {
+	function(i) {
 		console.log("[" + i + ": 正常系 2 - 投票締め切り処理]");
 		$.ajax({
 			url: SERVERURL + "handler/Audience.json",
@@ -258,7 +258,7 @@ TestCases = [
 		});
 	},
 
-	function() {
+	function(i) {
 		console.log("[" + i + ": 正常系 - 参加延べ人数取得]");
 		$.ajax({
 			url: SERVERURL + "handler/Audience.json",
