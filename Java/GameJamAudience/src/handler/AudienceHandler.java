@@ -1,5 +1,6 @@
 package handler;
 
+import java.sql.SQLException;
 import database.AudienceDAO;
 import jsonable.ModelAudienceGetCurrentEventIdResponse;
 import lombok.val;
@@ -17,8 +18,9 @@ public class AudienceHandler {
 	 * 現在投票可能かどうかを返します。
 	 *
 	 * @return 投票可能かどうかを示すレスポンスオブジェクト
+	 * @throws SQLException エラー発生
 	 */
-	public ModelAudienceGetCurrentEventIdResponse getCurrentEventId() {
+	public ModelAudienceGetCurrentEventIdResponse getCurrentEventId() throws SQLException {
 		val dao = new AudienceDAO();
 		return new ModelAudienceGetCurrentEventIdResponse(dao.getCurrentEventId());
 	}

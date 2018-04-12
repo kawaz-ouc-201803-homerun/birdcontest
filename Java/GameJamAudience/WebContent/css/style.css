@@ -1,4 +1,6 @@
-html,body {
+/* Basic */
+
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -97,7 +99,7 @@ a {
   outline: none;
   border:1px solid #ccc;
   border-radius: 5px;
-  width:calc(100% - 130px);
+  width: calc(100% - 130px);
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
 }
@@ -105,7 +107,7 @@ a {
 .form-field .label {
   display: inline-block;
   font-size: 1.3rem;
-  width:120px;
+  width: 120px;
   padding-right: 10px;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
@@ -117,7 +119,7 @@ button {
   padding: 10px;
   background: #9ec540;
   color: #fff;
-  -webkit-appearance:none;
+  -webkit-appearance: none;
   outline: none;
   border: 0;
   border-radius: 9px;
@@ -132,21 +134,60 @@ button:hover {
 }
 
 :placeholder-shown  {
-    color: #ccc
+  color: #ccc
 }
 
 ::-webkit-input-placeholder  {
-    color: #ccc
+  color: #ccc
 }
 
 :-moz-placeholder  {
-    color: #ccc
+  color: #ccc
 }
 
 ::-moz-placeholder  {
-    color: #ccc
+  color: #ccc
 }
 
 :-ms-input-placeholder  {
-    color: #ccc
+  color: #ccc
 }
+
+
+/* Now Loading */
+#loading {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%,-50%);
+          transform: translate(-50%,-50%);
+}
+
+#loader-bg {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  background: #fff;
+  z-index: 1;
+}
+
+
+/* Additional */
+.error .txt {
+  color: #f00;
+}
+
+.error button {
+  cursor: default;
+  background: #bbb;
+  transition: unset;
+}
+
+.error button:hover {
+  box-shadow: none;
+}
+

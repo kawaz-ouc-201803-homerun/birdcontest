@@ -11,9 +11,13 @@
       <param-name>config</param-name>
       <param-value>
 		{
-			&quot;debug&quot;: true,
-			&quot;mappings&quot;: {
-				&quot;/{package}/{class}.json&quot;: &quot;${package}.${class}Handler&quot;
+			"debug": true,
+			"mappings": {
+				"/{package}/{class}.json": "${package}.${class}Handler"
+			},
+			"errors": {
+				"exception.UserException": 406,
+				"java.sql.SQLException": 500
 			}
 		}
       </param-value>

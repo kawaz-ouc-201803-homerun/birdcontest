@@ -16,7 +16,8 @@ public class ConnectionManager {
 	/**
 	 * データベースの接続文字列
 	 */
-	static private final String DB_CONNECTION_STRING = "jdbc:sqlite:/home/tomcat/.jenkins/workspace/GameJamAudience.db";
+	static private final String DB_CONNECTION_STRING = "jdbc:sqlite:/home/tomcat/.jenkins/workspace/GameJamAudience/GameJamAudience.db";
+	// static private final String DB_CONNECTION_STRING = "jdbc:sqlite:E:/GitBucket/kawaz_ouc_201803_homerun/Java/GameJamAudience.db";
 
 	/**
 	 * シングルトン
@@ -47,11 +48,12 @@ public class ConnectionManager {
 	 * @throws SQLException 接続失敗
 	 */
 	public Connection connect(DAOInterface tableInitializer) throws SQLException {
+		// データベースに接続: ファイルがない場合は作成される
 		try {
 			Class.forName("org.sqlite.JDBC");
 		} catch(ClassNotFoundException e) {
 			e.printStackTrace();
-			System.out.println("JDBCドライバーの初期化に失敗しました。データベース関連の操作は無効です");
+			System.out.println("[ERROR] JDBCドライバーの初期化に失敗しました。データベース関連の操作は無効です");
 		}
 
 		if(tableInitializer != null) {

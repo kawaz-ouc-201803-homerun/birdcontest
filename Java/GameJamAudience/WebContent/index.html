@@ -16,6 +16,14 @@
 </head>
 <body>
 
+<!-- Now Loading 表示 -->
+<div id="loader-bg">
+  <div id="loading">
+    <img src="img/loading.gif">
+  </div>
+</div>
+
+<!-- メインコンテンツ -->
 <div class="page-container">
 
   <div class="content-box">
@@ -26,14 +34,14 @@
       <form id="postform">
         <div class="form-field">
           <label class="label">ニックネーム</label>
-          <input type="text" id="name" placeholder="例： 札幌太郎">
+          <input type="text" id="nickname" placeholder="例： 札幌太郎">
         </div>
         <div class="form-field">
           <label class="label">予想飛距離 (m)</label>
-          <input type="number" id="predict" min="0" max="99999999">
+          <input type="number" id="predict" min="0" max="99999999" placeholder="2500">
         </div>
 
-        <button onclick="DoPost();">投票</button>
+        <button id="post" type="button" onclick="DoPost();">投票</button>
 
       </form>
     </div>

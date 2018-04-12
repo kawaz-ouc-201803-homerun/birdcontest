@@ -3,7 +3,6 @@ package servlet;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
@@ -12,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import database.AudienceDAO;
+import execption.UserException;
 import jsonable.ModelAudiencePredict;
 import jsonable.ModelJSONICRequest;
 import lombok.val;
@@ -22,14 +22,15 @@ import net.arnx.jsonic.JSON;
  */
 @WebServlet("/servlet/AudiencePost")
 public class AudiencePostServlet extends HttpServlet {
+
 	private static final long serialVersionUID = 1L;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public AudiencePostServlet() {
-        super();
-    }
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public AudiencePostServlet() {
+		super();
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -48,10 +49,10 @@ public class AudiencePostServlet extends HttpServlet {
 		if(session.getAttribute("UserSessionId") == null) {
 			userSessionId = UUID.randomUUID().toString().replace("-", "");
 			session.setAttribute("UserSessionId", userSessionId);
-			System.out.println("[新規] UserSessionId: " + userSessionId);
+			System.out.println("[INFO] 新規 UserSessionId: " + userSessionId);
 		} else {
 			userSessionId = (String) session.getAttribute("UserSessionId");
-			System.out.println("[既存] UserSessionId: " + userSessionId);
+			System.out.println("[INFO] 既存 UserSessionId: " + userSessionId);
 		}
 
 		// リクエストボディのJSONからパラメーターオブジェクトを生成
@@ -61,12 +62,24 @@ public class AudiencePostServlet extends HttpServlet {
 		// 投稿処理実行
 		try {
 			val method = this.getClass().getMethod(requestParameterModel.getMethod(),
-					String.class, String.class, int.class, String.class, String.class);
-			method.invoke(this,
+					HttpServletResponse.class, String.class, String.class, int.class, String.class);
+			boolean result = (boolean) method.invoke(this,
+					response,
 					(String) requestParameterModel.getParams()[0],
 					(String) requestParameterModel.getParams()[1],
 					((BigDecimal) requestParameterModel.getParams()[2]).intValue(),
 					userSessionId);
+
+			if(result == true) {
+				// レスポンス正常処理
+				response.setStatus(HttpServletResponse.SC_OK);
+			}
+
+			// 空のJSONを返す
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("application/json");
+			response.getWriter().write("{}");
+
 		} catch(Exception e) {
 			// メソッドを実行できなかった: サーバーエラー扱い
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -81,25 +94,31 @@ public class AudiencePostServlet extends HttpServlet {
 	 * @param nickname ニックネーム
 	 * @param predict 予想飛距離
 	 * @param userSessionId ユーザーセッションID
+	 * @return 正常に終了したかどうか
 	 */
-	public void post(HttpServletResponse response, String eventId, String nickname, int predict, String userSessionId)  {
+	public boolean post(HttpServletResponse response, String eventId, String nickname, int predict, String userSessionId) {
 		val dao = new AudienceDAO();
 		try {
+
 			dao.post(new ModelAudiencePredict(
 					null,
 					eventId,
 					nickname,
 					predict,
-					(new Date()).toString(),
-					userSessionId
-				));
+					null,
+					userSessionId));
+
+			return true;
+
 		} catch(SQLException e) {
 			// データベースの接続に失敗した: サーバーエラー扱い
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		} catch(Exception e) {
+		} catch(UserException e) {
 			// ユーザーのリクエストが悪い
 			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
 		}
+
+		return false;
 	}
 
 }
