@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import database.AudienceDAO;
+import execption.EventException;
 import execption.UserException;
 import jsonable.ModelAudiencePredict;
 import jsonable.ModelJSONICRequest;
@@ -116,6 +117,9 @@ public class AudiencePostServlet extends HttpServlet {
 		} catch(UserException e) {
 			// ユーザーのリクエストが悪い
 			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+		} catch(EventException e) {
+			// イベントの問題
+			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 		}
 
 		return false;

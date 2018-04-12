@@ -141,7 +141,8 @@ TestCases = [
 				window.Assert(false, data.error);
 			}
 
-			console.log(data.result["currentEventId"]);
+			window.currentEventId = data.result["currentEventId"];
+			console.log(window.currentEventId);
 			if(!window.currentEventId || window.currentEventId == "") {
 				window.Assert(false, "イベントIDが取れませんでした。DBのTEVENTテーブルis_closedを確認して下さい。");
 			} else {
@@ -180,6 +181,34 @@ TestCases = [
 	},
 
 	function(i) {
+		console.log("[" + i + ": 異常系 1 - 投票処理]");
+		$.ajax({
+			url: SERVERURL + "servlet/AudiencePost",
+			type: "POST",
+			async: true,
+			contentType: "application/JSON",
+			dataType: "JSON",
+			data: JSON.stringify({
+				"method": "post",
+				"params": [window.EventId, "SystemTest", 2828],
+				"id": i
+			})
+		})
+		.done((data) => {
+			window.Assert(false, "二重投票できてしまいました。");
+		})
+		.fail((XMLHttpRequest, textStatus, errorThrown) => {
+			if(XMLHttpRequest.status == 406) {
+				// 二重投票を検知できた
+				window.Assert(true, i + 1);
+			} else {
+				// エラーだけど二重投票じゃないところで失敗した
+				window.Assert(false, XMLHttpRequest);
+			}
+		});
+	},
+
+	function(i) {
 		console.log("[" + i + ": 正常系 - 投票データ取り出し処理]");
 		$.ajax({
 			url: SERVERURL + "handler/GameMaster.json",
@@ -189,7 +218,7 @@ TestCases = [
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "getPosts",
-				"params": [],
+				"params": [window.currentEventId],
 				"id": i
 			})
 		})
@@ -217,7 +246,7 @@ TestCases = [
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "close",
-				"params": [],
+				"params": [window.currentEventId],
 				"id": i
 			})
 		})
@@ -244,7 +273,7 @@ TestCases = [
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "close",
-				"params": [],
+				"params": [window.currentEventId],
 				"id": i
 			})
 		})
@@ -259,6 +288,34 @@ TestCases = [
 		.fail((XMLHttpRequest, textStatus, errorThrown) => {
 			// JSONICのエラーはこっちに来ない想定
 			window.Assert(false, XMLHttpRequest);
+		});
+	},
+
+	function(i) {
+		console.log("[" + i + ": 異常系 2 - 投票処理]");
+		$.ajax({
+			url: SERVERURL + "servlet/AudiencePost",
+			type: "POST",
+			async: true,
+			contentType: "application/JSON",
+			dataType: "JSON",
+			data: JSON.stringify({
+				"method": "post",
+				"params": [window.EventId, "SystemTest", 2828],
+				"id": i
+			})
+		})
+		.done((data) => {
+			window.Assert(false, "締め切られたイベントに投票出来てしまいました。");
+		})
+		.fail((XMLHttpRequest, textStatus, errorThrown) => {
+			if(XMLHttpRequest.status == 503) {
+				// イベントの締め切りを検知できた
+				window.Assert(true, i + 1);
+			} else {
+				// エラーだけどイベント締め切りじゃないところで失敗した
+				window.Assert(false, XMLHttpRequest);
+			}
 		});
 	},
 

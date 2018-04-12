@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import execption.EventException;
 import execption.UserException;
 import jsonable.ModelAudiencePredict;
 import lombok.val;
@@ -21,7 +22,7 @@ public class AudienceDAO implements DAOInterface {
 	 * 作成前に存在しているイベントはすべて締切状態にします。
 	 *
 	 * @return イベントID
-	 * @throws SQLException エラー発生
+	 * @throws SQLException DBエラー
 	 */
 	public String newEvent() throws SQLException {
 		String eventId = this.createGUID();
@@ -41,6 +42,7 @@ public class AudienceDAO implements DAOInterface {
 				stmt.executeUpdate();
 			}
 
+			System.out.println("[INFO] イベント作成 -> EventId=" + eventId);
 			con.commit();
 			return eventId;
 
@@ -55,7 +57,7 @@ public class AudienceDAO implements DAOInterface {
 	 * 現在有効なイベントIDを取得
 	 *
 	 * @return イベントID
-	 * @throws SQLException エラー発生
+	 * @throws SQLException DBエラー
 	 */
 	public String getCurrentEventId() throws SQLException {
 		try(
@@ -65,9 +67,12 @@ public class AudienceDAO implements DAOInterface {
 
 			if(rs.next()) {
 				// イベントIDを取り出す
-				return rs.getString("event_id");
+				String eventId = rs.getString("event_id");
+				System.out.println("[INFO] 現在のイベント -> EventId=" + eventId);
+				return eventId;
 			} else {
 				// 有効なイベントが存在しない
+				System.out.println("[WARN] 現在のイベント -> なし");
 				return null;
 			}
 
@@ -82,12 +87,32 @@ public class AudienceDAO implements DAOInterface {
 	 * 投票処理
 	 *
 	 * @param data 投票データ
-	 * @throws SQLException, UserException エラー発生
+	 * @throws SQLException DBエラー
+	 * @throws UserException ユーザー操作エラー
+	 * @throws EventException イベントエラー
 	 */
-	public void post(ModelAudiencePredict data) throws SQLException, UserException {
+	public void post(ModelAudiencePredict data) throws SQLException, UserException, EventException {
 		try(val con = ConnectionManager.getManager().connect(this)) {
 
 			con.setAutoCommit(false);
+
+			// 既にイベントが締め切られていないかチェック
+			try(val stmt = con.createStatement()) {
+				val rs = stmt.executeQuery("SELECT * FROM TEVENT WHERE is_closed = 0 ORDER BY create_time ASC LIMIT 1");
+
+				if(rs.next()) {
+					// イベントIDを取り出す
+					if(rs.getString("event_id").equals(data.getEventId())) {
+						// OK
+					} else {
+						// 指定されているイベントIDが最新ではない
+						throw new EventException("最新ではないイベントに投票しようとしました。不正なリクエストです。");
+					}
+				} else {
+					// 有効なイベントが存在しない
+					throw new EventException("既に投票が締め切られています。次のゲームが始まるまでお待ち下さい。");
+				}
+			}
 
 			// 既に同じイベントに対して投稿していないかチェック
 			try(val stmt = con.prepareStatement("SELECT * FROM TPREDICT WHERE event_id = ? AND user_session_id = ?")) {
@@ -111,6 +136,7 @@ public class AudienceDAO implements DAOInterface {
 				stmt.executeUpdate();
 			}
 
+			System.out.println("[INFO] 投票 -> EventId=" + data.getEventId() + ", NickName=" + data.getNickname() + ", Predict=" + data.getPredict() + ", UserSessionId=" + data.getUserSessionId());
 			con.commit();
 
 		} catch(SQLException e) {
@@ -128,25 +154,30 @@ public class AudienceDAO implements DAOInterface {
 	 * 指定したイベントの投票データをすべて取得
 	 *
 	 * @param eventId イベントID
-	 * @throws SQLException エラー発生
+	 * @throws SQLException DBエラー
 	 */
 	public List<ModelAudiencePredict> getPosts(String eventId) throws SQLException {
 		val list = new ArrayList<ModelAudiencePredict>();
 
 		try(
 			val con = ConnectionManager.getManager().connect(this);
-			val stmt = con.createStatement();) {
-			val rs = stmt.executeQuery("SELECT * FROM TPREDICT WHERE event_id = ? ORDER BY receive_time ASC");
+			val stmt = con.prepareStatement("SELECT * FROM TPREDICT WHERE event_id = ? ORDER BY receive_time ASC");) {
 
-			while(rs.next()) {
-				list.add(new ModelAudiencePredict(
-						rs.getString("predict_id"),
-						eventId,
-						rs.getString("name"),
-						rs.getInt("predict"),
-						rs.getString("receive_time"),
-						null));
+			stmt.setString(1, eventId);
+
+			try(val rs = stmt.executeQuery()) {
+				while(rs.next()) {
+					list.add(new ModelAudiencePredict(
+							rs.getString("predict_id"),
+							eventId,
+							rs.getString("name"),
+							rs.getInt("predict"),
+							rs.getString("receive_time"),
+							null));
+				}
 			}
+
+			System.out.println("[INFO] 投票データ取得 -> EventID=" + eventId + " ... " + list.size() + " 件");
 
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -161,7 +192,7 @@ public class AudienceDAO implements DAOInterface {
 	 * 投票締切処理
 	 *
 	 * @param eventId イベントID
-	 * @throws SQLException エラー発生
+	 * @throws SQLException DBエラー
 	 */
 	public void close(String eventId) throws SQLException {
 		try(val con = ConnectionManager.getManager().connect(this)) {
@@ -174,6 +205,7 @@ public class AudienceDAO implements DAOInterface {
 				stmt.executeUpdate();
 			}
 
+			System.out.println("[INFO] 投票締切: " + eventId);
 			con.commit();
 
 		} catch(SQLException e) {
@@ -187,7 +219,7 @@ public class AudienceDAO implements DAOInterface {
 	 * オーディエンス参加延べ人数取得
 	 *
 	 * @return オーディエンス参加延べ人数
-	 * @throws SQLException エラー発生
+	 * @throws SQLException DBエラー
 	 */
 	public int getPeopleCount() throws SQLException {
 		try(
@@ -197,9 +229,12 @@ public class AudienceDAO implements DAOInterface {
 
 			if(rs.next()) {
 				// 投稿数を取り出す
-				return rs.getInt("people_count");
+				int count = rs.getInt("people_count");
+				System.out.println("[INFO] オーディエンス参加延べ人数: " + count + " 人");
+				return count;
 			} else {
 				// 一件も投稿されていない
+				System.out.println("[INFO] オーディエンス参加延べ人数: 0 人");
 				return 0;
 			}
 

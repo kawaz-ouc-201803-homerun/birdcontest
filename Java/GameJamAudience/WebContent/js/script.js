@@ -166,11 +166,15 @@ function DoPost() {
 function ErrorHandling(statusCode) {
 	switch(statusCode) {
 	    case 406:
-			alert("既に投票されています。次のゲームが始まるまでお待ち下さい。");
+			alert("既に投票されています。次のゲームが始まってからリロードして下さい。");
 			window.DisabledForm("投票済みです。");
 	    	break;
 	    case 500:
 			alert("サーバー側の不具合のため、投票に失敗しました。ゲームスタッフまでお声掛け下さい。");
+	    	break;
+	    case 503:
+			alert("イベントが締め切られているため、投票に失敗しました。次のゲームが始まってからリロードして下さい。");
+			window.DisabledForm("イベントが締め切られています。");
 	    	break;
 	    default:
 	    	alert("予期しないエラーが発生しました。ゲームスタッフまでお声掛け下さい。");
