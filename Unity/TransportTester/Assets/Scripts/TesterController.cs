@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using ModelControllerProgress = ModelDictionary<string, string>;
 
 /// <summary>
@@ -23,7 +24,7 @@ public class TesterController : TesterBase {
 	/// <summary>
 	/// UDPによる操作端末の進捗報告を送信する間隔秒数
 	/// </summary>
-	private const float UDPProgressSendFrequency = 5.0f;
+	private const float UDPProgressSendFrequency = 1.0f;
 
 	/// <summary>
 	/// UDPによる操作端末の進捗報告を最後に送信した時刻
@@ -36,17 +37,23 @@ public class TesterController : TesterBase {
 	private bool enabledUDPReport = false;
 
 	/// <summary>
-	/// 毎フレームの処理
+	/// 現在テスト中であるかどうか
+	/// </summary>
+	private bool isTesting = false;
+	
+	/// <summary>
+	/// 毎フレーム更新処理
 	/// </summary>
 	public void Update() {
-		if(this.enabledUDPReport == false) {
-			return;
-		}
+		// コントロール有効無効
+		GameObject.Find("DoTest").GetComponent<Button>().interactable = !this.isTesting;
 
-		// 一定間隔でUDPによる操作端末の進捗報告を送信する
-		if(Time.time - this.UDPProgressLastSendTime >= TesterController.UDPProgressSendFrequency) {
-			this.UDPProgressLastSendTime = Time.time;
-			this.testProcess2();
+		if(this.enabledUDPReport == true) {
+			// 一定間隔でUDPによる操作端末の進捗報告を送信する
+			if(Time.time - this.UDPProgressLastSendTime >= TesterController.UDPProgressSendFrequency) {
+				this.UDPProgressLastSendTime = Time.time;
+				this.testProcess2();
+			}
 		}
 	}
 
@@ -55,6 +62,7 @@ public class TesterController : TesterBase {
 	/// </summary>
 	/// <param name="parameters">テストに必要なパラメーターの連想配列</param>
 	public override void DoTest(Dictionary<string, object> parameters) {
+		this.isTesting = true;
 		Logger.LogProcess("操作端末 " + parameters["RoleID"] + " としてテストを開始します。");
 		this.parameters = parameters;
 		this.connector = new NetworkController((string)parameters["GMIP"]) {
@@ -116,7 +124,8 @@ public class TesterController : TesterBase {
 
 				// テスト完了
 				Logger.LogProcess("すべてのテストフェーズが完了しました。");
-				Logger.LogResult("成功: 操作端末ID=" + this.parameters["RoleID"]);
+				Logger.LogResult("成功: 操作端末ID=" + this.parameters["RoleID"] ?? "null");
+				this.isTesting = false;
 			},
 			() => {
 				// 失敗時: 再試行

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 using ModelControllerProgress = ModelDictionary<string, string>;
 
 /// <summary>
@@ -19,10 +21,23 @@ public class TesterGM : TesterBase {
 	private int UDPProgressReceiveCounter = 0;
 
 	/// <summary>
+	/// 現在テスト中であるかどうか
+	/// </summary>
+	private bool isTesting = false;
+
+	/// <summary>
+	/// 毎フレーム更新処理
+	/// </summary>
+	public void Update() {
+		GameObject.Find("DoTest").GetComponent<Button>().interactable = !this.isTesting;
+	}
+
+	/// <summary>
 	/// テストを実行します。
 	/// </summary>
 	/// <param name="parameters">テストに必要なパラメーターの連想配列</param>
 	public override void DoTest(Dictionary<string, object> parameters) {
+		this.isTesting = true;
 		Logger.LogProcess("ゲームマスターとしてテストを開始します。");
 		this.parameters = parameters;
 		this.connector = new NetworkGameMaster(new string[] {
@@ -113,7 +128,8 @@ public class TesterGM : TesterBase {
 
 			// テスト完了
 			Logger.LogProcess("すべてのテストフェーズが完了しました。");
-			Logger.LogResult("成功: ゲームマスター : 相手先端末ID=" + this.parameters["RoleID"]);
+			Logger.LogResult("成功: ゲームマスター : 相手先端末ID=" + data.GetDictionary()["RoleID"]);
+			this.isTesting = false;
 		}));
 	}
 

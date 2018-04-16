@@ -21,9 +21,25 @@ public abstract class NetworkConnector {
 	}
 
 	/// <summary>
+	/// コネクション確立を待機する秒数
+	/// </summary>
+	public const int ConnectionWaitSecondsForConnect = 5;
+
+	/// <summary>
 	/// 共通ポート番号
 	/// </summary>
 	protected const int GeneralPort = 30100;
+
+	/// <summary>
+	/// ゲームマスターが使用するポート番号
+	/// ゲームマスターとなる端末は、これらすべてのポートを開放する必要があります。
+	/// ただし、同じLANの中にいる場合はポート開放の必要はありません。
+	/// </summary>
+	protected static readonly int[] ControllerPorts = new int[] {
+		30000,
+		30001,
+		30002,
+	};
 
 	/// <summary>
 	/// オーディエンス投票システムの基本URL
@@ -45,20 +61,10 @@ public abstract class NetworkConnector {
 	};
 
 	/// <summary>
-	/// ゲームマスターが使用するポート番号
-	/// ゲームマスターとなる端末は、これらすべてのポートを開放する必要があります。
-	/// ただし、同じLANの中にいる場合はポート開放の必要はありません。
+	/// 受信用のUDPクライアント
+	/// 受信は必ずしも成功しないため、前回実行時のオブジェクトを保持しておく必要があります。
 	/// </summary>
-	protected static readonly int[] ControllerPorts = new int[] {
-		30000,
-		30001,
-		30002,
-	};
-
-	/// <summary>
-	/// コネクション確立を待機する秒数
-	/// </summary>
-	public const int ConnectionWaitSecondsForConnect = 5;
+	protected UdpClient udpClient;
 
 	/// <summary>
 	/// 非同期でストリーム受信するときに必要なバッファーオブジェクト
@@ -190,34 +196,41 @@ public abstract class NetworkConnector {
 				tcpSocket.BeginReceive(socketReader.Buffer, 0, socketReader.Buffer.Length, SocketFlags.None, new AsyncCallback((asyncReader) => {
 					Debug.Log("非同期TCPデータ受信OK: " + "any:" + port);
 					var reader = asyncReader.AsyncState as AsyncReceiveBuffer;
-					var buf = reader.Buffer;
 
-					var jsonBinaryData = new byte[1024];
-					try {
-						int receiveLength = reader.TCPSocket.EndReceive(asyncReader);
+					using(reader.TCPSocket) {
+						var buf = reader.Buffer;
+						var jsonBinaryData = new byte[1024];
 
-						// 先頭４バイトはデータの長さが入っている
-						var sizeBuf = new byte[4];
-						Array.Copy(buf, 0, sizeBuf, 0, 4);
-						int length = BitConverter.ToInt32(sizeBuf, 0);
+						try {
+							int receiveLength = reader.TCPSocket.EndReceive(asyncReader);
 
-						// 残りをすべてJSONの実データとして読み込む
-						if(receiveLength != length + 4) {
-							throw new Exception("受信したデータがヘッダーに示された長さと一致しません。過不足＝" + (receiveLength - (length + 4)));
+							// 先頭４バイトはデータの長さが入っている
+							var sizeBuf = new byte[4];
+							Array.Copy(buf, 0, sizeBuf, 0, 4);
+							int length = BitConverter.ToInt32(sizeBuf, 0);
+
+							// 残りをすべてJSONの実データとして読み込む
+							if(receiveLength != length + 4) {
+								throw new Exception("受信したデータがヘッダーに示された長さと一致しません。過不足＝" + (receiveLength - (length + 4)));
+							}
+							Array.Copy(buf, 4, jsonBinaryData, 0, buf.Length - 4);
+
+							Debug.Log("非同期TCPデータ受信完了: " + receiveLength + " Bytes");
+
+						} catch(Exception e) {
+							Debug.LogWarning("非同期TCPデータ受信エラー: " + e.Message);
+							return;
 						}
-						Array.Copy(buf, 4, jsonBinaryData, 0, buf.Length - 4);
 
-						Debug.Log("非同期TCPデータ受信完了: " + receiveLength + " Bytes");
-
-					} catch(Exception e) {
-						Debug.LogWarning("非同期TCPデータ受信エラー: " + e.Message);
-						return;
-					}
-
-					// 受信したJSONをデータとして復元して、呼出元が定義したコールバックを呼び出す
-					var obj = JsonUtility.FromJson<T>(System.Text.Encoding.UTF8.GetString(jsonBinaryData));
-					if(callback != null) {
-						callback.Invoke(obj);
+						// 受信したJSONをデータとして復元して、呼出元が定義したコールバックを呼び出す
+						var obj = JsonUtility.FromJson<T>(System.Text.Encoding.UTF8.GetString(jsonBinaryData));
+						if(callback != null) {
+							try {
+								callback.Invoke(obj);
+							} catch(Exception e) {
+								Debug.LogWarning("コールバック関数内の例外: " + e.Message);
+							}
+						}
 					}
 
 				}), socketReader);
@@ -239,20 +252,26 @@ public abstract class NetworkConnector {
 		Debug.Log("非同期TCP接続待ち (Client): " + ipAddress + ":" + port);
 		var tcpClient = new TcpClient();
 
-		var result = tcpClient.BeginConnect(
+		tcpClient.BeginConnect(
 			IPAddress.Parse(ipAddress),
 			port,
 			new AsyncCallback((async) => {
 				// 送信準備完了
 				var tcp = async.AsyncState as TcpClient;
+
+				// 通信エラーチェック
 				if(tcp.Connected == false) {
 					// 接続拒否された等で切断状態になった
 					Debug.LogWarning("非同期TCPコネクションの確立に失敗しました - Refused (Client)");
 					tcp.Close();
 
-					// 呼出元が定義したコールバック関数を呼び出す
+					// 失敗：呼出元が定義したコールバック関数を呼び出す
 					if(failureCallBack != null) {
-						failureCallBack.Invoke();
+						try {
+							failureCallBack.Invoke();
+						} catch(Exception e) {
+							Debug.LogWarning("コールバック関数内の例外: " + e.Message);
+						}
 					}
 
 					return;
@@ -262,41 +281,36 @@ public abstract class NetworkConnector {
 				Debug.Log("非同期TCPデータ送信中: " + tcp.Client.RemoteEndPoint.ToString());
 				var dataBinary = this.createDataForTransport(data);
 				try {
-					using(var stream = tcp.GetStream()) {
-						stream.Write(dataBinary, 0, dataBinary.Length);
-						Debug.Log("非同期TCPデータ送信完了: " + (dataBinary.Length) + " Bytes");
-
-						// 呼出元が定義したコールバック関数を呼び出す
-						if(successCallback != null) {
-							successCallback.Invoke();
+					using(tcp) {
+						using(var stream = tcp.GetStream()) {
+							stream.Write(dataBinary, 0, dataBinary.Length);
+							Debug.Log("非同期TCPデータ送信完了: " + (dataBinary.Length) + " Bytes");
 						}
 					}
 
-					// 非同期の接続を終了
-					tcp.EndConnect(async);
-
+					// 成功：呼出元が定義したコールバック関数を呼び出す
+					if(successCallback != null) {
+						try {
+							successCallback.Invoke();
+						} catch(Exception e) {
+							Debug.LogWarning("コールバック関数内の例外: " + e.Message);
+						}
+					}
 				} catch(Exception e) {
 					Debug.LogWarning("非同期TCPデータ送信エラー: " + e.Message);
 
-					// 呼出元が定義したコールバック関数を呼び出す
+					// 失敗：呼出元が定義したコールバック関数を呼び出す
 					if(failureCallBack != null) {
-						failureCallBack.Invoke();
+						try {
+							failureCallBack.Invoke();
+						} catch(Exception e2) {
+							Debug.LogWarning("コールバック関数内の例外: " + e2.Message);
+						}
 					}
 				}
 			}),
 			tcpClient
 		);
-
-		//if(result.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(NetworkConnector.ConnectionWaitSecondsForConnect)) == false) {
-		//	// タイムアウトにより、コネクション確立に失敗
-		//	Debug.LogWarning("非同期TCPコネクション確立に失敗しました - Timeout (Client)");
-		//	tcpClient.Close();
-
-		//	// 呼出元が定義したコールバック関数を呼び出す
-		//	if(failureCallBack != null) {
-		//		failureCallBack.Invoke();
-		//	}
-		//}
 	}
 
 	/// <summary>
@@ -306,75 +320,86 @@ public abstract class NetworkConnector {
 	/// <param name="udpClient">受信用UDPクライアントオブジェクト。初回送信時のみnullでOK</param>
 	/// <param name="port">使用するポート番号</param>
 	/// <param name="callback">データ処理を行うコールバック関数</param>
-	/// <returns>受信用UDPクライアントオブジェクト</returns>
-	protected UdpClient startUDPReceiver<T>(UdpClient udpClient, int port, Action<T> callback) where T : IJSONable<T> {
+	protected void startUDPReceiver<T>(int port, Action<T> callback) where T : IJSONable<T> {
 		// 受信用のUDPクライアントを生成（localhost）
-		if(udpClient == null) {
-			// UDPクライアントが指定されていない場合は新規生成
-			udpClient = new UdpClient(port);
+		if(this.udpClient != null) {
+			// 前回のUDPクライアントが残っている場合は処理をスキップ
+			Debug.Log("非同期UDPクライアントが使用中です。");
+			return;
 		}
+		this.udpClient = new UdpClient(port);
 
 		// 非同期でデータ受信
 		Debug.Log("非同期UDPデータ受信待ち:  " + "any:" + port);
-		udpClient.BeginReceive(
+		this.udpClient.BeginReceive(
 			new AsyncCallback((async) => {
-				var udp = async.AsyncState as UdpClient;
-				Debug.Log("非同期UDPデータ受信中: " + "any:" + port);
-
-				// 実際にデータ受信
+				this.udpClient = null;
 				byte[] receivedData = null;
-				IPEndPoint endPoint = null;
-				try {
-					// 非同期のデータ受信を終了し、得られたデータを保管する
-					receivedData = udp.EndReceive(async, ref endPoint);
+				var receivedDataCollection = new List<byte>();
 
-					// 先頭４バイトはデータの長さを示す
-					var receivedDataCollection = new List<byte>();
-					receivedDataCollection.AddRange(receivedData);
-					int length = BitConverter.ToInt32(receivedDataCollection.GetRange(0, 4).ToArray(), 0);
+				using(var udp = async.AsyncState as UdpClient) {
+					// 受信準備完了
 
-					// 指示されたデータの長さと実際の長さを比較する
-					if(length != receivedData.Length - 4) {
-						throw new Exception("受信したデータがヘッダーに示された長さと一致しません。過不足＝" + (length - (receivedData.Length - 4)));
+					// 通信エラーチェック
+					if(udp.Client.Connected == false) {
+						Debug.LogWarning("非同期UDPの受信に失敗しました - Packet Loss");
+						udp.Close();
+						return;
 					}
 
-					Debug.Log("非同期UDPデータ受信完了: " + receivedData.Length + " Bytes");
+					Debug.Log("非同期UDPデータ受信中: " + "any:" + port);
 
-					// 受信したJSONをデータとして復元して、呼出元が定義したコールバックを呼び出す
-					var obj = JsonUtility.FromJson<T>(System.Text.Encoding.UTF8.GetString(receivedDataCollection.GetRange(4, receivedData.Length - 4).ToArray()));
-					if(callback != null) {
+					// 実際にデータ受信
+					IPEndPoint endPoint = null;
+					try {
+						// 非同期のデータ受信を終了し、得られたデータを保管する
+						receivedData = udp.EndReceive(async, ref endPoint);
+
+						// 先頭４バイトはデータの長さを示す
+						receivedDataCollection.AddRange(receivedData);
+						int length = BitConverter.ToInt32(receivedDataCollection.GetRange(0, 4).ToArray(), 0);
+
+						// 指示されたデータの長さと実際の長さを比較する
+						if(length != receivedData.Length - 4) {
+							throw new Exception("受信したデータがヘッダーに示された長さと一致しません。過不足＝" + (length - (receivedData.Length - 4)));
+						}
+
+						Debug.Log("非同期UDPデータ受信完了: " + receivedData.Length + " Bytes");
+
+					} catch(Exception e) {
+						Debug.LogWarning("非同期UDPデータ受信エラー: " + e.Message);
+					}
+				}
+
+				// 受信したJSONをデータとして復元して、呼出元が定義したコールバックを呼び出す
+				var obj = JsonUtility.FromJson<T>(System.Text.Encoding.UTF8.GetString(receivedDataCollection.GetRange(4, receivedData.Length - 4).ToArray()));
+				if(callback != null) {
+					try {
 						callback.Invoke(obj);
+					} catch(Exception e) {
+						Debug.LogWarning("コールバック関数内の例外: " + e.Message);
 					}
-
-				} catch(Exception e) {
-					Debug.LogWarning("非同期UDPデータ受信エラー: " + e.Message);
 				}
 			}),
-			udpClient
+			this.udpClient
 		);
-
-		return udpClient;
 	}
 
 	/// <summary>
 	/// UDPによるデータ送信を非同期的に行います。
 	/// UDPなので必ずしも相手に届くとは限りません。
 	/// </summary>
-	/// <param name="udpClient">送信用UDPクライアントオブジェクト。初回送信時のみnullでOK</param>
 	/// <param name="ipAddress">接続先IPアドレス</param>
 	/// <param name="port">接続先ポート番号</param>
 	/// <param name="data">送信するデータ（JSONとしてシリアライズ可能なもの）</param>
 	/// <param name="callback">送信が完了したときに呼び出されるコールバック関数</param>
-	/// <returns>送信用UDPクライアントオブジェクト</returns>
-	protected UdpClient startUDPSender(UdpClient udpClient, string ipAddress, int port, object data, Action callback) {
-		if(udpClient == null) {
-			// UDPクライアントが指定されていない場合は新規生成
-			var endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
-			udpClient = new UdpClient();
+	protected void startUDPSender(string ipAddress, int port, object data, Action callback) {
+		// 送信用のUDPクライアントを生成
+		var endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
+		var udpClient = new UdpClient();
 
-			// UDPは送信側のみソケット接続が必要となる
-			udpClient.Connect(endPoint);
-		}
+		// UDPは送信側のみソケット接続が必要となる
+		udpClient.Connect(endPoint);
 
 		// データを通信用の形式に変換して送信
 		var dataBinary = this.createDataForTransport(data);
@@ -385,26 +410,29 @@ public abstract class NetworkConnector {
 			dataBinary,
 			dataBinary.Length,
 			new AsyncCallback((async) => {
-				var udp = async.AsyncState as UdpClient;
-				Debug.Log("非同期UDPデータ送信中: " + ipAddress + ":" + port);
+				using(var udp = async.AsyncState as UdpClient) {
+					Debug.Log("非同期UDPデータ送信中: " + ipAddress + ":" + port);
 
-				try {
-					int length = udp.EndSend(async);
-					Debug.Log("非同期UDPデータ送信完了: " + length + " Bytes");
-				} catch(Exception e) {
-					Debug.LogWarning("非同期UDPデータ送信エラー: " + e.Message);
-					return;
+					try {
+						int length = udp.EndSend(async);
+						Debug.Log("非同期UDPデータ送信完了: " + length + " Bytes");
+					} catch(Exception e) {
+						Debug.LogWarning("非同期UDPデータ送信エラー: " + e.Message);
+						return;
+					}
 				}
 
 				// 呼出元が定義したコールバック関数を呼び出す
 				if(callback != null) {
-					callback.Invoke();
+					try {
+						callback.Invoke();
+					} catch(Exception e) {
+						Debug.LogWarning("コールバック関数内の例外: " + e.Message);
+					}
 				}
 			}),
 			udpClient
 		);
-
-		return udpClient;
 	}
 
 	/// <summary>

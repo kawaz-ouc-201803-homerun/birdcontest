@@ -16,12 +16,7 @@ public class NetworkController : NetworkConnector {
 	public int RoleId {
 		get; set;
 	}
-
-	/// <summary>
-	/// 送信用UDPクライアント
-	/// </summary>
-	private UdpClient udpClient = null;
-
+	
 	/// <summary>
 	/// コンストラクター
 	/// </summary>
@@ -45,7 +40,7 @@ public class NetworkController : NetworkConnector {
 		if(this.RoleId == -1) {
 			throw new Exception("操作端末の役割IDが設定されていません。");
 		}
-		this.udpClient = this.startUDPSender(this.udpClient, this.GameMasterIPAddress, NetworkConnector.ControllerPorts[this.RoleId], data, null);
+		this.startUDPSender(this.GameMasterIPAddress, NetworkConnector.ControllerPorts[this.RoleId], data, null);
 	}
 
 	/// <summary>
@@ -58,12 +53,7 @@ public class NetworkController : NetworkConnector {
 		if(this.RoleId == -1) {
 			throw new Exception("操作端末の役割IDが設定されていません。");
 		}
-
-		// UDPの送信を止める
-		if(this.udpClient != null) {
-			this.udpClient = null;
-		}
-
+		
 		// TCPで送信
 		this.startTCPClient(this.GameMasterIPAddress, NetworkConnector.ControllerPorts[this.RoleId], data, successCallBack, failureCallBack);
 	}

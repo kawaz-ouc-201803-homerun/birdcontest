@@ -20,12 +20,7 @@ public class NetworkGameMaster : NetworkConnector {
 	/// UDPによる操作端末の進捗状況を受け付けるかどうか
 	/// </summary>
 	protected bool receivableUDPProgress = true;
-
-	/// <summary>
-	/// 受信用UDPクライアント
-	/// </summary>
-	private UdpClient udpClient = null;
-
+	
 	/// <summary>
 	/// コンストラクター
 	/// </summary>
@@ -119,7 +114,7 @@ public class NetworkGameMaster : NetworkConnector {
 
 		// すべての端末から受信
 		for(int i = 0; i < this.ControllerIPAddresses.Length; i++) {
-			this.udpClient = this.startUDPReceiver(this.udpClient, NetworkConnector.ControllerPorts[i], new Action<ModelControllerProgress>((obj) => {
+			this.startUDPReceiver(NetworkConnector.ControllerPorts[i], new Action<ModelControllerProgress>((obj) => {
 				if(this.receivableUDPProgress == false) {
 					// UDP受信を受け付けていない場合は中止する
 					return;
@@ -139,7 +134,6 @@ public class NetworkGameMaster : NetworkConnector {
 	public void WaitForControllers(Action<ModelControllerProgress> callback) {
 		// UDPでの受信を止める
 		this.receivableUDPProgress = false;
-		this.udpClient = null;
 
 		// すべての端末から受信待機
 		for(int i = 0; i < this.ControllerIPAddresses.Length; i++) {
