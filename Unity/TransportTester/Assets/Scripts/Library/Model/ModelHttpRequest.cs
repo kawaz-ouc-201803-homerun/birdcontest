@@ -16,12 +16,12 @@ public class ModelHttpRequest {
 	/// <summary>
 	/// メソッドの引数リスト
 	/// </summary>
-	public object[] param;
+	public string[] param;
 
 	/// <summary>
 	/// 呼び出しID
 	/// nullにするとJSONICの仕様によりレスポンスボディなしで返ってくるので注意。
 	/// </summary>
-	public object id;
+	public string id;
 
 }

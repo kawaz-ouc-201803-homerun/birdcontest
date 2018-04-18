@@ -13,13 +13,11 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.3.1f1</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -295,17 +293,19 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\GMSwitch.cs" />
     <Compile Include="Assets\Scripts\Library\Interface\IJSONable.cs" />
-    <Compile Include="Assets\Scripts\Library\Model\ModelDictionary.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudienceGetPeopleCountResponse.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudienceNewEventResponse.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudiencePredict.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudiencePredictList.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelControllerStart.cs" />
+    <Compile Include="Assets\Scripts\Library\Model\ModelDictionary.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelHttpRequest.cs" />
+    <Compile Include="Assets\Scripts\Library\Network\AsyncResource.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkConnector.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkController.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkGameMaster.cs" />
     <Compile Include="Assets\Scripts\Logger.cs" />
+    <Compile Include="Assets\Scripts\TesterAudience.cs" />
     <Compile Include="Assets\Scripts\TesterBase.cs" />
     <Compile Include="Assets\Scripts\TesterController.cs" />
     <Compile Include="Assets\Scripts\TesterGM.cs" />

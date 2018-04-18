@@ -40,7 +40,7 @@ public class TesterController : TesterBase {
 	/// 現在テスト中であるかどうか
 	/// </summary>
 	private bool isTesting = false;
-	
+
 	/// <summary>
 	/// 毎フレーム更新処理
 	/// </summary>
@@ -62,12 +62,15 @@ public class TesterController : TesterBase {
 	/// </summary>
 	/// <param name="parameters">テストに必要なパラメーターの連想配列</param>
 	public override void DoTest(Dictionary<string, object> parameters) {
-		this.isTesting = true;
 		Logger.LogProcess("操作端末 " + parameters["RoleID"] + " としてテストを開始します。");
+
+		this.isTesting = true;
+		this.UDPProgressSendCounter = 0;
 		this.parameters = parameters;
 		this.connector = new NetworkController((string)parameters["GMIP"]) {
 			RoleId = (int)parameters["RoleID"],
 		};
+
 		this.testProcess1();
 	}
 
@@ -76,6 +79,7 @@ public class TesterController : TesterBase {
 	/// </summary>
 	private void testProcess1() {
 		Logger.LogProcess("GMからの開始指示を待機します...");
+
 		(this.connector as NetworkController).ControllerWaitForStart((obj) => {
 			Logger.LogProcess("GMからの開始指示を受信しました。");
 
@@ -123,6 +127,7 @@ public class TesterController : TesterBase {
 				Logger.LogProcess("TCPでの操作端末の完了報告に成功しました。");
 
 				// テスト完了
+				this.connector.CloseConnectionsAll();
 				Logger.LogProcess("すべてのテストフェーズが完了しました。");
 				Logger.LogResult("成功: 操作端末ID=" + this.parameters["RoleID"] ?? "null");
 				this.isTesting = false;

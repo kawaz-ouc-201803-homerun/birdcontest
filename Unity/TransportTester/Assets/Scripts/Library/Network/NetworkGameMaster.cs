@@ -14,13 +14,13 @@ public class NetworkGameMaster : NetworkConnector {
 	/// <summary>
 	/// WebAPIのハンドラー名
 	/// </summary>
-	protected const string HandlerJson = "handler/GameMasterHandler.json";
+	protected const string HandlerJson = "handler/GameMaster.json";
 
 	/// <summary>
 	/// UDPによる操作端末の進捗状況を受け付けるかどうか
 	/// </summary>
 	protected bool receivableUDPProgress = true;
-	
+
 	/// <summary>
 	/// コンストラクター
 	/// </summary>
@@ -34,14 +34,19 @@ public class NetworkGameMaster : NetworkConnector {
 	/// </summary>
 	/// <returns>イベントID</returns>
 	public string StartAudiencePredicts() {
-		return this.postRequestWithResponseObject<ModelAudienceNewEventResponse>(
-			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
+		var result = this.postRequestWithResponseObject<ModelAudienceNewEventResponse>(
+			NetworkGameMaster.HandlerJson,
 			new ModelHttpRequest() {
 				method = "newEvent",
-				param = new object[] { },
-				id = 1,
+				param = new string[] { },
+				id = "1",
 			}
-		).eventId;
+		);
+		if(result != null) {
+			return result.eventId;
+		} else {
+			return null;
+		}
 	}
 
 	/// <summary>
@@ -49,15 +54,15 @@ public class NetworkGameMaster : NetworkConnector {
 	/// </summary>
 	/// <param name="eventId">イベントID</param>
 	/// <returns>オーディエンス予想のリスト</returns>
-	public List<ModelAudiencePredict> LoadAudiencePredicts(string eventId) {
+	public ModelAudiencePredictList GetAudiencePredicts(string eventId) {
 		return this.postRequestWithResponseObject<ModelAudiencePredictList>(
-			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
+			NetworkGameMaster.HandlerJson,
 			new ModelHttpRequest() {
 				method = "getPosts",
-				param = new object[] { eventId },
-				id = 2,
+				param = new string[] { eventId },
+				id = "2",
 			}
-		).audiencePredicts;
+		);
 	}
 
 	/// <summary>
@@ -70,8 +75,8 @@ public class NetworkGameMaster : NetworkConnector {
 			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
 			new ModelHttpRequest() {
 				method = "close",
-				param = new object[] { eventId },
-				id = 3,
+				param = new string[] { eventId },
+				id = "3",
 			}
 		);
 	}
@@ -85,8 +90,8 @@ public class NetworkGameMaster : NetworkConnector {
 			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
 			new ModelHttpRequest() {
 				method = "getPeopleCount",
-				param = new object[] { },
-				id = 4,
+				param = new string[] { },
+				id = "4",
 			}
 		).count;
 	}
@@ -115,13 +120,16 @@ public class NetworkGameMaster : NetworkConnector {
 		// すべての端末から受信
 		for(int i = 0; i < this.ControllerIPAddresses.Length; i++) {
 			this.startUDPReceiver(NetworkConnector.ControllerPorts[i], new Action<ModelControllerProgress>((obj) => {
+				// データ受信時のコールバック処理
+
 				if(this.receivableUDPProgress == false) {
 					// UDP受信を受け付けていない場合は中止する
 					return;
 				}
 
-				callback.Invoke(obj);
-				this.ReceiveControllerProgress(callback);
+				if(callback != null) {
+					callback.Invoke(obj);
+				}
 			}));
 		}
 	}

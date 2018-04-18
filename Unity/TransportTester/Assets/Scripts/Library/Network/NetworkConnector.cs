@@ -62,9 +62,17 @@ public abstract class NetworkConnector {
 
 	/// <summary>
 	/// 受信用のUDPクライアント
+	/// キーはポート番号
 	/// 受信は必ずしも成功しないため、前回実行時のオブジェクトを保持しておく必要があります。
 	/// </summary>
-	protected UdpClient udpClient;
+	protected Dictionary<int, AsyncResource<UdpClient>> udpReceiveClients = new Dictionary<int, AsyncResource<UdpClient>>();
+
+	/// <summary>
+	/// 受信用のTCPリスナー
+	/// キーはポート番号
+	/// 受信は必ずしも成功しないため、前回実行時のオブジェクトを保持しておく必要があります。
+	/// </summary>
+	protected Dictionary<int, AsyncResource<TcpListener>> tcpReceiveListeners = new Dictionary<int, AsyncResource<TcpListener>>();
 
 	/// <summary>
 	/// 非同期でストリーム受信するときに必要なバッファーオブジェクト
@@ -117,15 +125,20 @@ public abstract class NetworkConnector {
 		// HTTPリクエストを作成
 		httpRequest.Method = "POST";
 		httpRequest.ContentType = "application/json";
-		using(var W = new System.IO.StreamWriter(httpRequest.GetRequestStream())) {
-			W.Write(json);
+		using(var W = httpRequest.GetRequestStream()) {
+			var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+			W.Write(bytes, 0, bytes.Length);
 		}
 
 		// HTTPリクエスト送信、サーバーからレスポンスを受け取る
 		using(var httpResponse = httpRequest.GetResponse()) {
-			var buf = new System.IO.StringWriter();
-			using(var R = new System.IO.StreamReader(httpResponse.GetResponseStream())) {
-				buf.Write(R.Read());
+			var buf = new StringWriter();
+			using(var R = httpResponse.GetResponseStream()) {
+				var readBuffer = new byte[1024];
+				int length = 0;
+				while((length = R.Read(readBuffer, 0, readBuffer.Length)) > 0) {
+					buf.Write(System.Text.Encoding.UTF8.GetString(readBuffer, 0, length));
+				}
 			}
 			json = buf.ToString();
 		}
@@ -158,7 +171,7 @@ public abstract class NetworkConnector {
 		// HTTPリクエストを作成
 		httpRequest.Method = "POST";
 		httpRequest.ContentType = "application/json";
-		using(var W = new System.IO.StreamWriter(httpRequest.GetRequestStream())) {
+		using(var W = new StreamWriter(httpRequest.GetRequestStream())) {
 			W.Write(json);
 		}
 
@@ -169,21 +182,46 @@ public abstract class NetworkConnector {
 	}
 
 	/// <summary>
+	/// すべてのTCP/UDPコネクションを破棄します。
+	/// </summary>
+	public void CloseConnectionsAll() {
+		// 受信用TCPリスナー
+		foreach(var tcp in this.tcpReceiveListeners) {
+			tcp.Value.Resource.Server.Close();
+		}
+		this.tcpReceiveListeners.Clear();
+
+		// 受信用UDPクライアント
+		foreach(var udp in this.udpReceiveClients) {
+			udp.Value.Resource.Close();
+		}
+		this.udpReceiveClients.Clear();
+	}
+
+	/// <summary>
 	/// データ受信のみを行うTCPサーバーとして非同期的に接続を待ち受けます。
 	/// </summary>
 	/// <typeparam name="T">受信するデータの型</typeparam>
 	/// <param name="port">使用するポート番号</param>
 	/// <param name="callback">データ処理を行うコールバック関数</param>
 	protected void startTCPServer<T>(int port, Action<T> callback) where T : IJSONable<T> {
-		var tcpListener = new TcpListener(IPAddress.Any, port);
+		if(this.tcpReceiveListeners.ContainsKey(port) == true) {
+			// 既に同じポートが使われている場合はスキップ
+			Debug.Log("既にTCPポート #" + port + " が使用中です。");
+			return;
+		}
+		this.tcpReceiveListeners[port] = new AsyncResource<TcpListener>() {
+			Resource = new TcpListener(IPAddress.Any, port)
+		};
 
 		// 非同期で接続待機開始
 		Debug.Log("非同期TCP接続待ち (Server): " + "any:" + port);
-		tcpListener.Start();
-		tcpListener.BeginAcceptSocket(
+		this.tcpReceiveListeners[port].Resource.Start();
+		this.tcpReceiveListeners[port].AsyncResult = this.tcpReceiveListeners[port].Resource.BeginAcceptSocket(
 			new AsyncCallback((asyncSocket) => {
 				// 待ち受けを終了する
-				var listener = asyncSocket.AsyncState as TcpListener;
+				this.tcpReceiveListeners.Remove(port);
+				var listener = (asyncSocket.AsyncState as AsyncResource<TcpListener>).Resource;
 				var tcpSocket = listener.EndAcceptSocket(asyncSocket);
 				Debug.Log("非同期TCP接続受け入れ: " + tcpSocket.RemoteEndPoint.ToString());
 
@@ -196,12 +234,12 @@ public abstract class NetworkConnector {
 				tcpSocket.BeginReceive(socketReader.Buffer, 0, socketReader.Buffer.Length, SocketFlags.None, new AsyncCallback((asyncReader) => {
 					Debug.Log("非同期TCPデータ受信OK: " + "any:" + port);
 					var reader = asyncReader.AsyncState as AsyncReceiveBuffer;
+					var buf = reader.Buffer;
+					var jsonBinaryData = new byte[1024];
 
 					using(reader.TCPSocket) {
-						var buf = reader.Buffer;
-						var jsonBinaryData = new byte[1024];
-
 						try {
+							// 受信を終了し、受信したデータの実際の長さを取得
 							int receiveLength = reader.TCPSocket.EndReceive(asyncReader);
 
 							// 先頭４バイトはデータの長さが入っている
@@ -214,28 +252,31 @@ public abstract class NetworkConnector {
 								throw new Exception("受信したデータがヘッダーに示された長さと一致しません。過不足＝" + (receiveLength - (length + 4)));
 							}
 							Array.Copy(buf, 4, jsonBinaryData, 0, buf.Length - 4);
-
+							
 							Debug.Log("非同期TCPデータ受信完了: " + receiveLength + " Bytes");
 
 						} catch(Exception e) {
 							Debug.LogWarning("非同期TCPデータ受信エラー: " + e.Message);
 							return;
+						} finally {
+							// ソケットを切断
+							listener.Server.Close();
 						}
+					}
 
-						// 受信したJSONをデータとして復元して、呼出元が定義したコールバックを呼び出す
-						var obj = JsonUtility.FromJson<T>(System.Text.Encoding.UTF8.GetString(jsonBinaryData));
-						if(callback != null) {
-							try {
-								callback.Invoke(obj);
-							} catch(Exception e) {
-								Debug.LogWarning("コールバック関数内の例外: " + e.Message);
-							}
+					// 受信したJSONをデータとして復元して、呼出元が定義したコールバックを呼び出す
+					var obj = JsonUtility.FromJson<T>(System.Text.Encoding.UTF8.GetString(jsonBinaryData));
+					if(callback != null) {
+						try {
+							callback.Invoke(obj);
+						} catch(Exception e) {
+							Debug.LogWarning("コールバック関数内の例外: " + e.Message);
 						}
 					}
 
 				}), socketReader);
 			}),
-			tcpListener
+			this.tcpReceiveListeners[port]
 		);
 	}
 
@@ -322,22 +363,24 @@ public abstract class NetworkConnector {
 	/// <param name="callback">データ処理を行うコールバック関数</param>
 	protected void startUDPReceiver<T>(int port, Action<T> callback) where T : IJSONable<T> {
 		// 受信用のUDPクライアントを生成（localhost）
-		if(this.udpClient != null) {
+		if(this.udpReceiveClients.ContainsKey(port) == true) {
 			// 前回のUDPクライアントが残っている場合は処理をスキップ
-			Debug.Log("非同期UDPクライアントが使用中です。");
+			Debug.Log("非同期UDPクライアント #" + port + " が使用中です。");
 			return;
 		}
-		this.udpClient = new UdpClient(port);
+		this.udpReceiveClients[port] = new AsyncResource<UdpClient>() {
+			Resource = new UdpClient(port)
+		};
 
 		// 非同期でデータ受信
 		Debug.Log("非同期UDPデータ受信待ち:  " + "any:" + port);
-		this.udpClient.BeginReceive(
+		this.udpReceiveClients[port].AsyncResult = this.udpReceiveClients[port].Resource.BeginReceive(
 			new AsyncCallback((async) => {
-				this.udpClient = null;
+				this.udpReceiveClients.Remove(port);
 				byte[] receivedData = null;
 				var receivedDataCollection = new List<byte>();
 
-				using(var udp = async.AsyncState as UdpClient) {
+				using(var udp = (async.AsyncState as AsyncResource<UdpClient>).Resource) {
 					// 受信準備完了
 
 					// 通信エラーチェック
@@ -381,7 +424,7 @@ public abstract class NetworkConnector {
 					}
 				}
 			}),
-			this.udpClient
+			this.udpReceiveClients[port]
 		);
 	}
 

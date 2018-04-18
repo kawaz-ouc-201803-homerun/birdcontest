@@ -37,14 +37,18 @@ public class TesterGM : TesterBase {
 	/// </summary>
 	/// <param name="parameters">テストに必要なパラメーターの連想配列</param>
 	public override void DoTest(Dictionary<string, object> parameters) {
-		this.isTesting = true;
 		Logger.LogProcess("ゲームマスターとしてテストを開始します。");
+
+		this.isTesting = true;
+		this.UDPProgressReceiveCounter = 0;
 		this.parameters = parameters;
+
 		this.connector = new NetworkGameMaster(new string[] {
 			(string)parameters["CtrlIP"],
 			(string)parameters["CtrlIP"],
 			(string)parameters["CtrlIP"],
 		});
+
 		this.testProcess1();
 	}
 
@@ -127,8 +131,9 @@ public class TesterGM : TesterBase {
 			// }
 
 			// テスト完了
+			this.connector.CloseConnectionsAll();
 			Logger.LogProcess("すべてのテストフェーズが完了しました。");
-			Logger.LogResult("成功: ゲームマスター : 相手先端末ID=" + data.GetDictionary()["RoleID"]);
+			Logger.LogResult("成功: ゲームマスター: 相手先端末ID=" + data.GetDictionary()["RoleID"]);
 			this.isTesting = false;
 		}));
 	}
