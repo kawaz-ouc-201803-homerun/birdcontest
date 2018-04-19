@@ -66,7 +66,7 @@ TestCases = [
 			url: SERVERURL + "handler/Audience.json",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "getCurrentEventId",
@@ -99,7 +99,7 @@ TestCases = [
 			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "newEvent",
@@ -128,7 +128,7 @@ TestCases = [
 			url: SERVERURL + "handler/Audience.json",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "getCurrentEventId",
@@ -162,7 +162,7 @@ TestCases = [
 			url: SERVERURL + "servlet/AudiencePost",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "post",
@@ -186,7 +186,7 @@ TestCases = [
 			url: SERVERURL + "servlet/AudiencePost",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "post",
@@ -214,7 +214,7 @@ TestCases = [
 			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "getPosts",
@@ -242,7 +242,7 @@ TestCases = [
 			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "close",
@@ -269,7 +269,7 @@ TestCases = [
 			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "close",
@@ -297,7 +297,7 @@ TestCases = [
 			url: SERVERURL + "servlet/AudiencePost",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "post",
@@ -325,7 +325,7 @@ TestCases = [
 			url: SERVERURL + "handler/GameMaster.json",
 			type: "POST",
 			async: true,
-			contentType: "application/JSON",
+			contentType: "application/JSON; charset=UTF-8",
 			dataType: "JSON",
 			data: JSON.stringify({
 				"method": "getPeopleCount",

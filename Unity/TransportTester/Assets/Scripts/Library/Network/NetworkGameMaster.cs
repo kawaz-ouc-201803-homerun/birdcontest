@@ -36,7 +36,7 @@ public class NetworkGameMaster : NetworkConnector {
 	public string StartAudiencePredicts() {
 		var result = this.postRequestWithResponseObject<ModelAudienceNewEventResponse>(
 			NetworkGameMaster.HandlerJson,
-			new ModelHttpRequest() {
+			new ModelJsonicRequest() {
 				method = "newEvent",
 				param = new string[] { },
 				id = "1",
@@ -57,7 +57,7 @@ public class NetworkGameMaster : NetworkConnector {
 	public ModelAudiencePredictList GetAudiencePredicts(string eventId) {
 		return this.postRequestWithResponseObject<ModelAudiencePredictList>(
 			NetworkGameMaster.HandlerJson,
-			new ModelHttpRequest() {
+			new ModelJsonicRequest() {
 				method = "getPosts",
 				param = new string[] { eventId },
 				id = "2",
@@ -72,8 +72,8 @@ public class NetworkGameMaster : NetworkConnector {
 	/// <returns>HTTPレスポンスコード</returns>
 	public HttpStatusCode CloseAudiencePredicts(string eventId) {
 		return this.postRequestWithResponseCode(
-			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
-			new ModelHttpRequest() {
+			NetworkGameMaster.HandlerJson,
+			new ModelJsonicRequest() {
 				method = "close",
 				param = new string[] { eventId },
 				id = "3",
@@ -86,14 +86,19 @@ public class NetworkGameMaster : NetworkConnector {
 	/// </summary>
 	/// <returns>オーディエンスの参加延べ人数</returns>
 	public int GetPeopleCount() {
-		return this.postRequestWithResponseObject<ModelAudienceGetPeopleCountResponse>(
-			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
-			new ModelHttpRequest() {
+		var result = this.postRequestWithResponseObject<ModelAudienceGetPeopleCountResponse>(
+			NetworkGameMaster.HandlerJson,
+			new ModelJsonicRequest() {
 				method = "getPeopleCount",
 				param = new string[] { },
 				id = "4",
 			}
-		).count;
+		);
+		if(result != null) {
+			return result.count;
+		} else {
+			return -1;
+		}
 	}
 
 	/// <summary>

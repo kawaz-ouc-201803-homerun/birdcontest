@@ -54,6 +54,11 @@ public class TesterAudience : MonoBehaviour {
 		if(result == System.Net.HttpStatusCode.OK) {
 			Logger.LogProcess("イベント締切: ID=" + result);
 			Logger.LogResult("成功: オーディエンス投票システム: イベント締切");
+
+			// イベントを使ったAPIを使えなくする
+			GameObject.Find("Button_CloseEvent").GetComponent<Button>().interactable = false;
+			GameObject.Find("Button_GetPredicts").GetComponent<Button>().interactable = false;
+
 		} else {
 			Logger.LogResult("失敗: オーディエンス投票システム: イベント締切");
 		}

@@ -10,6 +10,16 @@ using UnityEngine;
 public class ModelControllerStart : IJSONable<ModelControllerStart> {
 
 	/// <summary>
+	/// 役割ID
+	/// </summary>
+	public int RoleId;
+
+	/// <summary>
+	/// 制限時間秒数
+	/// </summary>
+	public int LimitTimeSecond;
+
+	/// <summary>
 	/// JSON文字列からこのインターフェースを実装するオブジェクトにデシリアライズします。
 	/// </summary>
 	/// <param name="json">シリアライズされたJSON文字列</param>

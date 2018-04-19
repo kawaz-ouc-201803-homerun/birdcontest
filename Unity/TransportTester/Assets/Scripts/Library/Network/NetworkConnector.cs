@@ -112,7 +112,7 @@ public abstract class NetworkConnector {
 	/// <param name="url">リクエスト送信先URL</param>
 	/// <param name="parameter">リクエストとして送信するパラメーター</param>
 	/// <returns>レスポンスとして受信したオブジェクト。JSON形式からのデシリアライズに失敗した場合は null を返す</returns>
-	protected T postRequestWithResponseObject<T>(string url, ModelHttpRequest parameter) where T : IJSONable<T> {
+	protected T postRequestWithResponseObject<T>(string url, ModelJsonicRequest parameter) where T : IJSONable<T> {
 		if(parameter == null) {
 			throw new ArgumentNullException("parameter", "WebAPIのリクエストパラメーターは必須です。");
 		}
@@ -122,32 +122,48 @@ public abstract class NetworkConnector {
 		// 送信するデータはJSON化する
 		string json = JsonUtility.ToJson(parameter);
 
+		// JSONのうち、厳密には param -> params (C#の予約語につき変数名にできない) なので直す
+		json = json.Replace("\"param\":", "\"params\":");
+
+		// JSONをバイト配列化
+		var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+
 		// HTTPリクエストを作成
 		httpRequest.Method = "POST";
 		httpRequest.ContentType = "application/json";
-		using(var W = httpRequest.GetRequestStream()) {
-			var bytes = System.Text.Encoding.UTF8.GetBytes(json);
-			W.Write(bytes, 0, bytes.Length);
-		}
+		httpRequest.ContentLength = bytes.Length;
+		httpRequest.GetRequestStream().Write(bytes, 0, bytes.Length);
 
 		// HTTPリクエスト送信、サーバーからレスポンスを受け取る
-		using(var httpResponse = httpRequest.GetResponse()) {
-			var buf = new StringWriter();
+		using(var httpResponse = (HttpWebResponse)httpRequest.GetResponse()) {
+			var buf = "";
 			using(var R = httpResponse.GetResponseStream()) {
 				var readBuffer = new byte[1024];
 				int length = 0;
 				while((length = R.Read(readBuffer, 0, readBuffer.Length)) > 0) {
-					buf.Write(System.Text.Encoding.UTF8.GetString(readBuffer, 0, length));
+					buf += System.Text.Encoding.UTF8.GetString(readBuffer, 0, length);
 				}
 			}
-			json = buf.ToString();
+			json = buf;
 		}
 
-		// 受信したJSONをデシリアライズして返す
 		try {
-			return JsonUtility.FromJson<T>(json);
-		} catch {
-			Debug.LogWarning("HTTPレスポンスのJSONデシリアライズに失敗しました。型が一致していない可能性があります。");
+
+			// 受信したJSONレスポンスをデシリアライズ
+			var jsonicResponse = JsonUtility.FromJson<ModelJsonicResponse<T>>(json);
+
+			// JSONICエラーチェック
+			if(jsonicResponse.error != null
+			&& (jsonicResponse.error.code != 0 || string.IsNullOrEmpty(jsonicResponse.error.message) == false)) {
+				// エラーがある場合は戻り値を返さない
+				throw new Exception("JSONICエラー情報: [" + jsonicResponse.error.code + "] " + jsonicResponse.error.message);
+			}
+
+			// メソッドの戻り値を得る
+			return jsonicResponse.result;
+
+		} catch(Exception e) {
+			Debug.LogWarning("HTTPレスポンスエラー: " + e.Message);
 			return default(T);
 		}
 	}
@@ -158,7 +174,7 @@ public abstract class NetworkConnector {
 	/// <param name="url">リクエスト送信先URL</param>
 	/// <param name="parameter">リクエストとして送信するオブジェクト</param>
 	/// <returns>HTTPステータスコード</returns>
-	protected HttpStatusCode postRequestWithResponseCode(string url, ModelHttpRequest parameter) {
+	protected HttpStatusCode postRequestWithResponseCode(string url, ModelJsonicRequest parameter) {
 		if(parameter == null) {
 			throw new ArgumentNullException("parameter", "WebAPIのリクエストパラメーターは必須です。");
 		}
@@ -168,15 +184,44 @@ public abstract class NetworkConnector {
 		// 送信するデータはJSON化する
 		string json = JsonUtility.ToJson(parameter);
 
+		// JSONのうち、厳密には param -> params (C#の予約語につき変数名にできない) なので直す
+		json = json.Replace("\"param\":", "\"params\":");
+
+		// JSONをバイト配列化
+		var bytes = System.Text.Encoding.UTF8.GetBytes(json);
+
 		// HTTPリクエストを作成
 		httpRequest.Method = "POST";
 		httpRequest.ContentType = "application/json";
-		using(var W = new StreamWriter(httpRequest.GetRequestStream())) {
-			W.Write(json);
-		}
+		httpRequest.ContentLength = bytes.Length;
+		httpRequest.GetRequestStream().Write(bytes, 0, bytes.Length);
 
 		// HTTPリクエスト送信、サーバーからレスポンスを受け取る
 		using(var httpResponse = (HttpWebResponse)httpRequest.GetResponse()) {
+			var buf = new StringWriter();
+			using(var R = httpResponse.GetResponseStream()) {
+				var readBuffer = new byte[1024];
+				int length = 0;
+				while((length = R.Read(readBuffer, 0, readBuffer.Length)) > 0) {
+					buf.Write(System.Text.Encoding.UTF8.GetString(readBuffer, 0, length));
+				}
+			}
+			json = buf.ToString();
+
+			try {
+
+				// 受信したJSONレスポンスをデシリアライズ
+				var jsonicResponse = JsonUtility.FromJson<ModelJsonicResponse<object>>(json);
+
+				// JSONICエラーチェック
+				if(jsonicResponse.error != null
+				&& (jsonicResponse.error.code != 0 || string.IsNullOrEmpty(jsonicResponse.error.message) == false)) {
+					throw new Exception("JSONICエラー情報: [" + jsonicResponse.error.code + "] " + jsonicResponse.error.message);
+				}
+
+			} catch(Exception e) {
+				Debug.LogWarning("HTTPレスポンスエラー: " + e.Message);
+			}
 			return httpResponse.StatusCode;
 		}
 	}
@@ -252,7 +297,7 @@ public abstract class NetworkConnector {
 								throw new Exception("受信したデータがヘッダーに示された長さと一致しません。過不足＝" + (receiveLength - (length + 4)));
 							}
 							Array.Copy(buf, 4, jsonBinaryData, 0, buf.Length - 4);
-							
+
 							Debug.Log("非同期TCPデータ受信完了: " + receiveLength + " Bytes");
 
 						} catch(Exception e) {

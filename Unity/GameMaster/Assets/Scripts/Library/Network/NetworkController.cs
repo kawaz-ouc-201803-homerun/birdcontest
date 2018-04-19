@@ -15,12 +15,19 @@ public class NetworkController : NetworkConnector {
 	/// </summary>
 	public int RoleId {
 		get; set;
-	} = -1;
+	}
+	
+	/// <summary>
+	/// コンストラクター
+	/// </summary>
+	/// <param name="gameMasterIPAddress">ゲームマスターのIPアドレス。nullにするとサトの環境デフォルト設定になります。</param>
+	public NetworkController(string gameMasterIPAddress) : base(gameMasterIPAddress, null) {
+	}
 
 	/// <summary>
 	/// TCPでゲームマスターからの開始指示を待機します。
 	/// </summary>
-	public void ControllerWaitForStart<T>(Action<T> callback) where T : IJSONable<T> {
+	public void ControllerWaitForStart(Action<ModelControllerStart> callback) {
 		this.startTCPServer(NetworkConnector.GeneralPort, callback);
 	}
 
@@ -29,23 +36,26 @@ public class NetworkController : NetworkConnector {
 	/// 毎フレームで呼び出すと回線の負荷がワヤになるので一定間隔を置いて呼び出して下さい。
 	/// </summary>
 	/// <param name="data">報告内容</param>
-	public void ProgressToGameMaster(object data) {
+	public void ReportProgressToGameMaster(object data) {
 		if(this.RoleId == -1) {
 			throw new Exception("操作端末の役割IDが設定されていません。");
 		}
-		this.startUDPSender(NetworkConnector.GameMasterIPAddress, this.RoleId, data, null);
+		this.startUDPSender(this.GameMasterIPAddress, NetworkConnector.ControllerPorts[this.RoleId], data, null);
 	}
 
 	/// <summary>
 	/// TCPでゲームマスターに完了の報告を送信します。
 	/// </summary>
 	/// <param name="data">報告内容</param>
-	/// <param name="callback">処理が完了したときに呼び出されるコールバック関数</param>
-	public void ReportCompleteControllerToGameMaster(object data, Action callback) {
+	/// <param name="successCallBack">処理が完了したときに呼び出されるコールバック関数</param>
+	/// <param name="failureCallBack">処理が完了したときに呼び出されるコールバック関数</param>
+	public void ReportCompleteToGameMaster(object data, Action successCallBack, Action failureCallBack) {
 		if(this.RoleId == -1) {
 			throw new Exception("操作端末の役割IDが設定されていません。");
 		}
-		this.startTCPClient(NetworkConnector.GameMasterIPAddress, this.RoleId, data, callback);
+		
+		// TCPで送信
+		this.startTCPClient(this.GameMasterIPAddress, NetworkConnector.ControllerPorts[this.RoleId], data, successCallBack, failureCallBack);
 	}
 
 }

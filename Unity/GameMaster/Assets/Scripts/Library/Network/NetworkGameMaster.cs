@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using ModelControllerProgress = ModelDictionary<string, string>;
 
 /// <summary>
 /// ゲームマスター側のHTTP/TCP/UDP通信処理を行うラッパークラス
@@ -13,7 +14,19 @@ public class NetworkGameMaster : NetworkConnector {
 	/// <summary>
 	/// WebAPIのハンドラー名
 	/// </summary>
-	protected const string HandlerJson = "handler/GameMasterHandler.json";
+	protected const string HandlerJson = "handler/GameMaster.json";
+
+	/// <summary>
+	/// UDPによる操作端末の進捗状況を受け付けるかどうか
+	/// </summary>
+	protected bool receivableUDPProgress = true;
+
+	/// <summary>
+	/// コンストラクター
+	/// </summary>
+	/// <param name="controllerIPAddresses">各種操作端末のIPアドレス</param>
+	public NetworkGameMaster(string[] controllerIPAddresses) : base("localhost", controllerIPAddresses) {
+	}
 
 	/// <summary>
 	/// HTTP通信でオーディエンス予想の新しいイベントを生成します。
@@ -21,14 +34,19 @@ public class NetworkGameMaster : NetworkConnector {
 	/// </summary>
 	/// <returns>イベントID</returns>
 	public string StartAudiencePredicts() {
-		return this.postRequestWithResponseObject<ModelAudienceNewEventResponse>(
-			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
-			new ModelHttpRequest() {
+		var result = this.postRequestWithResponseObject<ModelAudienceNewEventResponse>(
+			NetworkGameMaster.HandlerJson,
+			new ModelJsonicRequest() {
 				method = "newEvent",
-				param = new object[] {},
-				id = 1,
+				param = new string[] { },
+				id = "1",
 			}
-		)?.eventId;
+		);
+		if(result != null) {
+			return result.eventId;
+		} else {
+			return null;
+		}
 	}
 
 	/// <summary>
@@ -36,15 +54,15 @@ public class NetworkGameMaster : NetworkConnector {
 	/// </summary>
 	/// <param name="eventId">イベントID</param>
 	/// <returns>オーディエンス予想のリスト</returns>
-	public List<ModelAudiencePredict> LoadAudiencePredicts(string eventId) {
+	public ModelAudiencePredictList GetAudiencePredicts(string eventId) {
 		return this.postRequestWithResponseObject<ModelAudiencePredictList>(
-			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
-			new ModelHttpRequest() {
+			NetworkGameMaster.HandlerJson,
+			new ModelJsonicRequest() {
 				method = "getPosts",
-				param = new object[] { eventId },
-				id = 2,
+				param = new string[] { eventId },
+				id = "2",
 			}
-		).audiencePredicts;
+		);
 	}
 
 	/// <summary>
@@ -54,11 +72,11 @@ public class NetworkGameMaster : NetworkConnector {
 	/// <returns>HTTPレスポンスコード</returns>
 	public HttpStatusCode CloseAudiencePredicts(string eventId) {
 		return this.postRequestWithResponseCode(
-			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
-			new ModelHttpRequest() {
+			NetworkGameMaster.HandlerJson,
+			new ModelJsonicRequest() {
 				method = "close",
-				param = new object[] { eventId },
-				id = 3,
+				param = new string[] { eventId },
+				id = "3",
 			}
 		);
 	}
@@ -68,27 +86,31 @@ public class NetworkGameMaster : NetworkConnector {
 	/// </summary>
 	/// <returns>オーディエンスの参加延べ人数</returns>
 	public int GetPeopleCount() {
-		return this.postRequestWithResponseObject<ModelAudienceGetPeopleCountResponse>(
-			NetworkConnector.AudienceSystemBaseURL + NetworkGameMaster.HandlerJson,
-			new ModelHttpRequest() {
+		var result = this.postRequestWithResponseObject<ModelAudienceGetPeopleCountResponse>(
+			NetworkGameMaster.HandlerJson,
+			new ModelJsonicRequest() {
 				method = "getPeopleCount",
-				param = new object[] {},
-				id = 4,
+				param = new string[] { },
+				id = "4",
 			}
-		).count;
+		);
+		if(result != null) {
+			return result.count;
+		} else {
+			return -1;
+		}
 	}
 
 	/// <summary>
-	/// TCPで各端末に開始指示を送信します。
+	/// TCPで指定した端末に開始指示を送信します。
 	/// このメソッドはノンブロッキングで通過するため、通信が完了したときに呼び出される処理をコールバック関数で指定する必要があります。
 	/// </summary>
 	/// <param name="data">送信する任意のデータ</param>
-	/// <param name="callback">通信が完了したときに呼び出されるコールバック関数</param>
-	public void StartControllers(object data, Action callback) {
-		// すべての端末に送信
-		foreach(var ipAddress in NetworkConnector.ControllerIPAddresses) {
-			this.startTCPClient(ipAddress, NetworkConnector.GeneralPort, data, callback);
-		}
+	/// <param name="roleId">役割ID</param>
+	/// <param name="successCallBack">通信が完了したときに呼び出されるコールバック関数</param>
+	/// <param name="failureCallBack">通信に失敗したときに呼び出されるコールバック関数</param>
+	public void StartController(ModelControllerStart data, int roleId, Action successCallBack, Action failureCallBack) {
+		this.startTCPClient(this.ControllerIPAddresses[roleId], NetworkConnector.GeneralPort, data, successCallBack, failureCallBack);
 	}
 
 	/// <summary>
@@ -97,8 +119,24 @@ public class NetworkGameMaster : NetworkConnector {
 	/// このメソッドはノンブロッキングで通過するため、通信が完了したときに呼び出される処理をコールバック関数で指定する必要があります。
 	/// </summary>
 	/// <param name="callback">データを受信したときに呼び出されるコールバック関数</param>
-	public void ReceiveControllerProgress<T>(Action<T> callback) where T : IJSONable<T> {
-		this.startUDPReceiver<T>(NetworkConnector.GeneralPort, callback);
+	public void ReceiveControllerProgress(Action<ModelControllerProgress> callback) {
+		this.receivableUDPProgress = true;
+
+		// すべての端末から受信
+		for(int i = 0; i < this.ControllerIPAddresses.Length; i++) {
+			this.startUDPReceiver(NetworkConnector.ControllerPorts[i], new Action<ModelControllerProgress>((obj) => {
+				// データ受信時のコールバック処理
+
+				if(this.receivableUDPProgress == false) {
+					// UDP受信を受け付けていない場合は中止する
+					return;
+				}
+
+				if(callback != null) {
+					callback.Invoke(obj);
+				}
+			}));
+		}
 	}
 
 	/// <summary>
@@ -106,9 +144,12 @@ public class NetworkGameMaster : NetworkConnector {
 	/// このメソッドはノンブロッキングで通過するため、通信が完了したときに呼び出される処理をコールバック関数で指定する必要があります。
 	/// </summary>
 	/// <param name="callback">受信が完了したときに呼び出されるコールバック関数</param>
-	public void WaitForControllers<T>(Action<T> callback) where T : IJSONable<T> {
-		// すべての端末に送信
-		for(int i = 0; i < NetworkConnector.ControllerIPAddresses.Length; i++) {
+	public void WaitForControllers(Action<ModelControllerProgress> callback) {
+		// UDPでの受信を止める
+		this.receivableUDPProgress = false;
+
+		// すべての端末から受信待機
+		for(int i = 0; i < this.ControllerIPAddresses.Length; i++) {
 			this.startTCPServer(NetworkConnector.ControllerPorts[i], callback);
 		}
 	}

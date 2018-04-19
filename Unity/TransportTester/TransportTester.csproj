@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.3.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -299,7 +301,9 @@
     <Compile Include="Assets\Scripts\Library\Model\ModelAudiencePredictList.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelControllerStart.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelDictionary.cs" />
-    <Compile Include="Assets\Scripts\Library\Model\ModelHttpRequest.cs" />
+    <Compile Include="Assets\Scripts\Library\Model\ModelJsonicError.cs" />
+    <Compile Include="Assets\Scripts\Library\Model\ModelJsonicRequest.cs" />
+    <Compile Include="Assets\Scripts\Library\Model\ModelJsonicResponse.cs" />
     <Compile Include="Assets\Scripts\Library\Network\AsyncResource.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkConnector.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkController.cs" />

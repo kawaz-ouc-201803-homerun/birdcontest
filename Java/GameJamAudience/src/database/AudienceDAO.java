@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import common.Logger;
 import execption.EventException;
 import execption.UserException;
 import jsonable.ModelAudiencePredict;
@@ -42,13 +43,13 @@ public class AudienceDAO implements DAOInterface {
 				stmt.executeUpdate();
 			}
 
-			System.out.println("[INFO] イベント作成 -> EventId=" + eventId);
+			Logger.getInstance().LogInfo(AudienceDAO.class, "イベント作成 -> EventId=" + eventId);
 			con.commit();
 			return eventId;
 
 		} catch(SQLException e) {
 			e.printStackTrace();
-			System.out.println("[ERROR] TEVENT: レコードの追加に失敗");
+			Logger.getInstance().LogError(AudienceDAO.class, "TEVENT: レコードの追加に失敗");
 			throw e;
 		}
 	}
@@ -68,17 +69,17 @@ public class AudienceDAO implements DAOInterface {
 			if(rs.next()) {
 				// イベントIDを取り出す
 				String eventId = rs.getString("event_id");
-				System.out.println("[INFO] 現在のイベント -> EventId=" + eventId);
+				Logger.getInstance().LogInfo(AudienceDAO.class, "現在のイベント -> EventId=" + eventId);
 				return eventId;
 			} else {
 				// 有効なイベントが存在しない
-				System.out.println("[WARN] 現在のイベント -> なし");
+				Logger.getInstance().LogWarn(AudienceDAO.class, "現在のイベント -> なし");
 				return null;
 			}
 
 		} catch(SQLException e) {
 			e.printStackTrace();
-			System.out.println("[ERROR] TEVENT: 有効なイベントの取得に失敗");
+			Logger.getInstance().LogError(AudienceDAO.class, "TEVENT: 有効なイベントの取得に失敗");
 			throw e;
 		}
 	}
@@ -136,16 +137,16 @@ public class AudienceDAO implements DAOInterface {
 				stmt.executeUpdate();
 			}
 
-			System.out.println("[INFO] 投票 -> EventId=" + data.getEventId() + ", NickName=" + data.getNickname() + ", Predict=" + data.getPredict() + ", UserSessionId=" + data.getUserSessionId());
+			Logger.getInstance().LogInfo(AudienceDAO.class, "投票 -> EventId=" + data.getEventId() + ", NickName=" + data.getNickname() + ", Predict=" + data.getPredict() + ", UserSessionId=" + data.getUserSessionId());
 			con.commit();
 
 		} catch(SQLException e) {
 			e.printStackTrace();
-			System.out.println("[ERROR] TEVENT: レコードの追加に失敗");
+			Logger.getInstance().LogError(AudienceDAO.class, "TEVENT: レコードの追加に失敗");
 			throw e;
 		} catch(UserException e) {
 			e.printStackTrace();
-			System.out.println("[WARN] TEVENT: レコードの追加をキャンセル");
+			Logger.getInstance().LogWarn(AudienceDAO.class, "TEVENT: レコードの追加をキャンセル");
 			throw e;
 		}
 	}
@@ -173,15 +174,15 @@ public class AudienceDAO implements DAOInterface {
 							rs.getString("name"),
 							rs.getInt("predict"),
 							rs.getString("receive_time"),
-							null));
+							rs.getString("user_session_id")));
 				}
 			}
 
-			System.out.println("[INFO] 投票データ取得 -> EventID=" + eventId + " ... " + list.size() + " 件");
+			Logger.getInstance().LogInfo(AudienceDAO.class, "投票データ取得 -> EventID=" + eventId + " ... " + list.size() + " 件");
 
 		} catch(SQLException e) {
 			e.printStackTrace();
-			System.out.println("[ERROR] TPREDICT: レコード一覧の取得に失敗");
+			Logger.getInstance().LogError(AudienceDAO.class, "TPREDICT: レコード一覧の取得に失敗");
 			throw e;
 		}
 
@@ -205,12 +206,12 @@ public class AudienceDAO implements DAOInterface {
 				stmt.executeUpdate();
 			}
 
-			System.out.println("[INFO] 投票締切: " + eventId);
+			Logger.getInstance().LogInfo(AudienceDAO.class, "投票締切: " + eventId);
 			con.commit();
 
 		} catch(SQLException e) {
 			e.printStackTrace();
-			System.out.println("[ERROR] TPREDICT: レコードの更新に失敗");
+			Logger.getInstance().LogError(AudienceDAO.class, "TPREDICT: レコードの更新に失敗");
 			throw e;
 		}
 	}
@@ -230,17 +231,17 @@ public class AudienceDAO implements DAOInterface {
 			if(rs.next()) {
 				// 投稿数を取り出す
 				int count = rs.getInt("people_count");
-				System.out.println("[INFO] オーディエンス参加延べ人数: " + count + " 人");
+				Logger.getInstance().LogInfo(AudienceDAO.class, "オーディエンス参加延べ人数: " + count + " 人");
 				return count;
 			} else {
 				// 一件も投稿されていない
-				System.out.println("[INFO] オーディエンス参加延べ人数: 0 人");
+				Logger.getInstance().LogInfo(AudienceDAO.class, "オーディエンス参加延べ人数: 0 人");
 				return 0;
 			}
 
 		} catch(SQLException e) {
 			e.printStackTrace();
-			System.out.println("[ERROR] TPREDICT: レコード数の取得に失敗");
+			Logger.getInstance().LogError(AudienceDAO.class, "TPREDICT: レコード数の取得に失敗");
 			throw e;
 		}
 	}

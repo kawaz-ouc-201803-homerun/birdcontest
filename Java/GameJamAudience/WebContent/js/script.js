@@ -69,7 +69,7 @@ function CheckPostable() {
 		url: SERVERURL + "handler/Audience.json",
 		type: "POST",
 		async: true,
-		contentType: "application/JSON",
+		contentType: "application/JSON; charset=UTF-8",
 		dataType: "JSON",
 		data: JSON.stringify({
 			"method": "getCurrentEventId",
@@ -134,7 +134,7 @@ function DoPost() {
 		url: SERVERURL + "servlet/AudiencePost",
 		type: "POST",
 		async: true,
-		contentType: "application/JSON",
+		contentType: "application/JSON; charset=UTF-8",
 		dataType: "JSON",
 		data: JSON.stringify({
 			"method": "post",

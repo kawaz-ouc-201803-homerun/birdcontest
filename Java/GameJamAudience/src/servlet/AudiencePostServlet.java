@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import common.Logger;
 import database.AudienceDAO;
 import execption.EventException;
 import execption.UserException;
@@ -50,10 +51,10 @@ public class AudiencePostServlet extends HttpServlet {
 		if(session.getAttribute("UserSessionId") == null) {
 			userSessionId = UUID.randomUUID().toString().replace("-", "");
 			session.setAttribute("UserSessionId", userSessionId);
-			System.out.println("[INFO] 新規 UserSessionId: " + userSessionId);
+			Logger.getInstance().LogInfo(AudiencePostServlet.class, "新規 UserSessionId: " + userSessionId);
 		} else {
 			userSessionId = (String) session.getAttribute("UserSessionId");
-			System.out.println("[INFO] 既存 UserSessionId: " + userSessionId);
+			Logger.getInstance().LogInfo(AudiencePostServlet.class, "既存 UserSessionId: " + userSessionId);
 		}
 
 		// リクエストボディのJSONからパラメーターオブジェクトを生成

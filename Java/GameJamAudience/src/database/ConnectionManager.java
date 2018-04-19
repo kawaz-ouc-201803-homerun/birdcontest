@@ -3,6 +3,7 @@ package database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import common.Logger;
 import lombok.val;
 
 /**
@@ -53,7 +54,7 @@ public class ConnectionManager {
 			Class.forName("org.sqlite.JDBC");
 		} catch(ClassNotFoundException e) {
 			e.printStackTrace();
-			System.out.println("[ERROR] JDBCドライバーの初期化に失敗しました。データベース関連の操作は無効です");
+			Logger.getInstance().LogError(ConnectionManager.class, "JDBCドライバーの初期化に失敗しました。データベース関連の操作は無効です");
 		}
 
 		if(tableInitializer != null) {
