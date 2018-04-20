@@ -54,8 +54,8 @@ public class NetworkGameMaster : NetworkConnector {
 	/// </summary>
 	/// <param name="eventId">イベントID</param>
 	/// <returns>オーディエンス予想のリスト</returns>
-	public ModelAudiencePredictList GetAudiencePredicts(string eventId) {
-		return this.postRequestWithResponseObject<ModelAudiencePredictList>(
+	public ModelAudiencePredictsResponse GetAudiencePredicts(string eventId) {
+		return this.postRequestWithResponseObject<ModelAudiencePredictsResponse>(
 			NetworkGameMaster.HandlerJson,
 			new ModelJsonicRequest() {
 				method = "getPosts",

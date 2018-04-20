@@ -37,17 +37,9 @@ public class TesterController : TesterBase {
 	private bool enabledUDPReport = false;
 
 	/// <summary>
-	/// 現在テスト中であるかどうか
-	/// </summary>
-	private bool isTesting = false;
-
-	/// <summary>
 	/// 毎フレーム更新処理
 	/// </summary>
 	public void Update() {
-		// コントロール有効無効
-		GameObject.Find("DoTest").GetComponent<Button>().interactable = !this.isTesting;
-
 		if(this.enabledUDPReport == true) {
 			// 一定間隔でUDPによる操作端末の進捗報告を送信する
 			if(Time.time - this.UDPProgressLastSendTime >= TesterController.UDPProgressSendFrequency) {
@@ -64,7 +56,7 @@ public class TesterController : TesterBase {
 	public override void DoTest(Dictionary<string, object> parameters) {
 		Logger.LogProcess("操作端末 " + parameters["RoleID"] + " としてテストを開始します。");
 
-		this.isTesting = true;
+		// パラメーター初期化
 		this.UDPProgressSendCounter = 0;
 		this.parameters = parameters;
 		this.connector = new NetworkController((string)parameters["GMIP"]) {
@@ -129,8 +121,10 @@ public class TesterController : TesterBase {
 				// テスト完了
 				this.connector.CloseConnectionsAll();
 				Logger.LogProcess("すべてのテストフェーズが完了しました。");
-				Logger.LogResult("成功: 操作端末ID=" + this.parameters["RoleID"] ?? "null");
-				this.isTesting = false;
+				if(this.TestCompletedCallBack != null) {
+					// テスト完了時のコールバック関数を呼び出す
+					this.TestCompletedCallBack();
+				}
 			},
 			() => {
 				// 失敗時: 再試行

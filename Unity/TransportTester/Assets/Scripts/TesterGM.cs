@@ -21,28 +21,15 @@ public class TesterGM : TesterBase {
 	private int UDPProgressReceiveCounter = 0;
 
 	/// <summary>
-	/// 現在テスト中であるかどうか
-	/// </summary>
-	private bool isTesting = false;
-
-	/// <summary>
-	/// 毎フレーム更新処理
-	/// </summary>
-	public void Update() {
-		GameObject.Find("DoTest").GetComponent<Button>().interactable = !this.isTesting;
-	}
-
-	/// <summary>
 	/// テストを実行します。
 	/// </summary>
 	/// <param name="parameters">テストに必要なパラメーターの連想配列</param>
 	public override void DoTest(Dictionary<string, object> parameters) {
 		Logger.LogProcess("ゲームマスターとしてテストを開始します。");
 
-		this.isTesting = true;
+		// パラメーター初期化
 		this.UDPProgressReceiveCounter = 0;
 		this.parameters = parameters;
-
 		this.connector = new NetworkGameMaster(new string[] {
 			(string)parameters["CtrlIP"],
 			(string)parameters["CtrlIP"],
@@ -133,8 +120,10 @@ public class TesterGM : TesterBase {
 			// テスト完了
 			this.connector.CloseConnectionsAll();
 			Logger.LogProcess("すべてのテストフェーズが完了しました。");
-			Logger.LogResult("成功: ゲームマスター: 相手先端末ID=" + data.GetDictionary()["RoleID"]);
-			this.isTesting = false;
+			if(this.TestCompletedCallBack != null) {
+				// テスト完了時のコールバック関数を呼び出す
+				this.TestCompletedCallBack();
+			}
 		}));
 	}
 

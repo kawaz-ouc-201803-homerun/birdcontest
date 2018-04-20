@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +9,11 @@ using ModelControllerProgress = ModelDictionary<string, string>;
 /// テストの管理・制御を行います。
 /// </summary>
 public class TesterManager : MonoBehaviour {
+
+	/// <summary>
+	/// 現在テスト中であるかどうか
+	/// </summary>
+	private bool isTesting = false;
 
 	/// <summary>
 	/// 自分がGM？
@@ -38,11 +44,19 @@ public class TesterManager : MonoBehaviour {
 	/// インスタンス：操作端末
 	/// </summary>
 	public GameObject ObjectTesterController;
-
+	
 	/// <summary>
 	/// 開始時の処理
 	/// </summary>
 	public void Start() {
+	}
+
+	/// <summary>
+	/// 毎フレーム更新処理
+	/// </summary>
+	public void Update() {
+		// コントロール有効無効
+		GameObject.Find("Button_DoTest").GetComponent<Button>().interactable = !this.isTesting;
 	}
 
 	/// <summary>
@@ -68,7 +82,7 @@ public class TesterManager : MonoBehaviour {
 		}
 
 		// テスト開始
-		GameObject.Find("DoTest").GetComponent<Button>().interactable = false;
+		GameObject.Find("Button_DoTest").GetComponent<Button>().interactable = false;
 		Logger.LogProcess("==============================");
 		Logger.LogProcess(
 			"テストを開始します...IsGM=" + this.IsGM + ", GMIP=" + this.GMIPAddress + ", CtrlIP=" + this.ControllerIPAddress + ", RoleID=" + this.RoleId
@@ -78,9 +92,17 @@ public class TesterManager : MonoBehaviour {
 		if(this.IsGM == true) {
 			this.ObjectTesterGM.SetActive(true);
 			tester = this.ObjectTesterGM.GetComponent<TesterGM>();
+			tester.TestCompletedCallBack = new Action(() => {
+				Logger.LogResult("成功: ゲームマスター: 相手先端末ID=" + this.RoleId);
+				this.isTesting = false;
+			});
 		} else {
 			this.ObjectTesterController.SetActive(true);
 			tester = this.ObjectTesterController.GetComponent<TesterController>();
+			tester.TestCompletedCallBack = new Action(() => {
+				Logger.LogResult("成功: 操作端末ID=" + this.RoleId);
+				this.isTesting = false;
+			});
 		}
 		tester.DoTest(new Dictionary<string, object>() {
 			{"GMIP", this.GMIPAddress },

@@ -4,18 +4,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 操作端末Ｃの進捗報告クラス
+/// オーディエンス予想クラスのリストクラス
 /// </summary>
 [Serializable]
-public class ModelControllerC : IJSONable<ModelControllerC> {
+public class ModelAudiencePredictsResponse : IJSONable<ModelAudiencePredictsResponse> {
+
+	/// <summary>
+	/// オーディエンス予想リスト
+	/// </summary>
+	public List<ModelAudiencePredict> audiencePredicts;
 
 	/// <summary>
 	/// JSON文字列からこのインターフェースを実装するオブジェクトにデシリアライズします。
 	/// </summary>
 	/// <param name="json">シリアライズされたJSON文字列</param>
 	/// <returns>復元されたオブジェクト</returns>
-	public ModelControllerC FromJSON(string json) {
-		return JsonUtility.FromJson<ModelControllerC>(json);
+	public ModelAudiencePredictsResponse FromJSON(string json) {
+		return JsonUtility.FromJson<ModelAudiencePredictsResponse>(json);
 	}
 
 	/// <summary>

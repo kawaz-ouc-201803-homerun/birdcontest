@@ -19,6 +19,14 @@ public abstract class TesterBase : MonoBehaviour {
 	protected Dictionary<string, object> parameters;
 
 	/// <summary>
+	/// テストが完了したときに呼び出すイベントリスナー
+	/// </summary>
+	public Action TestCompletedCallBack {
+		protected get;
+		set;
+	}
+
+	/// <summary>
 	/// テストを実行します。
 	/// </summary>
 	/// <param name="parameters">テストに必要なパラメーターの連想配列</param>

@@ -295,11 +295,12 @@
     <Compile Include="Assets\Scripts\Library\Model\ModelAudienceNewEventResponse.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudiencePredict.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelAudiencePredictList.cs" />
-    <Compile Include="Assets\Scripts\Library\Model\ModelControllerA.cs" />
-    <Compile Include="Assets\Scripts\Library\Model\ModelControllerB.cs" />
-    <Compile Include="Assets\Scripts\Library\Model\ModelControllerC.cs" />
     <Compile Include="Assets\Scripts\Library\Model\ModelControllerStart.cs" />
-    <Compile Include="Assets\Scripts\Library\Model\ModelHttpRequest.cs" />
+    <Compile Include="Assets\Scripts\Library\Model\ModelDictionary.cs" />
+    <Compile Include="Assets\Scripts\Library\Model\ModelJsonicError.cs" />
+    <Compile Include="Assets\Scripts\Library\Model\ModelJsonicRequest.cs" />
+    <Compile Include="Assets\Scripts\Library\Model\ModelJsonicResponse.cs" />
+    <Compile Include="Assets\Scripts\Library\Network\AsyncResource.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkConnector.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkController.cs" />
     <Compile Include="Assets\Scripts\Library\Network\NetworkGameMaster.cs" />
