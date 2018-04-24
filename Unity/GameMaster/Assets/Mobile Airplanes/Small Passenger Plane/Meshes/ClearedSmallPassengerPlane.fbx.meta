@@ -1,0 +1,152 @@
+fileFormatVersion: 2
+guid: a1c6e535ea50b9541ade192dc5ad76e3
+timeCreated: 1524585449
+licenseType: Free
+ModelImporter:
+  serializedVersion: 22
+  fileIDToRecycleName:
+    100000: Cessna_Body
+    100002: Cessna_ControlSurface_L
+    100004: Cessna_ControlSurface_R
+    100006: Cessna_Front_wheel
+    100008: CEssna_Left_wheel
+    100010: Cessna_Propeller
+    100012: Cessna_Right_wheel
+    100014: Cessna_TailWing_L
+    100016: Cessna_TailWing_R
+    100018: Cessna_WheelStruts
+    100020: Cessna_Wings
+    100022: //RootNode
+    100024: Cube
+    400000: Cessna_Body
+    400002: Cessna_ControlSurface_L
+    400004: Cessna_ControlSurface_R
+    400006: Cessna_Front_wheel
+    400008: CEssna_Left_wheel
+    400010: Cessna_Propeller
+    400012: Cessna_Right_wheel
+    400014: Cessna_TailWing_L
+    400016: Cessna_TailWing_R
+    400018: Cessna_WheelStruts
+    400020: Cessna_Wings
+    400022: //RootNode
+    400024: Cube
+    2100000: No Name
+    2100002: 'Material #29'
+    2100004: glass
+    2300000: Cessna_Body
+    2300002: Cessna_ControlSurface_L
+    2300004: Cessna_ControlSurface_R
+    2300006: Cessna_Front_wheel
+    2300008: CEssna_Left_wheel
+    2300010: Cessna_Propeller
+    2300012: Cessna_Right_wheel
+    2300014: Cessna_TailWing_L
+    2300016: Cessna_TailWing_R
+    2300018: Cessna_WheelStruts
+    2300020: Cessna_Wings
+    2300022: Cube
+    3300000: Cessna_Body
+    3300002: Cessna_ControlSurface_L
+    3300004: Cessna_ControlSurface_R
+    3300006: Cessna_Front_wheel
+    3300008: CEssna_Left_wheel
+    3300010: Cessna_Propeller
+    3300012: Cessna_Right_wheel
+    3300014: Cessna_TailWing_L
+    3300016: Cessna_TailWing_R
+    3300018: Cessna_WheelStruts
+    3300020: Cessna_Wings
+    3300022: Cube
+    4300000: Cube
+    4300002: Cessna_Body
+    4300004: Cessna_Wings
+    4300006: Cessna_Propeller
+    4300008: Cessna_TailWing_R
+    4300010: Cessna_Right_wheel
+    4300012: Cessna_TailWing_L
+    4300014: Cessna_ControlSurface_R
+    4300016: Cessna_WheelStruts
+    4300018: Cessna_ControlSurface_L
+    4300020: CEssna_Left_wheel
+    4300022: Cessna_Front_wheel
+  externalObjects: {}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
