@@ -45,9 +45,14 @@ public class Timer : MonoBehaviour {
 	public UnityEvent ZeroTimerEvent;
 
 	/// <summary>
-	/// ゲームオブジェクト：タイマー音源
+	/// ゲームオブジェクト：タイマーSE音源
 	/// </summary>
 	public GameObject GameObject_TimerSound;
+
+	/// <summary>
+	/// ゲームオブジェクト：タイマー終了SE音源
+	/// </summary>
+	public GameObject GameObject_TimerEndSound;
 
 	/// <summary>
 	/// ゲームオブジェクト：タイマーフレーム
@@ -85,13 +90,8 @@ public class Timer : MonoBehaviour {
 		// タイマーカウント
 		this.remainTimeSeconds -= Time.deltaTime;
 		if(this.remainTimeSeconds <= 0) {
-			// タイマー終了
-			this.StopTimer();
-
-			// タイマーゼロイベント発動
-			if(this.ZeroTimerEvent != null) {
-				this.ZeroTimerEvent.Invoke();
-			}
+			// タイマー終了＆イベント発生
+			this.StopTimer(true);
 		}
 		if(this.GameObject_TimerSeconds != null) {
 			// 画面上の秒数を更新
@@ -139,8 +139,14 @@ public class Timer : MonoBehaviour {
 	/// <summary>
 	/// タイマーのカウントダウンを停止します。
 	/// </summary>
-	public void StopTimer() {
+	/// <param name="useCallback">終了時のコールバック関数を呼び出すかどうか</param>
+	public void StopTimer(bool useCallback) {
 		this.Counting = false;
+
+		// 終了サウンド再生
+		if(this.GameObject_TimerEndSound != null) {
+			this.GameObject_TimerEndSound.GetComponent<AudioSource>().Play();
+		}
 
 		// アニメーション停止
 		if(this.GameObject_TimerSound != null) {
@@ -152,6 +158,13 @@ public class Timer : MonoBehaviour {
 		}
 		if(this.GameObject_TimerSeconds != null) {
 			this.GameObject_TimerSeconds.GetComponent<Animator>().cullingMode = AnimatorCullingMode.CullCompletely;
+		}
+
+		if(useCallback == true) {
+			// 終了時のコールバックを呼び出す
+			if(this.ZeroTimerEvent != null) {
+				this.ZeroTimerEvent.Invoke();
+			}
 		}
 	}
 
