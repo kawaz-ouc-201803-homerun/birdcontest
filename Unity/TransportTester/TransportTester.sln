@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2017
+# Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransportTester", "TransportTester.csproj", "{B18347C1-FDAF-8B54-9909-E574CB5396E8}"
 EndProject
 Global

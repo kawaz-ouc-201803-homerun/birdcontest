@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 /// 
 /// ＊フェーズの管理を行い、その中のロジックは移譲する
 /// ＊本シーンの端末操作を行うのは、イベントスタッフのみ
+/// ＊シーンを分けないのは、１つのシーン内で状態遷移を行うため
 /// 
 /// </summary>
 public class GameMaster : MonoBehaviour {
