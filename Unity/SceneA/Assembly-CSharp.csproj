@@ -51,9 +51,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\BarrageGame.cs" />
-     <Compile Include="Assets\PushKeysGame.cs" />
-     <Compile Include="Assets\StopGaugeGame.cs" />
+     <Compile Include="Assets\Scripts\BarrageGame.cs" />
+     <Compile Include="Assets\Scripts\PowerUI.cs" />
+     <Compile Include="Assets\Scripts\Push3KeysGame.cs" />
+     <Compile Include="Assets\Scripts\Push3KeysUI.cs" />
+     <Compile Include="Assets\Scripts\PushKeyArrayGame.cs" />
+     <Compile Include="Assets\Scripts\PushKeyArrayUI.cs" />
+     <Compile Include="Assets\Scripts\StomGaugeGameUI.cs" />
+     <Compile Include="Assets\Scripts\StopGaugeGame.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
