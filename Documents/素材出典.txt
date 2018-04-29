@@ -1,0 +1,46 @@
+# フォーマット:
+#     ファイル名相対パス（リポジトリーフォルダー基準）
+#         配布元サイト名および配布者（サイト管理人名もしくは会社名）
+#         配布元サイトのURL
+#         利用規約のページURL
+#         利用規約の特記事項、利用規約を満たしているかどうかなど（破っている場合は何を破っているのかを明記のこと）
+
+
+Unity\GameMaster\Assets\UnityChan
+	ユニティ・テクノロジーズ・ジャパン合同会社
+	http://unity-chan.com/
+	http://unity-chan.com/contents/guideline/
+	UCLロゴ、もしくはライセンス表記が必要
+
+Unity\GameMaster\Assets\ZRNAssets
+	株式会社ゼンリン
+	http://www.zenrin.co.jp/product/service/3d/asset/
+	http://www.zenrin.co.jp/product/service/3d/asset/pdf/guideline.pdf
+	CCライセンス(BY)＝クレジット表示必須、改変＆再配布自由
+
+Unity\GameMaster\Assets\Mobile Airplanes\Small Passenger Plane
+	Dollar Assets
+	https://assetstore.unity.com/packages/3d/vehicles/air/mobile-planes-small-passenger-plane-56690
+	個別ライセンスなし＝アセットストア利用規約が適用
+		https://unity3d.com/jp/legal/as_terms
+	改変しちゃってるのでグレーゾーン
+		↑の規約読んでも結局改変がOKなのかNGなのかハッキリしない
+		ソースコードの改変はアウトだが、素材の改変はアリなのか？
+
+MPlus Fonts
+	M+ FONTS PROJECT
+	https://mplus-fonts.osdn.jp/
+	https://mplus-fonts.osdn.jp/about.html
+	改変自由、再配布自由
+
+Unity\GameMaster\Assets\Images\KK【ウィンドウ枠】mes009_960_bk.png
+	空想曲線「こ・ぱんだ」様
+	http://kopacurve.blog33.fc2.com/blog-category-27.html
+	http://kopacurve.blog33.fc2.com/blog-entry-394.html
+	クレジット表記自由
+
+Unity\GameMaster\Assets\Images\NC【吹き出し】nc156268.png
+	ニコニコモンズ
+	インターネット全般公開OK、営利利用OK
+
+

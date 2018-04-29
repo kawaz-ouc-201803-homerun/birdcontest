@@ -10,12 +10,12 @@ using UnityEngine;
 /// ＊選んだ選択肢と、アクション内容の進捗を定期的にゲームマスターへ報告してもらう
 /// 
 /// </summary>
-public class PhaseBranch : PhaseBase {
+public class PhaseControllers : PhaseBase {
 
 	/// <summary>
 	/// コンストラクター
 	/// </summary>
-	public PhaseBranch() : base(null) {
+	public PhaseControllers() : base(null) {
 	}
 
 	/// <summary>
