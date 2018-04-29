@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 /// ＊シーンを分けないのは、１つのシーン内で状態遷移を行うため
 /// 
 /// </summary>
-public class GameMaster : MonoBehaviour {
+public class PhaseManager : MonoBehaviour {
 
 	/// <summary>
 	/// 現在のフェーズ
