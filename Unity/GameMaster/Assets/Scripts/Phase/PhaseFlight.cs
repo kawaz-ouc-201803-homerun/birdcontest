@@ -13,8 +13,9 @@ public class PhaseFlight : PhaseBase {
 	/// <summary>
 	/// コンストラクター
 	/// </summary>
-	/// <param name="parameters">[0]=SceneA結果、[1]=SceneB結果、[2]=SceneC結果</param>
-	public PhaseFlight(object[] parameters) : base(parameters) {
+	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
+	/// <param name="parameters">[0]=イベントID, [1]=SceneA結果, [2]=SceneB結果, [3]=SceneC結果</param>
+	public PhaseFlight(PhaseManager parent, object[] parameters) : base(parent, parameters) {
 
 	}
 	

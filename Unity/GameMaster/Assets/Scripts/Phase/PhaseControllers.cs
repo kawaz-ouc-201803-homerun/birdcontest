@@ -13,9 +13,31 @@ using UnityEngine;
 public class PhaseControllers : PhaseBase {
 
 	/// <summary>
+	/// 操作端末のIPアドレス
+	/// </summary>
+	private static readonly string[] ControllerIPAddresses = new string[] {
+		"192.168.11.2",
+		"192.168.11.3",
+		"192.168.11.4",
+	};
+
+	/// <summary>
+	/// 通信システム
+	/// </summary>
+	private NetworkGameMaster connector;
+
+	/// <summary>
+	/// イベントID
+	/// </summary>
+	private string eventId;
+
+	/// <summary>
 	/// コンストラクター
 	/// </summary>
-	public PhaseControllers() : base(null) {
+	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
+	public PhaseControllers(PhaseManager parent) : base(parent, null) {
+		this.connector = new NetworkGameMaster(PhaseControllers.ControllerIPAddresses);
+		this.eventId = this.connector.StartAudiencePredicts();
 	}
 
 	/// <summary>

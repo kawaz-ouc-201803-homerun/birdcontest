@@ -15,6 +15,11 @@ using UnityEngine.SceneManagement;
 public class PhaseManager : MonoBehaviour {
 
 	/// <summary>
+	/// ゲームタイトル
+	/// </summary>
+	public const string GameTitle = "鳥人間コンテスト";
+
+	/// <summary>
 	/// 各種フェーズクラスに対応するインデックスの定義
 	/// </summary>
 	private static readonly Dictionary<Type, int> PhaseIndexMap = new Dictionary<Type, int>() {
@@ -59,10 +64,10 @@ public class PhaseManager : MonoBehaviour {
 	/// </summary>
 	void Start() {
 		// フェーズをアイドル状態にセット
-		this.phase = new PhaseIdle();
+		//this.ChangePhase(new PhaseIdle(this));
+		this.ChangePhase(new PhaseControllers(this));
 
 		// 各種変数を初期化
-		this.phaseIndex = 0;
 		this.previousKeyCounter = 0;
 		this.nextKeyCounter = 0;
 	}
@@ -86,15 +91,15 @@ public class PhaseManager : MonoBehaviour {
 						break;
 
 					case "PhaseControllers":
-						this.ChangePhase(new PhaseIdle());
+						this.ChangePhase(new PhaseIdle(this));
 						break;
 
 					case "PhaseFlight":
-						this.ChangePhase(new PhaseControllers());
+						this.ChangePhase(new PhaseControllers(this));
 						break;
 
 					case "PhaseResult":
-						this.ChangePhase(new PhaseFlight(null));
+						this.ChangePhase(new PhaseFlight(this, null));
 						break;
 				}
 			}
@@ -110,15 +115,15 @@ public class PhaseManager : MonoBehaviour {
 				// 前のフェーズへ戻る
 				switch(this.phase.GetType().Name) {
 					case "PhaseIdle":
-						this.ChangePhase(new PhaseControllers());
+						this.ChangePhase(new PhaseControllers(this));
 						break;
 
 					case "PhaseControllers":
-						this.ChangePhase(new PhaseFlight(null));
+						this.ChangePhase(new PhaseFlight(this, null));
 						break;
 
 					case "PhaseFlight":
-						this.ChangePhase(new PhaseResult(null));
+						this.ChangePhase(new PhaseResult(this, null));
 						break;
 
 					case "PhaseResult":
@@ -133,7 +138,9 @@ public class PhaseManager : MonoBehaviour {
 
 		// TODO: ゲームマスター共通の処理
 
-		this.phase.Update();
+		if(this.phase != null) {
+			this.phase.Update();
+		}
 	}
 
 	/// <summary>
@@ -157,9 +164,7 @@ public class PhaseManager : MonoBehaviour {
 	/// <param name="phase">フェーズオブジェクト</param>
 	public void ChangePhase(PhaseBase phase) {
 		this.phaseIndex = PhaseManager.PhaseIndexMap[phase.GetType()];
-
-		// 暗転開始
-		this.DoTransitionOut(1.0f, new Action(() => {
+		var nextPhaseCallback = new Action(() => {
 			// 暗転後にフェーズ切り替え、対応するUIブロックに表示を切り替える
 			for(int i = 0; i < PhaseManager.PhaseIndexMap.Count; i++) {
 				this.PhaseUIs[i].SetActive(false);
@@ -167,9 +172,20 @@ public class PhaseManager : MonoBehaviour {
 			this.PhaseUIs[this.phaseIndex].SetActive(true);
 			this.phase = phase;
 
+			// 初回処理をここで実行
+			this.phase.Start();
+
 			// 明転開始
 			this.DoTransitionIn(PhaseManager.TransitionTimeSecond);
-		}));
+		});
+
+		if(this.phase == null) {
+			// 前のシーンがない場合はすぐにシーンを開始する
+			nextPhaseCallback();
+		} else {
+			// 前のシーンがある場合は暗転を挟む
+			this.DoTransitionOut(1.0f, nextPhaseCallback);
+		}
 	}
 
 	/// <summary>

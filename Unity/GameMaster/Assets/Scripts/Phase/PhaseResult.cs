@@ -14,7 +14,9 @@ public class PhaseResult : PhaseBase {
 	/// <summary>
 	/// コンストラクター
 	/// </summary>
-	public PhaseResult(object[] parameters) : base(parameters) {
+	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
+	/// <param name="param">[0]=イベントID, [1]=飛距離</param>
+	public PhaseResult(PhaseManager parent, object[] parameters) : base(parent, parameters) {
 	}
 
 	/// <summary>
