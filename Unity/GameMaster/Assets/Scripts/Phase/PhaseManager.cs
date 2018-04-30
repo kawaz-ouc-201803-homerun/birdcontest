@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,6 +15,21 @@ using UnityEngine.SceneManagement;
 public class PhaseManager : MonoBehaviour {
 
 	/// <summary>
+	/// 各種フェーズクラスに対応するインデックスの定義
+	/// </summary>
+	private static readonly Dictionary<Type, int> PhaseIndexMap = new Dictionary<Type, int>() {
+		{ typeof(PhaseIdle), 0 },
+		{ typeof(PhaseControllers), 1 },
+		{ typeof(PhaseFlight), 2 },
+		{ typeof(PhaseResult), 3 },
+	};
+
+	/// <summary>
+	/// トランジションにかける秒数
+	/// </summary>
+	private const float TransitionTimeSecond = 2.0f;
+
+	/// <summary>
 	/// フェーズごとのUI親オブジェクト
 	/// </summary>
 	public GameObject[] PhaseUIs;
@@ -26,22 +42,7 @@ public class PhaseManager : MonoBehaviour {
 	/// <summary>
 	/// フェーズのインデックス
 	/// </summary>
-	private int phaseIndex {
-		get {
-			return this._phaseIndex;
-		}
-		set {
-			if(value < 0 || this.PhaseUIs.Length <= value) {
-				return;
-			}
-
-			// 対応するUIブロックに表示を切り替える
-			this.PhaseUIs[this._phaseIndex].SetActive(false);
-			this._phaseIndex = value;
-			this.PhaseUIs[value].SetActive(true);
-		}
-	}
-	private int _phaseIndex;
+	private int phaseIndex;
 
 	/// <summary>
 	/// 前のフェーズに戻るキーのフレームカウンター
@@ -76,6 +77,7 @@ public class PhaseManager : MonoBehaviour {
 		// 戻るボタン
 		if(Input.GetKeyDown(KeyCode.Escape) == true) {
 			this.previousKeyCounter++;
+
 			if(this.previousKeyCounter == 1) {
 				// 前のフェーズへ戻る
 				switch(this.phase.GetType().Name) {
@@ -84,18 +86,15 @@ public class PhaseManager : MonoBehaviour {
 						break;
 
 					case "PhaseControllers":
-						this.phase = new PhaseIdle();
-						this.phaseIndex--;
+						this.ChangePhase(new PhaseIdle());
 						break;
 
 					case "PhaseFlight":
-						this.phase = new PhaseControllers();
-						this.phaseIndex--;
+						this.ChangePhase(new PhaseControllers());
 						break;
 
 					case "PhaseResult":
-						this.phase = new PhaseFlight(null);
-						this.phaseIndex--;
+						this.ChangePhase(new PhaseFlight(null));
 						break;
 				}
 			}
@@ -106,22 +105,20 @@ public class PhaseManager : MonoBehaviour {
 		// 進むボタン
 		if(Input.GetKeyDown(KeyCode.Return) == true) {
 			this.nextKeyCounter++;
+
 			if(this.nextKeyCounter == 1) {
 				// 前のフェーズへ戻る
 				switch(this.phase.GetType().Name) {
 					case "PhaseIdle":
-						this.phase = new PhaseControllers();
-						this.phaseIndex++;
+						this.ChangePhase(new PhaseControllers());
 						break;
 
 					case "PhaseControllers":
-						this.phase = new PhaseFlight(null);
-						this.phaseIndex++;
+						this.ChangePhase(new PhaseFlight(null));
 						break;
 
 					case "PhaseFlight":
-						this.phase = new PhaseResult(null);
-						this.phaseIndex++;
+						this.ChangePhase(new PhaseResult(null));
 						break;
 
 					case "PhaseResult":
@@ -145,13 +142,52 @@ public class PhaseManager : MonoBehaviour {
 	/// <param name="sender">イベント発生源</param>
 	/// <param name="e">イベント引数</param>
 	private void changePhaseEventHandler(object sender, PhaseBase.NextPhaseEventArgs e) {
-		this.phase = e.NextPhase;
-		this.phaseIndex++;
-
-		// 次のフェーズがないとき、ゲームの１サイクルが終了したとみなして現在のシーンをリロードする
-		if(this.phase == null) {
+		if(this.phase != null) {
+			// トランジション付きでフェーズ遷移
+			this.ChangePhase(e.NextPhase);
+		} else {
+			// 次のフェーズがないとき、ゲームの１サイクルが終了したとみなして現在のシーンをリロードする
 			SceneManager.LoadScene("GameMaster");
 		}
+	}
+
+	/// <summary>
+	/// フェーズを変更します。
+	/// </summary>
+	/// <param name="phase">フェーズオブジェクト</param>
+	public void ChangePhase(PhaseBase phase) {
+		this.phaseIndex = PhaseManager.PhaseIndexMap[phase.GetType()];
+
+		// 暗転開始
+		this.DoTransitionOut(1.0f, new Action(() => {
+			// 暗転後にフェーズ切り替え、対応するUIブロックに表示を切り替える
+			for(int i = 0; i < PhaseManager.PhaseIndexMap.Count; i++) {
+				this.PhaseUIs[i].SetActive(false);
+			}
+			this.PhaseUIs[this.phaseIndex].SetActive(true);
+			this.phase = phase;
+
+			// 明転開始
+			this.DoTransitionIn(PhaseManager.TransitionTimeSecond);
+		}));
+	}
+
+	/// <summary>
+	/// 画面を表示するトランジションを実行します。
+	/// </summary>
+	/// <param name="time">処理時間秒数</param>
+	/// <param name="callback">処理完了後に呼び出されるコールバック関数</param>
+	public void DoTransitionIn(float time, Action callback = null) {
+		GameObject.Find("FadeCanvas").GetComponent<Fade>().FadeOut(time, callback);
+	}
+
+	/// <summary>
+	/// 画面を消去するトランジションを実行します。
+	/// </summary>
+	/// <param name="time">処理時間秒数</param>
+	/// <param name="callback">処理完了後に呼び出されるコールバック関数</param>
+	public void DoTransitionOut(float time, Action callback = null) {
+		GameObject.Find("FadeCanvas").GetComponent<Fade>().FadeIn(time, callback);
 	}
 
 }
