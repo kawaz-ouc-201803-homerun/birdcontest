@@ -8,31 +8,6 @@ using UnityEngine;
 public abstract class PhaseBase {
 
 	/// <summary>
-	/// 次のフェーズに移行するときのイベントの引数
-	/// </summary>
-	public class NextPhaseEventArgs {
-		
-		/// <summary>
-		/// 次のフェーズ名
-		/// </summary>
-		public PhaseBase NextPhase {
-			get; set;
-		}
-	}
-
-	/// <summary>
-	/// 次のフェーズに移行するときのイベントのデリゲート
-	/// </summary>
-	/// <param name="sender">イベント発生源のオブジェクト</param>
-	/// <param name="e">イベント引数</param>
-	public delegate void NextPhaseEventDelegate(object sender, NextPhaseEventArgs e);
-
-	/// <summary>
-	/// 次のフェーズに移行するときのイベント
-	/// </summary>
-	public event NextPhaseEventDelegate NextPhaseEvent;
-
-	/// <summary>
 	/// フェーズ管理クラスのインスタンス
 	/// </summary>
 	protected PhaseManager parent;
@@ -43,6 +18,14 @@ public abstract class PhaseBase {
 	/// インターフェースはフェーズ同士で取り決めが必要です。
 	/// </summary>
 	protected object[] parameters;
+
+	/// <summary>
+	/// 毎フレーム呼び出すUpdate関数が有効であるかどうか
+	/// </summary>
+	public bool IsUpdateEnabled {
+		get;
+		protected set;
+	} = true;
 
 	/// <summary>
 	/// コンストラクター
@@ -67,19 +50,9 @@ public abstract class PhaseBase {
 	public abstract void Update();
 
 	/// <summary>
-	/// 次のフェーズに移行します。
+	/// このフェーズが破棄されるときに実行する処理
 	/// </summary>
-	/// <param name="nextPhase"></param>
-	protected void NextPhase(PhaseBase nextPhase) {
-		if(this.NextPhaseEvent != null) {
-			// イベント発生：ゲームマスターが捕捉してフェーズを切り替える
-			this.NextPhaseEvent.Invoke(
-				this,
-				new NextPhaseEventArgs {
-					NextPhase = nextPhase,
-				}
-			);
-		}
+	public virtual void Destroy() {
 	}
-	
+
 }

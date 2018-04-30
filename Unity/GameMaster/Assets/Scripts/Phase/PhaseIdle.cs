@@ -14,12 +14,12 @@ public class PhaseIdle : PhaseBase {
 	/// <summary>
 	/// メッセージを１文字進めるまでに待機する秒数
 	/// </summary>
-	private const float MessageSpeed = 0.01f;
+	private const float MessageSpeed = 0.03f;
 
 	/// <summary>
 	/// メッセージをすべて表示しきってから待機する秒数
 	/// </summary>
-	private const float MessageAllViewSeconds = 5.0f;
+	private const float MessageAllViewSeconds = 30.0f;
 
 	/// <summary>
 	/// テキストエリアの元文章

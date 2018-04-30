@@ -138,26 +138,11 @@ public class PhaseManager : MonoBehaviour {
 
 		// TODO: ゲームマスター共通の処理
 
-		if(this.phase != null) {
+		if(this.phase != null && this.phase.IsUpdateEnabled == true) {
 			this.phase.Update();
 		}
 	}
-
-	/// <summary>
-	/// 次のフェーズに移行するときのイベントを捕捉したとき
-	/// </summary>
-	/// <param name="sender">イベント発生源</param>
-	/// <param name="e">イベント引数</param>
-	private void changePhaseEventHandler(object sender, PhaseBase.NextPhaseEventArgs e) {
-		if(this.phase != null) {
-			// トランジション付きでフェーズ遷移
-			this.ChangePhase(e.NextPhase);
-		} else {
-			// 次のフェーズがないとき、ゲームの１サイクルが終了したとみなして現在のシーンをリロードする
-			SceneManager.LoadScene("GameMaster");
-		}
-	}
-
+	
 	/// <summary>
 	/// フェーズを変更します。
 	/// </summary>
@@ -165,6 +150,14 @@ public class PhaseManager : MonoBehaviour {
 	public void ChangePhase(PhaseBase phase) {
 		this.phaseIndex = PhaseManager.PhaseIndexMap[phase.GetType()];
 		var nextPhaseCallback = new Action(() => {
+			// シーン移行前にすべてのコルーチンを停止しておく
+			this.StopAllCoroutines();
+
+			// フェーズ破棄処理
+			if(this.phase != null) {
+				this.phase.Destroy();
+			}
+
 			// 暗転後にフェーズ切り替え、対応するUIブロックに表示を切り替える
 			for(int i = 0; i < PhaseManager.PhaseIndexMap.Count; i++) {
 				this.PhaseUIs[i].SetActive(false);
