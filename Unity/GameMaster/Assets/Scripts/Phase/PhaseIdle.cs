@@ -12,11 +12,6 @@ using UnityEngine;
 public class PhaseIdle : PhaseBase {
 
 	/// <summary>
-	/// メッセージを１文字進めるまでに待機する秒数
-	/// </summary>
-	private const float MessageSpeed = 0.03f;
-
-	/// <summary>
 	/// メッセージをすべて表示しきってから待機する秒数
 	/// </summary>
 	private const float MessageAllViewSeconds = 30.0f;
@@ -72,7 +67,7 @@ public class PhaseIdle : PhaseBase {
 	}
 
 	/// <summary>
-	/// メッセージの文字を１文字進める
+	/// メッセージの文字を１文字進めるコルーチン
 	/// </summary>
 	private IEnumerator nextMessageCharacter() {
 		while(true) {
@@ -83,7 +78,7 @@ public class PhaseIdle : PhaseBase {
 				this.textCursorIndex = -1;
 			} else {
 				// 先に遅延
-				yield return new WaitForSeconds(PhaseIdle.MessageSpeed);
+				yield return new WaitForSeconds(PhaseManager.MessageSpeed);
 			}
 
 			// １文字進める

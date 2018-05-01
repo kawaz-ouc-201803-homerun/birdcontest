@@ -20,9 +20,14 @@ public class PhaseManager : MonoBehaviour {
 	public const string GameTitle = "鳥人間コンテスト";
 
 	/// <summary>
+	/// RPG風メッセージ送りで、メッセージを１文字進めるまでに待機する秒数
+	/// </summary>
+	public const float MessageSpeed = 0.03f;
+
+	/// <summary>
 	/// 各種フェーズクラスに対応するインデックスの定義
 	/// </summary>
-	private static readonly Dictionary<Type, int> PhaseIndexMap = new Dictionary<Type, int>() {
+	public static readonly Dictionary<Type, int> PhaseIndexMap = new Dictionary<Type, int>() {
 		{ typeof(PhaseIdle), 0 },
 		{ typeof(PhaseControllers), 1 },
 		{ typeof(PhaseFlight), 2 },
@@ -42,12 +47,15 @@ public class PhaseManager : MonoBehaviour {
 	/// <summary>
 	/// 現在のフェーズ
 	/// </summary>
-	private PhaseBase phase;
+	public PhaseBase phase;
 
 	/// <summary>
 	/// フェーズのインデックス
 	/// </summary>
-	private int phaseIndex;
+	public int PhaseIndex {
+		get;
+		private set;
+	}
 
 	/// <summary>
 	/// 前のフェーズに戻るキーのフレームカウンター
@@ -64,8 +72,7 @@ public class PhaseManager : MonoBehaviour {
 	/// </summary>
 	void Start() {
 		// フェーズをアイドル状態にセット
-		//this.ChangePhase(new PhaseIdle(this));
-		this.ChangePhase(new PhaseControllers(this));
+		this.ChangePhase(new PhaseIdle(this));
 
 		// 各種変数を初期化
 		this.previousKeyCounter = 0;
@@ -119,11 +126,13 @@ public class PhaseManager : MonoBehaviour {
 						break;
 
 					case "PhaseControllers":
-						this.ChangePhase(new PhaseFlight(this, null));
+						// this.ChangePhase(new PhaseFlight(this, null));
+						((PhaseControllers)this.phase).ChangeToFlightPhase();
 						break;
 
 					case "PhaseFlight":
-						this.ChangePhase(new PhaseResult(this, null));
+						// this.ChangePhase(new PhaseResult(this, null));
+						((PhaseFlight)this.phase).ChangeToResultPhase();
 						break;
 
 					case "PhaseResult":
@@ -142,13 +151,13 @@ public class PhaseManager : MonoBehaviour {
 			this.phase.Update();
 		}
 	}
-	
+
 	/// <summary>
 	/// フェーズを変更します。
 	/// </summary>
 	/// <param name="phase">フェーズオブジェクト</param>
 	public void ChangePhase(PhaseBase phase) {
-		this.phaseIndex = PhaseManager.PhaseIndexMap[phase.GetType()];
+		this.PhaseIndex = PhaseManager.PhaseIndexMap[phase.GetType()];
 		var nextPhaseCallback = new Action(() => {
 			// シーン移行前にすべてのコルーチンを停止しておく
 			this.StopAllCoroutines();
@@ -162,7 +171,7 @@ public class PhaseManager : MonoBehaviour {
 			for(int i = 0; i < PhaseManager.PhaseIndexMap.Count; i++) {
 				this.PhaseUIs[i].SetActive(false);
 			}
-			this.PhaseUIs[this.phaseIndex].SetActive(true);
+			this.PhaseUIs[this.PhaseIndex].SetActive(true);
 			this.phase = phase;
 
 			// 初回処理をここで実行

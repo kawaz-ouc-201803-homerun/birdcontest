@@ -72,7 +72,7 @@ public class TesterController : TesterBase {
 	private void testProcess1() {
 		Logger.LogProcess("GMからの開始指示を待機します...");
 
-		(this.connector as NetworkController).ControllerWaitForStart((obj) => {
+		(this.connector as NetworkController).ControllerWaitForStart((int)this.parameters["RoleID"], (obj) => {
 			Logger.LogProcess("GMからの開始指示を受信しました。");
 
 			// NOTE: 本来の操作端末は受信内容をもとに初期設定を行うが、ここでは情報表示のみ行う

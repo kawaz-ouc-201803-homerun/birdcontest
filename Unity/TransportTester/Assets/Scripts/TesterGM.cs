@@ -21,6 +21,11 @@ public class TesterGM : TesterBase {
 	private int UDPProgressReceiveCounter = 0;
 
 	/// <summary>
+	/// 操作端末の役割ID
+	/// </summary>
+	private int roleId;
+
+	/// <summary>
 	/// テストを実行します。
 	/// </summary>
 	/// <param name="parameters">テストに必要なパラメーターの連想配列</param>
@@ -43,17 +48,17 @@ public class TesterGM : TesterBase {
 	/// 操作端末に役割を送信してゲームを開始させます。
 	/// </summary>
 	private void testProcess1() {
-		int roleId = (int)this.parameters["RoleID"];
+		this.roleId = (int)this.parameters["RoleID"];
 
 		// NOTE: 本来のゲームマスターは、以下の処理を全端末分だけ行うが、このテスターは１端末しか相手にしないので１回のみ通信を行う
 
 		Logger.LogProcess("操作端末へゲーム開始指示を送ります...");
 		(this.connector as NetworkGameMaster).StartController(
 			new ModelControllerStart() {
-				RoleId = roleId,
+				RoleId = this.roleId,
 				LimitTimeSecond = 60,
 			},
-			roleId,
+			this.roleId,
 			() => {
 				// 成功時: ゲーム開始
 
@@ -81,22 +86,25 @@ public class TesterGM : TesterBase {
 	private void testProcess2() {
 		Logger.LogProcess("UDPで操作端末の進捗報告を受け付けます..." + (this.UDPProgressReceiveCounter + 1) + " / " + TesterGM.UDPProgressReceiveCount + " 回目");
 
-		(this.connector as NetworkGameMaster).ReceiveControllerProgress(new Action<ModelControllerProgress>((data) => {
-			Logger.LogProcess("UDPによる操作端末の進捗報告を受信しました。");
-			this.testProcessControllerStatus(data);
+		(this.connector as NetworkGameMaster).ReceiveControllerProgress(
+			this.roleId,
+			new Action<ModelControllerProgress>((data) => {
+				Logger.LogProcess("UDPによる操作端末の進捗報告を受信しました。");
+				this.testProcessControllerStatus(data);
 
-			// 一定回数に達するまで進捗報告を受け付ける
-			this.UDPProgressReceiveCounter++;
-			if(this.UDPProgressReceiveCounter < TesterGM.UDPProgressReceiveCount) {
-				// 再度受信待ちへ
-				Logger.LogProcess("操作端末の進捗報告受付を継続します。");
-				this.testProcess2();
-			} else {
-				// 次のフェーズへ
-				Logger.LogProcess("操作端末の進捗報告受付を終了します。");
-				this.testProcess3();
+				// 一定回数に達するまで進捗報告を受け付ける
+				this.UDPProgressReceiveCounter++;
+				if(this.UDPProgressReceiveCounter < TesterGM.UDPProgressReceiveCount) {
+					// 再度受信待ちへ
+					Logger.LogProcess("操作端末の進捗報告受付を継続します。");
+					this.testProcess2();
+				} else {
+					// 次のフェーズへ
+					Logger.LogProcess("操作端末の進捗報告受付を終了します。");
+					this.testProcess3();
+				}
 			}
-		}));
+		));
 	}
 
 	/// <summary>
@@ -107,24 +115,27 @@ public class TesterGM : TesterBase {
 
 		// NOTE: 本来のゲームマスターは以下の処理を端末の数だけ繰り返し実行する必要がある
 
-		(this.connector as NetworkGameMaster).WaitForControllers(new Action<ModelControllerProgress>((data) => {
-			Logger.LogProcess("TCPによる操作端末の完了報告を受信しました。");
-			this.testProcessControllerStatus(data);
+		(this.connector as NetworkGameMaster).WaitForControllers(
+			this.roleId,
+			new Action<ModelControllerProgress>((data) => {
+				Logger.LogProcess("TCPによる操作端末の完了報告を受信しました。");
+				this.testProcessControllerStatus(data);
 
-			// NOTE: 本来のゲームマスターは以下のように通信できた端末の数を数えて、全員始まったら次のフェーズに移るようにするが、このテスターは１端末しか相手にしないので無条件に次のフェーズへ移る
-			// this.completedContollerCounter += 1;
-			// if(this.completedControllerCounter == GMTester.ControllerCount) {
-			// TODO: 次のフェーズへ移る
-			// }
+				// NOTE: 本来のゲームマスターは以下のように通信できた端末の数を数えて、全員始まったら次のフェーズに移るようにするが、このテスターは１端末しか相手にしないので無条件に次のフェーズへ移る
+				// this.completedContollerCounter += 1;
+				// if(this.completedControllerCounter == GMTester.ControllerCount) {
+				// TODO: 次のフェーズへ移る
+				// }
 
-			// テスト完了
-			this.connector.CloseConnectionsAll();
-			Logger.LogProcess("すべてのテストフェーズが完了しました。");
-			if(this.TestCompletedCallBack != null) {
-				// テスト完了時のコールバック関数を呼び出す
-				this.TestCompletedCallBack();
+				// テスト完了
+				this.connector.CloseConnectionsAll();
+				Logger.LogProcess("すべてのテストフェーズが完了しました。");
+				if(this.TestCompletedCallBack != null) {
+					// テスト完了時のコールバック関数を呼び出す
+					this.TestCompletedCallBack();
+				}
 			}
-		}));
+		));
 	}
 
 	/// <summary>

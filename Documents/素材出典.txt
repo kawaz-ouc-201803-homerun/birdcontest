@@ -44,3 +44,8 @@ Unity\GameMaster\Assets\Images\NC【吹き出し】nc156268.png
 	インターネット全般公開OK、営利利用OK
 
 
+Unity\GameMaster\Assets\Images\IR【完了】アンケートや質問などのチェックマークのアイコン素材 1.png
+	Icon-rainbow
+	http://icon-rainbow.com/tag/%E3%83%81%E3%82%A7%E3%83%83%E3%82%AF%E3%83%9E%E3%83%BC%E3%82%AF/
+	http://icon-rainbow.com/license/
+	表示不要、報告不要

@@ -37,6 +37,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 #endregion
 
 /// <summary>
@@ -53,7 +54,11 @@ public class iTween : MonoBehaviour{
 	
 	//camera fade object:
 	private static GameObject cameraFade;
-	
+
+	public static void ColorTo(Image windowImage, Hashtable hashtable) {
+		throw new NotImplementedException();
+	}
+
 	//status members (made public for visual troubleshooting in the inspector):
 	public string id, type, method;
 	public iTween.EaseType easeType;
@@ -7049,27 +7054,29 @@ public class iTween : MonoBehaviour{
 	
 	        lastRealTime = Time.realtimeSinceStartup; // Added by PressPlay
 	}
-	
-	void CallBack(string callbackType){
-		if (tweenArguments.Contains(callbackType) && !tweenArguments.Contains("ischild")) {
+
+	void CallBack(string callbackType) {
+		if(tweenArguments.Contains(callbackType) && !tweenArguments.Contains("ischild")) {
 			//establish target:
 			GameObject target;
-			if (tweenArguments.Contains(callbackType+"target")) {
-				target=(GameObject)tweenArguments[callbackType+"target"];
-			}else{
-				target=gameObject;	
+			if(tweenArguments.Contains(callbackType + "target")) {
+				target = (GameObject)tweenArguments[callbackType + "target"];
+			} else {
+				target = gameObject;
 			}
-			
+
 			//throw an error if a string wasn't passed for callback:
-			if (tweenArguments[callbackType].GetType() == typeof(System.String)) {
-				target.SendMessage((string)tweenArguments[callbackType],(object)tweenArguments[callbackType+"params"],SendMessageOptions.DontRequireReceiver);
-			}else{
+			if(tweenArguments[callbackType] is Action<object>) {
+				((Action<object>)tweenArguments[callbackType]).Invoke((object)tweenArguments[callbackType + "params"]);
+			} else if(tweenArguments[callbackType].GetType() == typeof(System.String)) {
+				target.SendMessage((string)tweenArguments[callbackType], (object)tweenArguments[callbackType + "params"], SendMessageOptions.DontRequireReceiver);
+			} else {
 				Debug.LogError("iTween Error: Callback method references must be passed as a String!");
-				Destroy (this);
+				Destroy(this);
 			}
 		}
 	}
-	
+
 	void Dispose(){
 		for (int i = 0; i < tweens.Count; i++) {
 			Hashtable tweenEntry = tweens[i];
