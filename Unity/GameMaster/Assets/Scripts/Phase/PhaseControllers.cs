@@ -218,7 +218,7 @@ public class PhaseControllers : PhaseBase {
 				this.closingAudienceRemainSeconds -= Time.deltaTime;
 				if(this.closingAudienceRemainSeconds < 0) {
 					// タイムアップ：次のフェーズへ移行
-					this.parent.ChangePhase(new PhaseFlight(this.parent, null));
+					this.ChangeToFlightPhase();
 					this.IsUpdateEnabled = false;
 					return;
 				}

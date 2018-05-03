@@ -17,7 +17,7 @@ public class PhaseManager : MonoBehaviour {
 	/// <summary>
 	/// ゲームタイトル
 	/// </summary>
-	public const string GameTitle = "鳥人間コンテスト";
+	public const string GameTitle = "鳥人コンテスト";
 
 	/// <summary>
 	/// RPG風メッセージ送りで、メッセージを１文字進めるまでに待機する秒数

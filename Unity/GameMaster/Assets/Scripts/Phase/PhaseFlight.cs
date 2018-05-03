@@ -162,7 +162,7 @@ public class PhaseFlight : PhaseBase {
 	/// </summary>
 	public void ChangeToResultPhase() {
 		this.parent.ChangePhase(new PhaseResult(this.parent, new object[] {
-			(string) this.parameters[0],
+			(string) this.parameters[0] ?? "none",
 			this.score
 		}));
 	}
