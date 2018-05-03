@@ -52,7 +52,10 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\BarrageGame.cs" />
+     <Compile Include="Assets\Scripts\ButtonChack.cs" />
      <Compile Include="Assets\Scripts\PowerUI.cs" />
+     <Compile Include="Assets\Scripts\Push3KeyPadGame.cs" />
+     <Compile Include="Assets\Scripts\Push3KeyPadGameUI.cs" />
      <Compile Include="Assets\Scripts\Push3KeysGame.cs" />
      <Compile Include="Assets\Scripts\Push3KeysUI.cs" />
      <Compile Include="Assets\Scripts\PushKeyArrayGame.cs" />

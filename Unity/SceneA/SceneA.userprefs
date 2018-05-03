@@ -1,6 +1,14 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/PushKeyArrayGame.cs">
+    <Files>
+      <File FileName="Assets/Scripts/PowerUI.cs" Line="7" Column="16" />
+      <File FileName="Assets/Scripts/PushKeyArrayGame.cs" Line="27" Column="2" />
+      <File FileName="Assets/Scripts/PushKeyArrayUI.cs" Line="8" Column="1" />
+      <File FileName="Assets/Scripts/StomGaugeGameUI.cs" Line="11" Column="31" />
+      <File FileName="Assets/Scripts/StopGaugeGame.cs" Line="6" Column="10" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
