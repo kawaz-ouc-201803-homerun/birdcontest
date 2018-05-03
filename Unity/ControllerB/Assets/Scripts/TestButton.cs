@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class TestButton : MonoBehaviour {
+	public GameObject Seccond;
+	public GameObject End;
 
-	// Use this for initialization
-	void Start () {
-		
+	// すたーとぼたんをおしたときのがめんせんい
+	public void OnClick () {
+		this.Seccond.SetActive(false);
+		this.End.SetActive(true);
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
+
 }

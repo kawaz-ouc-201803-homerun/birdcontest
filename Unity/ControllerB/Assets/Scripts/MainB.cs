@@ -22,7 +22,7 @@ public class MainB : MonoBehaviour {
 			this.count++;
 			this.flag = false;
 			GameObject.Find ("Slider").GetComponent<UnityEngine.UI.Slider> ().value = this.count;
-
+			GameObject.Find ("Text").GetComponent<UnityEngine.UI.Text> ().text = this.count.ToString();
 		}
 	}
 }
