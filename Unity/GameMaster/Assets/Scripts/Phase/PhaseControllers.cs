@@ -67,7 +67,8 @@ public class PhaseControllers : PhaseBase {
 	/// <summary>
 	/// オーディエンス投票を締め切る直前に画面に出すテキスト
 	/// </summary>
-	private string closingText;
+	private const string ClosingTextSource = @"${REMAIN_SECOND} 秒後に投票を締め切ります...
+まだ投票できていない人は今のうちに済ませてね！";
 
 	/// <summary>
 	/// 各端末の操作が完了したかどうか
@@ -203,11 +204,8 @@ public class PhaseControllers : PhaseBase {
 				closingWindow.gameObject.SetActive(true);
 				this.closingAudienceRemainSeconds = PhaseControllers.ClosingAudienceWaitSeconds + 0.99f;
 
-				// 初期状態のプレースホルダーを含む文字列を記憶する
-				closingTextUI = GameObject.Find("Controller_ClosingAudienceText").GetComponent<UnityEngine.UI.Text>();
-				this.closingText = closingTextUI.text;
-
 				// ウィンドウオープン
+				closingWindow.localScale = Vector3.zero;
 				iTween.ScaleTo(
 					closingWindow.gameObject,
 					new Vector3(1, 1, 1),
@@ -226,7 +224,7 @@ public class PhaseControllers : PhaseBase {
 
 			// 表示文字列を更新
 			closingTextUI = GameObject.Find("Controller_ClosingAudienceText").GetComponent<UnityEngine.UI.Text>();
-			closingTextUI.text = this.closingText
+			closingTextUI.text = PhaseControllers.ClosingTextSource
 				.Replace("${REMAIN_SECOND}", ((int)this.closingAudienceRemainSeconds).ToString());
 		}
 

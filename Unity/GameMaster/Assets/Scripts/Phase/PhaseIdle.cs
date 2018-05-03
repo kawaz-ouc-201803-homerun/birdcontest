@@ -19,7 +19,9 @@ public class PhaseIdle : PhaseBase {
 	/// <summary>
 	/// テキストエリアの元文章
 	/// </summary>
-	private string textSource;
+	private const string TextSource = @"あなた達 ""３人"" は「" + PhaseManager.GameTitle + @"」に出場するチームメイトだ。
+一人は助走をつけ、一人は人力飛行機を漕ぎ、一人はそれを手助けする。
+それぞれがメチャクチャに動いて、より遠くを目指せ！";
 
 	/// <summary>
 	/// テキストエリアの現在表示している文字列インデックス
@@ -49,8 +51,6 @@ public class PhaseIdle : PhaseBase {
 	/// </summary>
 	public override void Start() {
 		this.textArea = GameObject.Find("Idle_DescriptionGameText").GetComponent<UnityEngine.UI.Text>();
-		this.textSource = this.textArea.text
-			.Replace("${TITLE}", PhaseManager.GameTitle);
 		this.textArea.text = "";
 		this.textArea.enabled = true;
 	}
@@ -71,7 +71,7 @@ public class PhaseIdle : PhaseBase {
 	/// </summary>
 	private IEnumerator nextMessageCharacter() {
 		while(true) {
-			if(this.textCursorIndex + 1 > this.textSource.Length) {
+			if(this.textCursorIndex + 1 > PhaseIdle.TextSource.Length) {
 				// 最後まで達したとき：指定秒だけ待機して初期化
 				yield return new WaitForSeconds(PhaseIdle.MessageAllViewSeconds);
 				this.textArea.text = "";
@@ -83,7 +83,7 @@ public class PhaseIdle : PhaseBase {
 
 			// １文字進める
 			this.textCursorIndex++;
-			this.textArea.text = this.textSource.Substring(0, this.textCursorIndex);
+			this.textArea.text = PhaseIdle.TextSource.Substring(0, this.textCursorIndex);
 		}
 	}
 
