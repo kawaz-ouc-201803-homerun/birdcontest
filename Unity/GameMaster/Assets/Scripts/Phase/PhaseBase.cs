@@ -25,7 +25,7 @@ public abstract class PhaseBase {
 	public bool IsUpdateEnabled {
 		get;
 		protected set;
-	} = true;
+	}
 
 	/// <summary>
 	/// コンストラクター
@@ -35,6 +35,7 @@ public abstract class PhaseBase {
 	public PhaseBase(PhaseManager parent, object[] parameters) {
 		this.parent = parent;
 		this.parameters = parameters;
+		this.IsUpdateEnabled = true;
 	}
 
 	/// <summary>

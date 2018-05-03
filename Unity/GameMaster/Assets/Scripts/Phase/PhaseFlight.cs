@@ -50,6 +50,9 @@ public class PhaseFlight : PhaseBase {
 	/// ゲームオブジェクト初期化
 	/// </summary>
 	public override void Start() {
+		// メインカメラのアニメーション（舞台背景カメラワーク）を無効化
+		GameObject.Find("Main Camera").GetComponent<Animator>().enabled = false;
+
 		// TODO: 機体オブジェクトを保管
 		this.airplane = GameObject.Find("Airplane");
 		GameObject.Find("Flight_ScoreText").GetComponent<UnityEngine.UI.Text>().text = string.Format("{0:0.00} m", 0);
@@ -72,6 +75,14 @@ public class PhaseFlight : PhaseBase {
 			this.mapAddress = afterMapAddress;
 			this.mapAddressCoroutine = this.parent.StartCoroutine(this.showMapAddress());
 		}
+	}
+
+	/// <summary>
+	/// このフェーズが破棄されるときに実行する処理
+	/// </summary>
+	public override void Destroy() {
+		// メインカメラのアニメーション（舞台背景カメラワーク）を有効化
+		GameObject.Find("Main Camera").GetComponent<Animator>().enabled = true;
 	}
 
 	/// <summary>
