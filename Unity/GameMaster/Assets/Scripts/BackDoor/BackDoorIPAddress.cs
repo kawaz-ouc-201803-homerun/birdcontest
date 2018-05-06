@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 操作端末のIPアドレス定義を書き換えるバックドア
 /// </summary>
-public class BackDoorIPAddress : MonoBehaviour {
+public class BackDoorIPAddress : BackDoorBase {
 
 	/// <summary>
 	/// 入力されたIPアドレス
@@ -16,9 +16,8 @@ public class BackDoorIPAddress : MonoBehaviour {
 	/// <summary>
 	/// ゲームオブジェクト初期化
 	/// </summary>
-	public void Start() {
+	public override void Start() {
 		// 現在設定されているIPアドレスで復元
-		Debug.Log(PhaseControllers.ControllerIPAddresses.Length);
 		for(int i = 0; i < this.IPAddresses.Length; i++) {
 			this.IPAddresses[i].text = PhaseControllers.ControllerIPAddresses[i];
 		}
@@ -27,7 +26,7 @@ public class BackDoorIPAddress : MonoBehaviour {
 	/// <summary>
 	/// 毎フレーム処理
 	/// </summary>
-	public void Update() {
+	public override void Update() {
 	}
 
 	/// <summary>

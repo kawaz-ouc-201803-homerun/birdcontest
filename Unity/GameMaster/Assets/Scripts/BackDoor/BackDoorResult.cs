@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 操作端末の結果を書き換えるバックドア
 /// </summary>
-public class BackDoorResult : MonoBehaviour {
+public class BackDoorResult : BackDoorBase {
 
 	/// <summary>
 	/// 入力された結果データ
@@ -17,9 +18,8 @@ public class BackDoorResult : MonoBehaviour {
 	/// <summary>
 	/// ゲームオブジェクト初期化
 	/// </summary>
-	public void Start() {
+	public override void Start() {
 		// 現在の結果データを所定の形式に変換してUIに格納する
-		Debug.Log(PhaseControllers.ControllerProgresses.Length);
 		for(int i = 0; i < this.Results.Length; i++) {
 			this.Results[i].text = this.convertDictionaryToString(PhaseControllers.ControllerProgresses[i]);
 		}
@@ -28,7 +28,7 @@ public class BackDoorResult : MonoBehaviour {
 	/// <summary>
 	/// 毎フレーム処理
 	/// </summary>
-	public void Update() {
+	public override void Update() {
 	}
 
 	/// <summary>
@@ -36,8 +36,13 @@ public class BackDoorResult : MonoBehaviour {
 	/// </summary>
 	public void OnApply() {
 		// 現在の入力データを辞書型配列に変換して結果データとして格納する
-		for(int i = 0; i < this.Results.Length; i++) {
-			PhaseControllers.ControllerProgresses[i] = this.convertStringToDictionary(this.Results[i].text);
+		try {
+			for(int i = 0; i < this.Results.Length; i++) {
+				PhaseControllers.ControllerProgresses[i] = this.convertStringToDictionary(this.Results[i].text);
+			}
+		} catch(Exception e) {
+			Debug.LogError("書式が不正です: " + e.Message);
+			return;
 		}
 
 		PhaseControllers.BackDoorOperated = true;

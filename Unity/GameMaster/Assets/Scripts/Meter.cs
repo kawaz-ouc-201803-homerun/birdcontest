@@ -52,7 +52,7 @@ public class Meter : MonoBehaviour {
 		this.Value = value;
 
 		if(this.component_Slider == null) {
-			Debug.LogError("メーターに紐づけるゲームオブジェクトが設定されていません。");
+			Debug.LogWarning("メーターに紐づけるゲームオブジェクトが設定されていません。");
 			return;
 		}
 

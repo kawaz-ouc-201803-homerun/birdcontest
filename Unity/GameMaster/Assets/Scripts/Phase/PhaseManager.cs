@@ -75,7 +75,7 @@ public class PhaseManager : MonoBehaviour {
 	/// <summary>
 	/// 初期設定
 	/// </summary>
-	void Start() {
+	public void Start() {
 		// フェーズをアイドル状態にセット
 		this.ChangePhase(new PhaseIdle(this));
 
@@ -90,9 +90,11 @@ public class PhaseManager : MonoBehaviour {
 	/// <summary>
 	/// 毎フレームの処理
 	/// </summary>
-	void Update() {
-#if UNITY_EDITOR
-		// デバッグ時のみ有効な処理
+	public void Update() {
+		if(BackDoorOpenTrigger.IsBackDoorOpened == true) {
+			// バックドアが開いているときは操作を無効にする
+			return;
+		}
 
 		// 戻るボタン
 		if(Input.GetKeyDown(KeyCode.Escape) == true) {
@@ -144,16 +146,17 @@ public class PhaseManager : MonoBehaviour {
 						break;
 
 					case "PhaseResult":
-						// これ以上進めない
+						// 最初のフェーズに戻す
+						this.ChangePhase(new PhaseIdle(this));
 						break;
 				}
 			}
 		} else {
 			this.nextKeyCounter = 0;
 		}
-#endif
 
-		if(this.Phase != null && this.Phase.IsUpdateEnabled == true) {
+		if(this.Phase != null
+		&& this.Phase.IsUpdateEnabled == true) {
 			// 現在のフェーズの毎フレーム更新処理
 			this.Phase.Update();
 		}
@@ -168,6 +171,7 @@ public class PhaseManager : MonoBehaviour {
 		var nextPhaseCallback = new Action(() => {
 			// シーン移行前にすべてのコルーチンを停止しておく
 			this.StopAllCoroutines();
+			iTween.Stop();
 
 			// フェーズ破棄処理
 			if(this.Phase != null) {

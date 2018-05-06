@@ -32,13 +32,23 @@ public class BackDoorOpenTrigger : MonoBehaviour {
 	/// <summary>
 	/// 現在開いているバックドアのインデックス
 	/// </summary>
-	private int currentBackDoorIndex;
+	private static int currentBackDoorIndex;
+
+	/// <summary>
+	/// 現在バックドアが開かれているかどうか
+	/// </summary>
+	/// <returns></returns>
+	public static bool IsBackDoorOpened {
+		get {
+			return BackDoorOpenTrigger.currentBackDoorIndex != -1;
+		}
+	}
 
 	/// <summary>
 	/// ゲームオブジェクト初期化
 	/// </summary>
 	public void Start() {
-		this.currentBackDoorIndex = -1;
+		BackDoorOpenTrigger.currentBackDoorIndex = -1;
 	}
 
 	/// <summary>
@@ -46,7 +56,7 @@ public class BackDoorOpenTrigger : MonoBehaviour {
 	/// </summary>
 	public void Update() {
 		foreach(var map in BackDoorOpenTrigger.UIIndexMap) {
-			if(Input.GetKeyDown(map.Key) == true && this.currentBackDoorIndex != map.Value) {
+			if(Input.GetKeyDown(map.Key) == true && BackDoorOpenTrigger.currentBackDoorIndex != map.Value) {
 				this.ChangeBackDoor(map.Value);
 			}
 		}
@@ -57,7 +67,7 @@ public class BackDoorOpenTrigger : MonoBehaviour {
 	/// </summary>
 	/// <param name="index">表示するバックドアのインデックス。すべて無効にするときは -1 を指定する</param>
 	public void ChangeBackDoor(int index) {
-		this.currentBackDoorIndex = index;
+		BackDoorOpenTrigger.currentBackDoorIndex = index;
 
 		// すべて無効化
 		foreach(var obj in this.BackDoorUIs) {
@@ -67,6 +77,7 @@ public class BackDoorOpenTrigger : MonoBehaviour {
 		// 指定したバックドアを有効にする
 		if(0 <= index && index < this.BackDoorUIs.Length) {
 			this.BackDoorUIs[index].SetActive(true);
+			this.BackDoorUIs[index].GetComponentInChildren<BackDoorBase>().Start();
 		}
 	}
 

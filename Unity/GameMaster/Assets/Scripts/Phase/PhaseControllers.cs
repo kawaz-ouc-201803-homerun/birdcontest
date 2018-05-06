@@ -32,7 +32,7 @@ public class PhaseControllers : PhaseBase {
 		"127.0.0.1",
 		"127.0.0.1",
 #else
-		// TODO: GM開始時に設定を動的に変えられるようにしたい
+		// GM開始時に設定を動的に変える
 		"192.168.11.11",
 		"192.168.11.12",
 		"192.168.11.13",
@@ -57,7 +57,7 @@ public class PhaseControllers : PhaseBase {
 	/// <summary>
 	/// 各端末の進捗状況を更新する間隔
 	/// </summary>
-	private const float ControllerProgressRefreshSeconds = 1.0f;
+	private const float ControllerProgressRefreshSeconds = 2.0f;
 
 	/// <summary>
 	/// オーディエンス投票を締め切るまでの残り秒数
@@ -151,6 +151,7 @@ public class PhaseControllers : PhaseBase {
 	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
 	public PhaseControllers(PhaseManager parent) : base(parent, null) {
 		this.connector = new NetworkGameMaster(PhaseControllers.ControllerIPAddresses);
+		PhaseControllers.BackDoorOperated = false;
 	}
 
 	/// <summary>
@@ -172,6 +173,9 @@ public class PhaseControllers : PhaseBase {
 			GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text = "";
 			GameObject.Find("Controller_CompleteCheck" + i).transform.localScale = new Vector3(0, 0, 1);
 			GameObject.Find("Controller_CompleteCheck" + i).GetComponent<UnityEngine.UI.Image>().enabled = false;
+			for(int n = 0; n < GameObject.Find("Controller_Meters" + i).transform.childCount; n++) {
+				GameObject.Find("Controller_Meters" + i).transform.GetChild(n).GetComponent<Meter>().SetValue(0);
+			}
 		}
 
 		// 各端末に開始指示を出す
@@ -199,11 +203,10 @@ public class PhaseControllers : PhaseBase {
 		var closingWindow = GameObject.Find("ControllerPhase").transform.Find("Controller_ClosingAudienceWindow");
 
 		// 端末の進捗状況
+		this.controllerProgressRefreshTimer += Time.deltaTime;
 		for(int i = 0; i < PhaseControllers.ControllerIPAddresses.Length; i++) {
-			// 毎秒１回ずつ処理する
-			this.controllerProgressRefreshTimer += Time.deltaTime;
 			if(this.controllerProgressRefreshTimer >= PhaseControllers.ControllerProgressRefreshSeconds) {
-				this.controllerProgressRefreshTimer = 0;
+				// 一定間隔で実行する処理
 
 				// 操作状況を文字列化して表示
 				if(PhaseControllers.BackDoorOperated == true || this.isControllerError[i] == false) {
@@ -230,6 +233,10 @@ public class PhaseControllers : PhaseBase {
 				// チェックマークをiTween表示
 				iTween.ScaleTo(checkBox, new Vector3(1, 1, 1), 1.0f);
 			}
+		}
+		if(this.controllerProgressRefreshTimer >= PhaseControllers.ControllerProgressRefreshSeconds) {
+			// 一定間隔で実行する処理が完了したらタイマーを初期化する
+			this.controllerProgressRefreshTimer = 0;
 		}
 
 		// 実況更新
@@ -314,15 +321,12 @@ public class PhaseControllers : PhaseBase {
 		// 端末の操作を強制終了する
 		if(Input.GetKeyDown(KeyCode.Alpha1) == true) {
 			this.isControllerCompleted[0] = true;
-			Debug.Log("端末A 終了");
 		}
 		if(Input.GetKeyDown(KeyCode.Alpha2) == true) {
 			this.isControllerCompleted[1] = true;
-			Debug.Log("端末B 終了");
 		}
 		if(Input.GetKeyDown(KeyCode.Alpha3) == true) {
 			this.isControllerCompleted[2] = true;
-			Debug.Log("端末C 終了");
 		}
 
 #endif
@@ -496,41 +500,67 @@ public class PhaseControllers : PhaseBase {
 				Debug.LogError("GMで管理している役割IDと操作端末が申告してきた役割IDが一致しません。");
 			}
 
+			// 具体的な数値はメーターでグラフィカルに表示するため、ここではそれ以外の情報を入れる
 			switch(roleId) {
 				case (int)NetworkConnector.RoleIds.A_Prepare:
-					buf.WriteLine("【助走役：○○ちゃん】");
+					buf.Write("【助走役：クエリちゃん】\n");
 					if(isStarted == true) {
-						buf.WriteLine("　助走方法：");
-						buf.WriteLine("　ＰＯＷＥＲ：");
+						buf.Write("　");
+						switch(int.Parse(progress["option"])) {
+							case 0:
+								buf.Write("人力手押し");
+								break;
+
+							case 1:
+								buf.Write("クルマでけん引");
+								break;
+
+							case 2:
+								buf.Write("ボム");
+								break;
+						}
 					}
 					break;
 
 				case (int)NetworkConnector.RoleIds.B_Flight:
-					buf.WriteLine("【飛行役：○○ちゃん】");
+					buf.Write("【飛行役：ユニティちゃん】\n");
 					if(isStarted == true) {
-						buf.WriteLine("　ＰＯＷＥＲ：");
+						buf.Write("　");
+						buf.Write("スタミナチャージ");
 					}
 					break;
 
 				case (int)NetworkConnector.RoleIds.C_Assist:
-					buf.WriteLine("【サポート役：○○ちゃん】");
+					buf.Write("【援護役：○○ちゃん】\n");
 					if(isStarted == true) {
-						buf.WriteLine("　サポート方法：");
-						buf.WriteLine("　？？？：");
+						buf.Write("　");
+						switch(int.Parse(progress["option"])) {
+							case 0:
+								buf.Write("全力応援");
+								break;
+
+							case 1:
+								buf.Write("ボム");
+								break;
+
+							case 2:
+								buf.Write("主催者へワイロを贈る");
+								break;
+						}
 					}
 					break;
 			}
 
 			if(isStarted == false) {
 				// まだ開始指示を受け取っていない端末
-				buf.WriteLine("　開始準備中...");
+				buf.Write("　開始準備中...");
 			}
 
 #if UNITY_EDITOR
 			// デバッグ用
-			foreach(var item in progress) {
-				buf.Write(item.Key + "=" + item.Value + ", ");
-			}
+			//foreach(var item in progress) {
+			//	buf.Write(item.Key + "=" + item.Value + ", ");
+			//}
 #endif
 
 			return buf.ToString();
@@ -562,22 +592,22 @@ public class PhaseControllers : PhaseBase {
 				switch(option) {
 					case 0:
 						// 人力
-						values[(int)PowerMeter.StartPower] = 0.1f + int.Parse(progress["param"]) / 0.4f;
+						values[(int)PowerMeter.StartPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.4f;
 						values[(int)PowerMeter.FlightPower] = 0;
-						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 0.5f;
+						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.5f;
 						break;
 
 					case 1:
 						// 牽引
-						values[(int)PowerMeter.StartPower] = 0.4f + int.Parse(progress["param"]) / 0.4f;
+						values[(int)PowerMeter.StartPower] = 0.4f + int.Parse(progress["param"]) / 100.0f / 0.4f;
 						values[(int)PowerMeter.FlightPower] = 0;
-						values[(int)PowerMeter.LackPower] = 0.1f + int.Parse(progress["param"]) / 0.4f;
+						values[(int)PowerMeter.LackPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.4f;
 						break;
 
 					case 2:
 						// 爆弾
 						values[(int)PowerMeter.StartPower] = 1.0f;
-						values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 0.8f;
+						values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.8f;
 						values[(int)PowerMeter.LackPower] = 0;
 						break;
 				}
@@ -586,7 +616,7 @@ public class PhaseControllers : PhaseBase {
 			case (int)NetworkConnector.RoleIds.B_Flight:
 				// 基本バランスは固定で、スコアに応じて増減する
 				values[(int)PowerMeter.StartPower] = 0;
-				values[(int)PowerMeter.FlightPower] = int.Parse(progress["param"]) / 1.0f;
+				values[(int)PowerMeter.FlightPower] = int.Parse(progress["param"]) / 100.0f / 1.0f;
 				values[(int)PowerMeter.LackPower] = 0;
 				break;
 
@@ -597,14 +627,14 @@ public class PhaseControllers : PhaseBase {
 					case 0:
 						// 応援
 						values[(int)PowerMeter.StartPower] = 0;
-						values[(int)PowerMeter.FlightPower] = 0.1f + int.Parse(progress["param"]) / 0.25f;
-						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 0.3f;
+						values[(int)PowerMeter.FlightPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.25f;
+						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.3f;
 						break;
 
 					case 1:
 						// 爆弾
 						values[(int)PowerMeter.StartPower] = 0;
-						values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 0.5f;
+						values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.5f;
 						values[(int)PowerMeter.LackPower] = 0;
 						break;
 
@@ -612,7 +642,7 @@ public class PhaseControllers : PhaseBase {
 						// 賄賂
 						values[(int)PowerMeter.StartPower] = 0;
 						values[(int)PowerMeter.FlightPower] = 0;
-						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 0.8f;
+						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.8f;
 						break;
 				}
 				break;
