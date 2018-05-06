@@ -83,6 +83,15 @@ public class PhaseResult : PhaseBase {
 
 		// 非同期でオーディエンス投票データを取り出す
 		this.connector.GetAudiencePredicts((string)this.parameters[0], new System.Action<ModelAudiencePredictsResponse>((result) => {
+			if(result == null) {
+				// 取得失敗
+				Debug.LogError("オーディエンス投票データ取得失敗: "
+					+ ((this.parameters[0] == null) ? "イベントが開始できていません" : "HTTP通信エラー"));
+				this.nearpinText = "ニアピン賞 ... 障害発生中につきありません";
+				this.rankingText = "＜＜障害発生中＞＞";
+				return;
+			}
+
 			Debug.Log("オーディエンス投票データ取得OK");
 
 			// TODO: デバッグ用

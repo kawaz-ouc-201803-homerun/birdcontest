@@ -45,9 +45,14 @@ public class PhaseManager : MonoBehaviour {
 	public GameObject[] PhaseUIs;
 
 	/// <summary>
+	/// バックドアの管理オブジェクト
+	/// </summary>
+	public BackDoorOpenTrigger BackDoorManager;
+
+	/// <summary>
 	/// 現在のフェーズ
 	/// </summary>
-	public PhaseBase phase;
+	public PhaseBase Phase;
 
 	/// <summary>
 	/// フェーズのインデックス
@@ -74,6 +79,9 @@ public class PhaseManager : MonoBehaviour {
 		// フェーズをアイドル状態にセット
 		this.ChangePhase(new PhaseIdle(this));
 
+		// IPアドレスのバックドアを開く
+		this.BackDoorManager.GetComponent<BackDoorOpenTrigger>().ChangeBackDoor((int)BackDoorOpenTrigger.BackDoorUIIndex.IPAddress);
+
 		// 各種変数を初期化
 		this.previousKeyCounter = 0;
 		this.nextKeyCounter = 0;
@@ -92,7 +100,7 @@ public class PhaseManager : MonoBehaviour {
 
 			if(this.previousKeyCounter == 1) {
 				// 前のフェーズへ戻る
-				switch(this.phase.GetType().Name) {
+				switch(this.Phase.GetType().Name) {
 					case "PhaseIdle":
 						// これ以上戻れない
 						break;
@@ -120,19 +128,19 @@ public class PhaseManager : MonoBehaviour {
 
 			if(this.nextKeyCounter == 1) {
 				// 前のフェーズへ戻る
-				switch(this.phase.GetType().Name) {
+				switch(this.Phase.GetType().Name) {
 					case "PhaseIdle":
 						this.ChangePhase(new PhaseControllers(this));
 						break;
 
 					case "PhaseControllers":
 						// this.ChangePhase(new PhaseFlight(this, null));
-						((PhaseControllers)this.phase).ChangeToFlightPhase();
+						((PhaseControllers)this.Phase).ChangeToFlightPhase();
 						break;
 
 					case "PhaseFlight":
 						// this.ChangePhase(new PhaseResult(this, null));
-						((PhaseFlight)this.phase).ChangeToResultPhase();
+						((PhaseFlight)this.Phase).ChangeToResultPhase();
 						break;
 
 					case "PhaseResult":
@@ -145,10 +153,9 @@ public class PhaseManager : MonoBehaviour {
 		}
 #endif
 
-		// TODO: ゲームマスター共通の処理
-
-		if(this.phase != null && this.phase.IsUpdateEnabled == true) {
-			this.phase.Update();
+		if(this.Phase != null && this.Phase.IsUpdateEnabled == true) {
+			// 現在のフェーズの毎フレーム更新処理
+			this.Phase.Update();
 		}
 	}
 
@@ -163,8 +170,8 @@ public class PhaseManager : MonoBehaviour {
 			this.StopAllCoroutines();
 
 			// フェーズ破棄処理
-			if(this.phase != null) {
-				this.phase.Destroy();
+			if(this.Phase != null) {
+				this.Phase.Destroy();
 			}
 
 			// 暗転後にフェーズ切り替え、対応するUIブロックに表示を切り替える
@@ -172,16 +179,16 @@ public class PhaseManager : MonoBehaviour {
 				this.PhaseUIs[i].SetActive(false);
 			}
 			this.PhaseUIs[this.PhaseIndex].SetActive(true);
-			this.phase = phase;
+			this.Phase = phase;
 
 			// 初回処理をここで実行
-			this.phase.Start();
+			this.Phase.Start();
 
 			// 明転開始
 			this.DoTransitionIn(PhaseManager.TransitionTimeSecond);
 		});
 
-		if(this.phase == null) {
+		if(this.Phase == null) {
 			// 前のシーンがない場合はすぐにシーンを開始する
 			nextPhaseCallback();
 		} else {

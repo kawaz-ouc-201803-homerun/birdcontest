@@ -14,6 +14,16 @@ using UnityEngine;
 public class PhaseControllers : PhaseBase {
 
 	/// <summary>
+	/// メーター順序
+	/// </summary>
+	public enum PowerMeter {
+		StartPower,
+		FlightPower,
+		LackPower,
+		Count,
+	}
+
+	/// <summary>
 	/// 操作端末のIPアドレス
 	/// </summary>
 	public static string[] ControllerIPAddresses = new string[] {
@@ -45,6 +55,11 @@ public class PhaseControllers : PhaseBase {
 	private const int ControllerLimitSeconds = 60;
 
 	/// <summary>
+	/// 各端末の進捗状況を更新する間隔
+	/// </summary>
+	private const float ControllerProgressRefreshSeconds = 1.0f;
+
+	/// <summary>
 	/// オーディエンス投票を締め切るまでの残り秒数
 	/// </summary>
 	private float closingAudienceRemainSeconds;
@@ -65,10 +80,25 @@ public class PhaseControllers : PhaseBase {
 	private string postText;
 
 	/// <summary>
+	/// オーディエンス投票が通信障害によって利用できない状態になっているかどうか
+	/// </summary>
+	private bool isAudienceEventError;
+
+	/// <summary>
 	/// オーディエンス投票を締め切る直前に画面に出すテキスト
 	/// </summary>
 	private const string ClosingTextSource = @"${REMAIN_SECOND} 秒後に投票を締め切ります...
 まだ投票できていない人は今のうちに済ませてね！";
+
+	/// <summary>
+	/// 画面上部のスクロール文字列の元のテキスト（平常運行時）
+	/// </summary>
+	private const string TopDescriptionSourceNormal = @"ただいま３名のプレイヤーが飛行の準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分です）。観客の皆さんも結果を予想してみましょう！ スマホから画面のＱＲコードを読み込んで投票してみて下さい♪";
+
+	/// <summary>
+	/// 画面上部のスクロール文字列の元のテキスト（オーディエンス投票障害発生時）
+	/// </summary>
+	private const string TopDescriptionSourceError = @"ただいま３名のプレイヤーが飛行の準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分です）。観客の皆さんも結果を予想をして頂きたいところですが、あいにくただいま障害発生中のため投票できません。";
 
 	/// <summary>
 	/// 各端末の操作が完了したかどうか
@@ -76,9 +106,24 @@ public class PhaseControllers : PhaseBase {
 	private bool[] isControllerCompleted;
 
 	/// <summary>
+	/// 各端末の通信でエラーが発生しているかどうか
+	/// </summary>
+	private bool[] isControllerError;
+
+	/// <summary>
+	/// バックドアによって端末の操作内容が変更されたかどうか
+	/// </summary>
+	public static bool BackDoorOperated = false;
+
+	/// <summary>
 	/// 各端末の操作状況
 	/// </summary>
-	private Dictionary<string, string>[] controllerProgresses;
+	public static Dictionary<string, string>[] ControllerProgresses;
+
+	/// <summary>
+	/// 各端末の操作状況を更新するための Timer.deltaTime 加算用
+	/// </summary>
+	private float controllerProgressRefreshTimer;
 
 	/// <summary>
 	/// 実況テキストエリアの元文章
@@ -106,19 +151,6 @@ public class PhaseControllers : PhaseBase {
 	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
 	public PhaseControllers(PhaseManager parent) : base(parent, null) {
 		this.connector = new NetworkGameMaster(PhaseControllers.ControllerIPAddresses);
-		this.connector.StartAudiencePredicts(new System.Action<string>((result) => {
-			// 生成されたイベントIDを保管
-			this.eventId = result;
-			Debug.Log("イベント開始: ID=" + result);
-		}));
-
-		// 各端末に開始指示を出す
-		this.controllerProgresses = new Dictionary<string, string>[PhaseControllers.ControllerIPAddresses.Length];
-		for(int i = 0; i < PhaseControllers.ControllerIPAddresses.Length; i++) {
-			this.controllerProgresses[i] = new Dictionary<string, string>();
-			this.controllerProgresses[i]["isStarted"] = "false";
-			this.startController(i);
-		}
 	}
 
 	/// <summary>
@@ -130,12 +162,24 @@ public class PhaseControllers : PhaseBase {
 		closingWindow.gameObject.SetActive(false);
 		this.parent.StartCoroutine(this.watcherAudience());
 
+		// 新規投票イベント生成
+		this.startAudienceEvent();
+
 		// ##### 操作端末周り #####
 		this.isControllerCompleted = new bool[PhaseControllers.ControllerIPAddresses.Length];
+		this.isControllerError = new bool[PhaseControllers.ControllerIPAddresses.Length];
 		for(int i = 0; i < PhaseControllers.ControllerIPAddresses.Length; i++) {
 			GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text = "";
 			GameObject.Find("Controller_CompleteCheck" + i).transform.localScale = new Vector3(0, 0, 1);
 			GameObject.Find("Controller_CompleteCheck" + i).GetComponent<UnityEngine.UI.Image>().enabled = false;
+		}
+
+		// 各端末に開始指示を出す
+		PhaseControllers.ControllerProgresses = new Dictionary<string, string>[PhaseControllers.ControllerIPAddresses.Length];
+		for(int i = 0; i < PhaseControllers.ControllerIPAddresses.Length; i++) {
+			PhaseControllers.ControllerProgresses[i] = new Dictionary<string, string>();
+			PhaseControllers.ControllerProgresses[i]["isStarted"] = "false";
+			this.startController(i);
 		}
 
 		// 実況テキスト
@@ -154,10 +198,28 @@ public class PhaseControllers : PhaseBase {
 		var isControllerCompleteAll = (this.isControllerCompleted.Where(a => a == false).Count() == 0);
 		var closingWindow = GameObject.Find("ControllerPhase").transform.Find("Controller_ClosingAudienceWindow");
 
-		// 操作状況更新
+		// 端末の進捗状況
 		for(int i = 0; i < PhaseControllers.ControllerIPAddresses.Length; i++) {
-			GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text =
-				this.conrollerProgressToString(i, this.controllerProgresses[i]);
+			// 毎秒１回ずつ処理する
+			this.controllerProgressRefreshTimer += Time.deltaTime;
+			if(this.controllerProgressRefreshTimer >= PhaseControllers.ControllerProgressRefreshSeconds) {
+				this.controllerProgressRefreshTimer = 0;
+
+				// 操作状況を文字列化して表示
+				if(PhaseControllers.BackDoorOperated == true || this.isControllerError[i] == false) {
+					// 平常運転 or バックドアによって強制的に書き換えられた
+
+					// 進捗状況のテキスト更新
+					GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text =
+						this.conrollerProgressToString(i, PhaseControllers.ControllerProgresses[i]);
+
+					// 各種メーター更新
+					this.setMetersByConrollerProgress(i, PhaseControllers.ControllerProgresses[i]);
+				} else {
+					// 障害発生中
+					GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text = "＜＜障害発生中＞＞";
+				}
+			}
 
 			// 完了したときのマーク表示
 			var checkBox = GameObject.Find("Controller_CompleteCheck" + i);
@@ -197,35 +259,53 @@ public class PhaseControllers : PhaseBase {
 
 		// オーディエンス投票締切直前カウントダウン表示
 		if(isControllerCompleteAll == true) {
-			UnityEngine.UI.Text closingTextUI;
+			if(this.isAudienceEventError == true) {
 
-			if(closingWindow.gameObject.activeInHierarchy == false) {
-				// オーディエンス投票締切直前カウントダウン開始
-				closingWindow.gameObject.SetActive(true);
-				this.closingAudienceRemainSeconds = PhaseControllers.ClosingAudienceWaitSeconds + 0.99f;
+				// オーディエンス投票が障害発生中のときはすぐに次のフェーズへ移行する
+				this.ChangeToFlightPhase();
+				this.IsUpdateEnabled = false;
 
-				// ウィンドウオープン
-				closingWindow.localScale = Vector3.zero;
-				iTween.ScaleTo(
-					closingWindow.gameObject,
-					new Vector3(1, 1, 1),
-					1.0f
-				);
 			} else {
-				// オーディエンス投票締切直前カウントダウン中
-				this.closingAudienceRemainSeconds -= Time.deltaTime;
-				if(this.closingAudienceRemainSeconds < 0) {
-					// タイムアップ：次のフェーズへ移行
-					this.ChangeToFlightPhase();
-					this.IsUpdateEnabled = false;
-					return;
-				}
-			}
 
-			// 表示文字列を更新
-			closingTextUI = GameObject.Find("Controller_ClosingAudienceText").GetComponent<UnityEngine.UI.Text>();
-			closingTextUI.text = PhaseControllers.ClosingTextSource
-				.Replace("${REMAIN_SECOND}", ((int)this.closingAudienceRemainSeconds).ToString());
+				UnityEngine.UI.Text closingTextUI;
+
+				if(closingWindow.gameObject.activeInHierarchy == false) {
+					// オーディエンス投票締切直前カウントダウン開始
+					closingWindow.gameObject.SetActive(true);
+					this.closingAudienceRemainSeconds = PhaseControllers.ClosingAudienceWaitSeconds + 0.99f;
+
+					// ウィンドウオープン
+					closingWindow.localScale = Vector3.zero;
+					iTween.ScaleTo(
+						closingWindow.gameObject,
+						new Vector3(1, 1, 1),
+						1.0f
+					);
+				} else {
+					// オーディエンス投票締切直前カウントダウン中
+					this.closingAudienceRemainSeconds -= Time.deltaTime;
+					if(this.closingAudienceRemainSeconds < 0) {
+						// タイムアップ：次のフェーズへ移行
+						this.ChangeToFlightPhase();
+						this.IsUpdateEnabled = false;
+						return;
+					}
+				}
+
+				// 表示文字列を更新
+				closingTextUI = GameObject.Find("Controller_ClosingAudienceText").GetComponent<UnityEngine.UI.Text>();
+				closingTextUI.text = PhaseControllers.ClosingTextSource
+					.Replace("${REMAIN_SECOND}", ((int)this.closingAudienceRemainSeconds).ToString());
+
+			}
+		}
+
+		// ##### その他 #####
+		// オーディエンス投票をやっているかどうかで上部スクロール文字列の中身を変える
+		if(this.isAudienceEventError == false) {
+			GameObject.Find("Controller_TopDescriptionText").GetComponent<UnityEngine.UI.Text>().text = PhaseControllers.TopDescriptionSourceNormal;
+		} else {
+			GameObject.Find("Controller_TopDescriptionText").GetComponent<UnityEngine.UI.Text>().text = PhaseControllers.TopDescriptionSourceError;
 		}
 
 #if UNITY_EDITOR
@@ -257,10 +337,30 @@ public class PhaseControllers : PhaseBase {
 	}
 
 	/// <summary>
+	/// 新規オーディエンス投票イベントを生成します。
+	/// </summary>
+	private void startAudienceEvent() {
+		this.connector.StartAudiencePredicts(new System.Action<string>((result) => {
+			if(string.IsNullOrEmpty(result) == false) {
+				// 生成されたイベントIDを保管
+				this.eventId = result;
+				Debug.Log("イベント開始: ID=" + result);
+				this.isAudienceEventError = false;
+			} else {
+				// エラー発生時
+				Debug.LogError("イベント開始失敗");
+				this.isAudienceEventError = true;
+			}
+		}));
+	}
+
+	/// <summary>
 	/// 操作端末へ開始指示を出します。
 	/// </summary>
 	/// <param name="roleId">役割ID</param>
 	private void startController(int roleId) {
+		Debug.Log("開始指示: 端末ID=" + roleId + ", IPアドレス=" + PhaseControllers.ControllerIPAddresses[roleId]);
+
 		this.connector.StartController(
 			new ModelControllerStart() {
 				RoleId = roleId,
@@ -269,7 +369,8 @@ public class PhaseControllers : PhaseBase {
 			roleId,
 			new System.Action(() => {
 				Debug.Log("接続開始成功: 端末ID=" + roleId);
-				this.controllerProgresses[roleId]["isStarted"] = "true";
+				PhaseControllers.ControllerProgresses[roleId]["isStarted"] = "true";
+				this.isControllerError[roleId] = false;
 
 				// 進捗報告と完了報告を受け付ける
 				this.watcherControllerProgresses(roleId);
@@ -277,6 +378,9 @@ public class PhaseControllers : PhaseBase {
 			}),
 			new System.Action(() => {
 				Debug.LogWarning("接続開始失敗: 端末ID=" + roleId);
+
+				// 当該端末をエラー状態に変更
+				this.isControllerError[roleId] = true;
 
 				if(this.parent.PhaseIndex == PhaseManager.PhaseIndexMap[this.GetType()]) {
 					// 現在のフェーズであるうちは自動でリトライを続ける
@@ -294,7 +398,7 @@ public class PhaseControllers : PhaseBase {
 		this.connector.ReceiveControllerProgress(
 			roleId,
 			new System.Action<ModelDictionary<string, string>>((result) => {
-				this.controllerProgresses[roleId] = result.GetDictionary();
+				PhaseControllers.ControllerProgresses[roleId] = result.GetDictionary();
 
 				if(this.isControllerCompleted[roleId] == false) {
 					// 完了報告が届いていないうちは引き続き受け付ける
@@ -313,7 +417,7 @@ public class PhaseControllers : PhaseBase {
 			roleId,
 			new System.Action<ModelDictionary<string, string>>((result) => {
 				this.isControllerCompleted[roleId] = true;
-				this.controllerProgresses[roleId] = result.GetDictionary();
+				PhaseControllers.ControllerProgresses[roleId] = result.GetDictionary();
 			}
 		));
 	}
@@ -345,8 +449,9 @@ public class PhaseControllers : PhaseBase {
 	private IEnumerator watcherAudience() {
 		while(true) {
 			yield return new WaitForSeconds(PhaseControllers.AudienceWatchSeconds);
-			if(string.IsNullOrEmpty(this.eventId) == true) {
+			if(this.isAudienceEventError == true) {
 				Debug.LogWarning("イベントIDが無効のため投票情報を取得できません。");
+				this.postText = "＜＜障害発生中＞＞";
 				continue;
 			}
 
@@ -433,6 +538,94 @@ public class PhaseControllers : PhaseBase {
 	}
 
 	/// <summary>
+	/// 操作端末の進捗情報を基に性能バランス値を各種メーターにセットします。
+	/// </summary>
+	/// <param name="roleId">役割ID</param>
+	/// <param name="progress">操作端末の進捗情報</param>
+	private void setMetersByConrollerProgress(int roleId, Dictionary<string, string> progress) {
+		int option;
+		var values = new float[(int)PowerMeter.Count];
+
+		var isStarted = (progress.ContainsKey("isStarted") == false || bool.Parse(progress["isStarted"]));
+		if(isStarted == false) {
+			// まだ始まっていないときは初期状態を維持する
+			values[(int)PowerMeter.StartPower] = 0;
+			values[(int)PowerMeter.FlightPower] = 0;
+			values[(int)PowerMeter.LackPower] = 0;
+			return;
+		}
+
+		switch(roleId) {
+			case (int)NetworkConnector.RoleIds.A_Prepare:
+				// 選択肢に応じて基本バランスが変わる
+				option = int.Parse(progress["option"]);
+				switch(option) {
+					case 0:
+						// 人力
+						values[(int)PowerMeter.StartPower] = 0.1f + int.Parse(progress["param"]) / 0.4f;
+						values[(int)PowerMeter.FlightPower] = 0;
+						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 0.5f;
+						break;
+
+					case 1:
+						// 牽引
+						values[(int)PowerMeter.StartPower] = 0.4f + int.Parse(progress["param"]) / 0.4f;
+						values[(int)PowerMeter.FlightPower] = 0;
+						values[(int)PowerMeter.LackPower] = 0.1f + int.Parse(progress["param"]) / 0.4f;
+						break;
+
+					case 2:
+						// 爆弾
+						values[(int)PowerMeter.StartPower] = 1.0f;
+						values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 0.8f;
+						values[(int)PowerMeter.LackPower] = 0;
+						break;
+				}
+				break;
+
+			case (int)NetworkConnector.RoleIds.B_Flight:
+				// 基本バランスは固定で、スコアに応じて増減する
+				values[(int)PowerMeter.StartPower] = 0;
+				values[(int)PowerMeter.FlightPower] = int.Parse(progress["param"]) / 1.0f;
+				values[(int)PowerMeter.LackPower] = 0;
+				break;
+
+			case (int)NetworkConnector.RoleIds.C_Assist:
+				// 選択肢に応じて基本バランスが変わる
+				option = int.Parse(progress["option"]);
+				switch(option) {
+					case 0:
+						// 応援
+						values[(int)PowerMeter.StartPower] = 0;
+						values[(int)PowerMeter.FlightPower] = 0.1f + int.Parse(progress["param"]) / 0.25f;
+						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 0.3f;
+						break;
+
+					case 1:
+						// 爆弾
+						values[(int)PowerMeter.StartPower] = 0;
+						values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 0.5f;
+						values[(int)PowerMeter.LackPower] = 0;
+						break;
+
+					case 2:
+						// 賄賂
+						values[(int)PowerMeter.StartPower] = 0;
+						values[(int)PowerMeter.FlightPower] = 0;
+						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 0.8f;
+						break;
+				}
+				break;
+		}
+
+		// メーターにセット
+		var meters = GameObject.Find("Controller_Meters" + roleId).transform;
+		for(int i = 0; i < meters.childCount; i++) {
+			meters.GetChild(i).GetComponent<Meter>().SetValue(values[i]);
+		}
+	}
+
+	/// <summary>
 	/// 現在の端末操作状況を基に、実況テキストを返します。
 	/// </summary>
 	/// <returns>実況テキスト</returns>
@@ -451,9 +644,9 @@ public class PhaseControllers : PhaseBase {
 	public void ChangeToFlightPhase() {
 		this.parent.ChangePhase(new PhaseFlight(this.parent, new object[] {
 			this.eventId,
-			this.controllerProgresses[0],
-			this.controllerProgresses[1],
-			this.controllerProgresses[2],
+			PhaseControllers.ControllerProgresses[0],
+			PhaseControllers.ControllerProgresses[1],
+			PhaseControllers.ControllerProgresses[2],
 		}));
 	}
 
