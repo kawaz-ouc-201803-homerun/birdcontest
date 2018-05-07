@@ -56,7 +56,7 @@ public class TesterGM : TesterBase {
 		(this.connector as NetworkGameMaster).StartController(
 			new ModelControllerStart() {
 				RoleId = this.roleId,
-				LimitTimeSecond = 60,
+				LimitTimeSecond = 10,
 			},
 			this.roleId,
 			() => {
@@ -144,7 +144,7 @@ public class TesterGM : TesterBase {
 	/// <param name="data">進捗報告データ</param>
 	private void testProcessControllerStatus(ModelControllerProgress data) {
 		// NOTE: 本来のゲームマスターは以下のように処理分岐して細かく情報を取り出す必要があるが、ここでは単に文字列として表示するだけなので何もしない
-		switch(data.GetDictionary()["RoleID"]) {
+		switch(data.GetDictionary()["roleId"]) {
 			case "0":
 				// TODO: 端末Aのデータ取り出し処理
 				break;

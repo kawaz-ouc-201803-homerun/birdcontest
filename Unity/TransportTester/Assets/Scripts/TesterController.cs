@@ -140,21 +140,21 @@ public class TesterController : TesterBase {
 	/// </summary>
 	private ModelControllerProgress createReportData() {
 		var controllerReport = new ModelControllerProgress(new Dictionary<string, string>() { });
-		controllerReport.GetDictionary()["RoleID"] = ((int)this.parameters["RoleID"]).ToString();
+		controllerReport.GetDictionary()["roleId"] = ((int)this.parameters["RoleID"]).ToString();
 
 		// 報告するデータを作成する
 		switch((int)this.parameters["RoleID"]) {
 			case 0:
-				controllerReport.GetDictionary()["OptionIndex"] = "1";
-				controllerReport.GetDictionary()["ActionResult"] = "114514";
+				controllerReport.GetDictionary()["option"] = "1";
+				controllerReport.GetDictionary()["param"] = "114514";
 				break;
 
 			case 1:
-				controllerReport.GetDictionary()["ActionResult"] = "999";
+				controllerReport.GetDictionary()["param"] = "999";
 				break;
 
 			case 2:
-				controllerReport.GetDictionary()["OptionIndex"] = "2";
+				controllerReport.GetDictionary()["option"] = "2";
 				break;
 		}
 

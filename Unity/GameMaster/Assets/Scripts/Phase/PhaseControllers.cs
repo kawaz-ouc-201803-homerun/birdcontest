@@ -52,7 +52,7 @@ public class PhaseControllers : PhaseBase {
 	/// <summary>
 	/// 操作端末に与えられるゲーム時間
 	/// </summary>
-	private const int ControllerLimitSeconds = 60;
+	private const int ControllerLimitSeconds = 30;
 
 	/// <summary>
 	/// 各端末の進捗状況を更新する間隔
