@@ -181,8 +181,7 @@ public class PhaseControllers : PhaseBase {
 		// 各端末に開始指示を出す
 		PhaseControllers.ControllerProgresses = new Dictionary<string, string>[PhaseControllers.ControllerIPAddresses.Length];
 		for(int i = 0; i < PhaseControllers.ControllerIPAddresses.Length; i++) {
-			PhaseControllers.ControllerProgresses[i] = new Dictionary<string, string>();
-			PhaseControllers.ControllerProgresses[i]["isStarted"] = "false";
+			PhaseControllers.ControllerProgresses[i] = null;
 			this.startController(i);
 		}
 
@@ -373,7 +372,6 @@ public class PhaseControllers : PhaseBase {
 			roleId,
 			new System.Action(() => {
 				Debug.Log("接続開始成功: 端末ID=" + roleId);
-				PhaseControllers.ControllerProgresses[roleId]["isStarted"] = "true";
 				this.isControllerError[roleId] = false;
 
 				// 進捗報告と完了報告を受け付ける
@@ -489,11 +487,11 @@ public class PhaseControllers : PhaseBase {
 	/// <returns>文字列化された進捗情報</returns>
 	private string conrollerProgressToString(int roleId, Dictionary<string, string> progress) {
 		if(progress == null) {
-			return "";
+			// まだ開始指示を受け取っていない端末
+			return "　開始準備中...";
 		}
 
 		// TODO: それぞれのI/F仕様に応じた表示
-		var isStarted = (progress.ContainsKey("isStarted") == false || bool.Parse(progress["isStarted"]));
 		using(var buf = new System.IO.StringWriter()) {
 			// バリデーション
 			if(progress.ContainsKey("roleId") == true && int.Parse(progress["roleId"]) != roleId) {
@@ -504,56 +502,45 @@ public class PhaseControllers : PhaseBase {
 			switch(roleId) {
 				case (int)NetworkConnector.RoleIds.A_Prepare:
 					buf.Write("【助走役：クエリちゃん】\n");
-					if(isStarted == true) {
-						buf.Write("　");
-						switch(int.Parse(progress["option"])) {
-							case 0:
-								buf.Write("人力手押し");
-								break;
+					buf.Write("　");
+					switch(int.Parse(progress["option"])) {
+						case 0:
+							buf.Write("人力手押し");
+							break;
 
-							case 1:
-								buf.Write("クルマでけん引");
-								break;
+						case 1:
+							buf.Write("クルマでけん引");
+							break;
 
-							case 2:
-								buf.Write("ボム");
-								break;
-						}
+						case 2:
+							buf.Write("ボム");
+							break;
 					}
 					break;
 
 				case (int)NetworkConnector.RoleIds.B_Flight:
 					buf.Write("【飛行役：ユニティちゃん】\n");
-					if(isStarted == true) {
-						buf.Write("　");
-						buf.Write("スタミナチャージ");
-					}
+					buf.Write("　");
+					buf.Write("スタミナチャージ");
 					break;
 
 				case (int)NetworkConnector.RoleIds.C_Assist:
 					buf.Write("【援護役：○○ちゃん】\n");
-					if(isStarted == true) {
-						buf.Write("　");
-						switch(int.Parse(progress["option"])) {
-							case 0:
-								buf.Write("全力応援");
-								break;
+					buf.Write("　");
+					switch(int.Parse(progress["option"])) {
+						case 0:
+							buf.Write("全力応援");
+							break;
 
-							case 1:
-								buf.Write("ボム");
-								break;
+						case 1:
+							buf.Write("ボム");
+							break;
 
-							case 2:
-								buf.Write("主催者へワイロを贈る");
-								break;
-						}
+						case 2:
+							buf.Write("主催者へワイロを贈る");
+							break;
 					}
 					break;
-			}
-
-			if(isStarted == false) {
-				// まだ開始指示を受け取っていない端末
-				buf.Write("　開始準備中...");
 			}
 
 #if UNITY_EDITOR
@@ -576,76 +563,78 @@ public class PhaseControllers : PhaseBase {
 		int option;
 		var values = new float[(int)PowerMeter.Count];
 
-		var isStarted = (progress.ContainsKey("isStarted") == false || bool.Parse(progress["isStarted"]));
-		if(isStarted == false) {
+		if(progress == null) {
+
 			// まだ始まっていないときは初期状態を維持する
 			values[(int)PowerMeter.StartPower] = 0;
 			values[(int)PowerMeter.FlightPower] = 0;
 			values[(int)PowerMeter.LackPower] = 0;
-			return;
-		}
 
-		switch(roleId) {
-			case (int)NetworkConnector.RoleIds.A_Prepare:
-				// 選択肢に応じて基本バランスが変わる
-				option = int.Parse(progress["option"]);
-				switch(option) {
-					case 0:
-						// 人力
-						values[(int)PowerMeter.StartPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.4f;
-						values[(int)PowerMeter.FlightPower] = 0;
-						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.5f;
-						break;
+		} else {
 
-					case 1:
-						// 牽引
-						values[(int)PowerMeter.StartPower] = 0.4f + int.Parse(progress["param"]) / 100.0f / 0.4f;
-						values[(int)PowerMeter.FlightPower] = 0;
-						values[(int)PowerMeter.LackPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.4f;
-						break;
+			switch(roleId) {
+				case (int)NetworkConnector.RoleIds.A_Prepare:
+					// 選択肢に応じて基本バランスが変わる
+					option = int.Parse(progress["option"]);
+					switch(option) {
+						case 0:
+							// 人力
+							values[(int)PowerMeter.StartPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.4f;
+							values[(int)PowerMeter.FlightPower] = 0;
+							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.5f;
+							break;
 
-					case 2:
-						// 爆弾
-						values[(int)PowerMeter.StartPower] = 1.0f;
-						values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.8f;
-						values[(int)PowerMeter.LackPower] = 0;
-						break;
-				}
-				break;
+						case 1:
+							// 牽引
+							values[(int)PowerMeter.StartPower] = 0.4f + int.Parse(progress["param"]) / 100.0f / 0.4f;
+							values[(int)PowerMeter.FlightPower] = 0;
+							values[(int)PowerMeter.LackPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.4f;
+							break;
 
-			case (int)NetworkConnector.RoleIds.B_Flight:
-				// 基本バランスは固定で、スコアに応じて増減する
-				values[(int)PowerMeter.StartPower] = 0;
-				values[(int)PowerMeter.FlightPower] = int.Parse(progress["param"]) / 100.0f / 1.0f;
-				values[(int)PowerMeter.LackPower] = 0;
-				break;
+						case 2:
+							// 爆弾
+							values[(int)PowerMeter.StartPower] = 1.0f;
+							values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.8f;
+							values[(int)PowerMeter.LackPower] = 0;
+							break;
+					}
+					break;
 
-			case (int)NetworkConnector.RoleIds.C_Assist:
-				// 選択肢に応じて基本バランスが変わる
-				option = int.Parse(progress["option"]);
-				switch(option) {
-					case 0:
-						// 応援
-						values[(int)PowerMeter.StartPower] = 0;
-						values[(int)PowerMeter.FlightPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.25f;
-						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.3f;
-						break;
+				case (int)NetworkConnector.RoleIds.B_Flight:
+					// 基本バランスは固定で、スコアに応じて増減する
+					values[(int)PowerMeter.StartPower] = 0;
+					values[(int)PowerMeter.FlightPower] = int.Parse(progress["param"]) / 100.0f / 1.0f;
+					values[(int)PowerMeter.LackPower] = 0;
+					break;
 
-					case 1:
-						// 爆弾
-						values[(int)PowerMeter.StartPower] = 0;
-						values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.5f;
-						values[(int)PowerMeter.LackPower] = 0;
-						break;
+				case (int)NetworkConnector.RoleIds.C_Assist:
+					// 選択肢に応じて基本バランスが変わる
+					option = int.Parse(progress["option"]);
+					switch(option) {
+						case 0:
+							// 応援
+							values[(int)PowerMeter.StartPower] = 0;
+							values[(int)PowerMeter.FlightPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.25f;
+							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.3f;
+							break;
 
-					case 2:
-						// 賄賂
-						values[(int)PowerMeter.StartPower] = 0;
-						values[(int)PowerMeter.FlightPower] = 0;
-						values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.8f;
-						break;
-				}
-				break;
+						case 1:
+							// 爆弾
+							values[(int)PowerMeter.StartPower] = 0;
+							values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.5f;
+							values[(int)PowerMeter.LackPower] = 0;
+							break;
+
+						case 2:
+							// 賄賂
+							values[(int)PowerMeter.StartPower] = 0;
+							values[(int)PowerMeter.FlightPower] = 0;
+							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.8f;
+							break;
+					}
+					break;
+			}
+
 		}
 
 		// メーターにセット

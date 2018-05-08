@@ -32,6 +32,7 @@ public class PhaseManager : MonoBehaviour {
 		{ typeof(PhaseControllers), 1 },
 		{ typeof(PhaseFlight), 2 },
 		{ typeof(PhaseResult), 3 },
+		{ typeof(PhaseCredit), 4 },
 	};
 
 	/// <summary>
@@ -118,6 +119,10 @@ public class PhaseManager : MonoBehaviour {
 					case "PhaseResult":
 						this.ChangePhase(new PhaseFlight(this, null));
 						break;
+
+					case "PhaseCredit":
+						this.ChangePhase(new PhaseResult(this, null));
+						break;
 				}
 			}
 		} else {
@@ -146,6 +151,10 @@ public class PhaseManager : MonoBehaviour {
 						break;
 
 					case "PhaseResult":
+						this.ChangePhase(new PhaseCredit(this));
+						break;
+
+					case "PhaseCredit":
 						// 最初のフェーズに戻す
 						this.ChangePhase(new PhaseIdle(this));
 						break;
@@ -174,6 +183,7 @@ public class PhaseManager : MonoBehaviour {
 			iTween.Stop();
 
 			// フェーズ破棄処理
+			var hasBeforePhase = (this.Phase != null);
 			if(this.Phase != null) {
 				this.Phase.Destroy();
 			}
@@ -188,8 +198,10 @@ public class PhaseManager : MonoBehaviour {
 			// 初回処理をここで実行
 			this.Phase.Start();
 
-			// 明転開始
-			this.DoTransitionIn(PhaseManager.TransitionTimeSecond);
+			if(hasBeforePhase == true) {
+				// 明転開始
+				this.DoTransitionIn(PhaseManager.TransitionTimeSecond);
+			}
 		});
 
 		if(this.Phase == null) {

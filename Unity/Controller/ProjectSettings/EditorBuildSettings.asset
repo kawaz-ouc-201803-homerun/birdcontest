@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/SelectRole.unity
+    path: Assets/InputGMIPAddress.unity
     guid: 91489dfb24d640d41bdd3e506826b800
   - enabled: 1
     path: Assets/Controllers.unity
