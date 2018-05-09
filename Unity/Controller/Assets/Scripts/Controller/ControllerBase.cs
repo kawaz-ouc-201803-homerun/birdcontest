@@ -80,4 +80,9 @@ public abstract class ControllerBase : MonoBehaviour {
 	/// <returns>ミニゲーム結果テキスト</returns>
 	public abstract string GetResultText();
 
+	/// <summary>
+	/// ゲームサイクル２周目以降に必要な初期化処理を実行します。
+	/// </summary>
+	public abstract void StartNewGame();
+
 }

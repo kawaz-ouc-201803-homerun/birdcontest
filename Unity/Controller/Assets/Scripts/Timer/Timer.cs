@@ -68,15 +68,6 @@ public class Timer : MonoBehaviour {
 	/// 開始時の処理
 	/// </summary>
 	public void Start() {
-		if(this.GameObject_TimerFrame != null) {
-			this.GameObject_TimerFrame.GetComponent<Animator>().enabled = false;
-		}
-		if(this.GameObject_TimerSeconds != null) {
-			this.GameObject_TimerSeconds.GetComponent<Animator>().enabled = false;
-		}
-
-		// デバッグ用
-		this.StartTimer(this.TimeSeconds);
 	}
 
 	/// <summary>
@@ -106,7 +97,12 @@ public class Timer : MonoBehaviour {
 				// 橙色に
 				this.GameObject_TimerFrame.GetComponent<UnityEngine.UI.Image>().color = new Color(252 / 255.0f, 235 / 255.0f, 151 / 255.0f);
 				this.GameObject_TimerSeconds.GetComponent<UnityEngine.UI.Text>().fontSize = 74;
+			} else {
+				// 白色に
+				this.GameObject_TimerFrame.GetComponent<UnityEngine.UI.Image>().color = new Color(255 / 255.0f, 255 / 255.0f, 255 / 255.0f);
+				this.GameObject_TimerSeconds.GetComponent<UnityEngine.UI.Text>().fontSize = 64;
 			}
+
 			this.GameObject_TimerSeconds.GetComponent<UnityEngine.UI.Text>().color = this.GameObject_TimerFrame.GetComponent<UnityEngine.UI.Image>().color;
 		}
 	}
@@ -128,11 +124,9 @@ public class Timer : MonoBehaviour {
 		}
 		if(this.GameObject_TimerFrame != null) {
 			this.GameObject_TimerFrame.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-			this.GameObject_TimerFrame.GetComponent<Animator>().enabled = true;
 		}
 		if(this.GameObject_TimerSeconds != null) {
 			this.GameObject_TimerSeconds.GetComponent<Animator>().cullingMode = AnimatorCullingMode.AlwaysAnimate;
-			this.GameObject_TimerSeconds.GetComponent<Animator>().enabled = true;
 		}
 	}
 

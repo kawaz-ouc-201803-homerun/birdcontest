@@ -46,4 +46,11 @@ public class ControllerC : ControllerBase {
 		return "";
 	}
 
+	/// <summary>
+	/// ゲームサイクル２周目以降に必要な初期化処理を実行します。
+	/// </summary>
+	public override void StartNewGame() {
+		this.Start();
+	}
+
 }

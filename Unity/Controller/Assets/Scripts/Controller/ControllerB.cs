@@ -26,6 +26,7 @@ public class ControllerB : ControllerBase {
 		base.Update();
 	}
 
+
 	/// <summary>
 	/// 進捗報告として送るデータを生成します。
 	/// </summary>
@@ -45,6 +46,14 @@ public class ControllerB : ControllerBase {
 	/// <returns>ミニゲーム結果テキスト</returns>
 	public override string GetResultText() {
 		return "獲得スコア ＝ " + ((int)this.SubGame.Score);
+	}
+
+	/// <summary>
+	/// ゲームサイクル２周目以降に必要な初期化処理を実行します。
+	/// </summary>
+	public override void StartNewGame() {
+		this.Start();
+		this.SubGame.Start();
 	}
 
 }

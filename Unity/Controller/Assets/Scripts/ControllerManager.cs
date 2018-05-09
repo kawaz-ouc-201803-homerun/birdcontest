@@ -42,6 +42,11 @@ public class ControllerManager : MonoBehaviour {
 	public ControllerBase[] Controllers;
 
 	/// <summary>
+	/// 各種役割に対応する背景用カメラ
+	/// </summary>
+	public GameObject[] Cameras;
+
+	/// <summary>
 	/// Ready-Goオブジェクト
 	/// </summary>
 	public GameObject ReadyGo;
@@ -85,8 +90,18 @@ public class ControllerManager : MonoBehaviour {
 	/// 初回処理
 	/// </summary>
 	public void Start() {
-		// ゲームマスターからの接続待機
 		this.readyForStart = false;
+		this.isControllerStarted = false;
+		this.emergencyText = "";
+
+		// 役割IDに応じてカメラを切り替える
+		GameObject.Find("DefaultCamera").SetActive(false);
+		foreach(var camera in this.Cameras) {
+			camera.SetActive(false);
+		}
+		this.Cameras[ControllerSelector.SelectedRoleId].SetActive(true);
+
+		// ゲームマスターからの接続待機
 		this.connector = new NetworkController(ControllerSelector.GameMasterIPAddress);
 		this.connector.ControllerWaitForStart(ControllerSelector.SelectedRoleId, new System.Action<ModelControllerStart>((result) => {
 			// 開始指示を受け取ったときの処理
@@ -105,6 +120,7 @@ public class ControllerManager : MonoBehaviour {
 		this.StartScreen.SetActive(false);
 		this.MainScreen.SetActive(false);
 		this.EndScreen.SetActive(false);
+
 	}
 
 	/// <summary>
@@ -133,14 +149,10 @@ public class ControllerManager : MonoBehaviour {
 			if(Input.GetKeyDown(KeyCode.Return) == true) {
 				var fader = GameObject.Find("FadeCanvas").GetComponent<Fade>();
 				fader.FadeIn(2.0f, new Action(() => {
-					// フェードアウトした後に画面遷移する
-					this.connector.CloseConnectionsAll();
+					// フェードアウト後、再び開始指示待ち状態へ戻ってフェードイン
+					this.Start();
 					this.TimerObject.SetActive(false);
-					this.EndScreen.SetActive(false);
-					this.IdleScreen.SetActive(true);
-					this.emergencyText = "";
-
-					// フェードイン
+					this.Controllers[ControllerSelector.SelectedRoleId].StartNewGame();
 					fader.FadeOut(2.0f);
 				}));
 			}
@@ -248,8 +260,8 @@ public class ControllerManager : MonoBehaviour {
 		this.Controllers[ControllerSelector.SelectedRoleId].gameObject.SetActive(true);
 
 		// タイマー開始
-		this.TimerObject.transform.Find("TimerManager").GetComponent<Timer>().TimeSeconds = this.limitTimeSeconds;
 		this.TimerObject.SetActive(true);
+		this.TimerObject.GetComponent<Timer>().StartTimer(this.limitTimeSeconds);
 	}
 
 	/// <summary>
@@ -263,7 +275,7 @@ public class ControllerManager : MonoBehaviour {
 
 		// タイマーゼロカウント時の処理を定義
 		this.TimerObject.SetActive(false);
-		this.TimerObject.transform.Find("TimerManager").GetComponent<Timer>().ZeroTimerEvent.AddListener(new UnityAction(() => {
+		this.TimerObject.GetComponent<Timer>().ZeroTimerEvent.AddListener(new UnityAction(() => {
 			// メイン画面を終えて終了画面へ
 			this.MainScreen.SetActive(false);
 			this.EndScreen.SetActive(true);

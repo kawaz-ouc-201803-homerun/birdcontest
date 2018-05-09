@@ -41,18 +41,25 @@ public class SubGameButtonRepeat : MonoBehaviour {
 	/// <summary>
 	/// 初回処理
 	/// </summary>
-	void Start() {
-		var slider = GameObject.Find("Slider").GetComponent<Slider>();
+	public void Start() {
+		this.IsButtonDown = false;
+		this.ButtonDownCount = 0;
+		this.TimeCounter = 0;
+		this.Score = 0;
+		this.LastButtonDownCount = 0;
+
+		iTween.Stop();
+		var slider = this.transform.Find("Slider").GetComponent<Slider>();
 		slider.value = 0;
 		slider.maxValue = (SubGameButtonRepeat.MaxScoreThreshold % 2 == 0) ? SubGameButtonRepeat.MaxScoreThreshold * 2 : SubGameButtonRepeat.MaxScoreThreshold * 2 - 1;
 
-		GameObject.Find("RealTimeScore").GetComponent<Text>().text = "獲得スコア ＝ 0.00";
+		this.transform.Find("ScoreWindow/RealTimeScore").GetComponent<Text>().text = "獲得スコア ＝ 0.00";
 	}
 
 	/// <summary>
 	/// 毎フレーム更新処理
 	/// </summary>
-	void Update() {
+	public void Update() {
 		// ボタン押下判定
 		if(Input.GetButtonDown("Click") == true) {
 			if(this.IsButtonDown == false) {
@@ -89,7 +96,7 @@ public class SubGameButtonRepeat : MonoBehaviour {
 			this.ButtonDownCount = 0;
 
 			// スコア表示更新
-			GameObject.Find("RealTimeScore").GetComponent<Text>().text = "獲得スコア ＝ " + string.Format("{0:0.00}", this.Score);
+			this.transform.Find("ScoreWindow/RealTimeScore").GetComponent<Text>().text = "獲得スコア ＝ " + string.Format("{0:0.00}", this.Score);
 		}
 	}
 
@@ -98,7 +105,7 @@ public class SubGameButtonRepeat : MonoBehaviour {
 	/// </summary>
 	/// <param name="Change">現在の値</param>
 	void ValueChange(float Change) {
-		GameObject.Find("Slider").GetComponent<Slider>().value = Change;
+		this.transform.Find("Slider").GetComponent<Slider>().value = Change;
 	}
 
 }

@@ -208,18 +208,12 @@ public class PhaseControllers : PhaseBase {
 				// 一定間隔で実行する処理
 
 				// 操作状況を文字列化して表示
+				GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text =
+					this.conrollerProgressToString(i, PhaseControllers.ControllerProgresses[i]);
+
 				if(PhaseControllers.BackDoorOperated == true || this.isControllerError[i] == false) {
-					// 平常運転 or バックドアによって強制的に書き換えられた
-
-					// 進捗状況のテキスト更新
-					GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text =
-						this.conrollerProgressToString(i, PhaseControllers.ControllerProgresses[i]);
-
-					// 各種メーター更新
+					// 平常運転 or バックドアによって強制的に書き換えられたときのみ、各種メーター更新
 					this.setMetersByConrollerProgress(i, PhaseControllers.ControllerProgresses[i]);
-				} else {
-					// 障害発生中
-					GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text = "＜＜障害発生中＞＞";
 				}
 			}
 
@@ -486,23 +480,42 @@ public class PhaseControllers : PhaseBase {
 	/// <param name="progress">操作端末の進捗情報</param>
 	/// <returns>文字列化された進捗情報</returns>
 	private string conrollerProgressToString(int roleId, Dictionary<string, string> progress) {
-		if(progress == null) {
-			// まだ開始指示を受け取っていない端末
-			return "　開始準備中...";
-		}
-
 		// TODO: それぞれのI/F仕様に応じた表示
 		using(var buf = new System.IO.StringWriter()) {
+			// 役割とキャラクター名は常時表示
+			switch(roleId) {
+				case (int)NetworkConnector.RoleIds.A_Prepare:
+					buf.Write("【助走役：クエリちゃん】\n");
+					break;
+
+				case (int)NetworkConnector.RoleIds.B_Flight:
+					buf.Write("【飛行役：ユニティちゃん】\n");
+					break;
+
+				case (int)NetworkConnector.RoleIds.C_Assist:
+					buf.Write("【援護役：○○ちゃん】\n");
+					break;
+			}
+			if(this.isControllerError[roleId] == true) {
+				// 障害発生中
+				buf.Write("　＜＜障害発生中＞＞");
+				return buf.ToString();
+			}
+			if(progress == null) {
+				// まだ開始指示を受け取っていない端末
+				buf.Write("　開始準備中...");
+				return buf.ToString();
+			}
+
 			// バリデーション
 			if(progress.ContainsKey("roleId") == true && int.Parse(progress["roleId"]) != roleId) {
 				Debug.LogError("GMで管理している役割IDと操作端末が申告してきた役割IDが一致しません。");
 			}
 
 			// 具体的な数値はメーターでグラフィカルに表示するため、ここではそれ以外の情報を入れる
+			buf.Write("　");
 			switch(roleId) {
 				case (int)NetworkConnector.RoleIds.A_Prepare:
-					buf.Write("【助走役：クエリちゃん】\n");
-					buf.Write("　");
 					switch(int.Parse(progress["option"])) {
 						case 0:
 							buf.Write("人力手押し");
@@ -519,14 +532,10 @@ public class PhaseControllers : PhaseBase {
 					break;
 
 				case (int)NetworkConnector.RoleIds.B_Flight:
-					buf.Write("【飛行役：ユニティちゃん】\n");
-					buf.Write("　");
 					buf.Write("スタミナチャージ");
 					break;
 
 				case (int)NetworkConnector.RoleIds.C_Assist:
-					buf.Write("【援護役：○○ちゃん】\n");
-					buf.Write("　");
 					switch(int.Parse(progress["option"])) {
 						case 0:
 							buf.Write("全力応援");
