@@ -308,10 +308,7 @@ public class PhaseControllers : PhaseBase {
 			GameObject.Find("Controller_TopDescriptionText").GetComponent<UnityEngine.UI.Text>().text = PhaseControllers.TopDescriptionSourceError;
 		}
 
-#if UNITY_EDITOR
-		// デバッグ時のみ有効な処理
-
-		// 端末の操作を強制終了する
+		// バックドア：端末の操作を強制終了する
 		if(Input.GetKeyDown(KeyCode.Alpha1) == true) {
 			this.isControllerCompleted[0] = true;
 		}
@@ -321,8 +318,6 @@ public class PhaseControllers : PhaseBase {
 		if(Input.GetKeyDown(KeyCode.Alpha3) == true) {
 			this.isControllerCompleted[2] = true;
 		}
-
-#endif
 	}
 
 	/// <summary>

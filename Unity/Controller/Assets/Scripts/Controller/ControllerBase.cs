@@ -83,6 +83,9 @@ public abstract class ControllerBase : MonoBehaviour {
 	/// <summary>
 	/// ゲームサイクル２周目以降に必要な初期化処理を実行します。
 	/// </summary>
-	public abstract void StartNewGame();
+	public virtual void StartNewGame() {
+		// すべての通信を切断
+		this.connector.CloseConnectionsAll();
+	}
 
 }
