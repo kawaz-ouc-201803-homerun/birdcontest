@@ -39,6 +39,11 @@ public class PhaseIdle : PhaseBase {
 	private UnityEngine.UI.Text textArea;
 
 	/// <summary>
+	/// テキストのメッセージを進めるコルーチン
+	/// </summary>
+	private Coroutine messageCoroutine;
+
+	/// <summary>
 	/// コンストラクター
 	/// </summary>
 	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
@@ -62,8 +67,16 @@ public class PhaseIdle : PhaseBase {
 		if(this.isStarted == false) {
 			// メッセージ送り開始
 			this.isStarted = true;
-			this.parent.StartCoroutine(this.nextMessageCharacter());
+			this.messageCoroutine = this.parent.StartCoroutine(this.nextMessageCharacter());
 		}
+	}
+
+	/// <summary>
+	/// フェーズ破棄
+	/// </summary>
+	public override void Destroy() {
+		// メッセージの文字を進めるコルーチンを止める
+		this.parent.StopCoroutine(this.messageCoroutine);
 	}
 
 	/// <summary>

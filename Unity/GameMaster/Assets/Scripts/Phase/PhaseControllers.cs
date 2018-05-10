@@ -324,8 +324,12 @@ public class PhaseControllers : PhaseBase {
 	/// このフェーズが破棄されるときに実行する処理
 	/// </summary>
 	public override void Destroy() {
+		// 通信切断
 		this.connector.CloseConnectionsAll();
 		this.connector.CloseAudiencePredicts(this.eventId, null);
+
+		// コルーチン停止
+		this.parent.StopCoroutine(this.messageCoroutine);
 	}
 
 	/// <summary>

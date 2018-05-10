@@ -12,6 +12,19 @@ using UnityEngine;
 public class PhaseFlight : PhaseBase {
 
 	/// <summary>
+	/// 飛行フェーズのステップ
+	/// </summary>
+	public enum FlightGameStep {
+		BeforePrepare,      // 仕込み前
+		Preparing,       // 仕込み開始後
+		StartFlight,        // 飛行開始
+		Flighting,          // 飛行中間
+		StartSupport,       // 援護開始
+		EndSupport,         // 援護終了
+		EndFlight,          // 飛行着地
+	}
+
+	/// <summary>
 	/// 地点表示を行う秒数
 	/// </summary>
 	private const float MapAddressShowTimeSecond = 3.0f;
@@ -27,6 +40,37 @@ public class PhaseFlight : PhaseBase {
 	private string mapAddress;
 
 	/// <summary>
+	/// 実況テキスト送りを開始したかどうか
+	/// </summary>
+	private bool isStreamStarted;
+
+	/// <summary>
+	/// 実況テキストの現在表示している文字列インデックス
+	/// </summary>
+	private int textCursorIndex;
+
+	/// <summary>
+	/// 実況テキスト
+	/// </summary>
+	private string streamTextBuffer;
+
+	/// <summary>
+	/// 最後に読み取った実況テキスト
+	/// </summary>
+	private static string lastStreamText;
+
+	/// <summary>
+	/// 実況のステップ
+	/// これが外部から変更されたとき、直後のフレームで実況テキストが更新されます。
+	/// </summary>
+	public static FlightGameStep StreamStep;
+
+	/// <summary>
+	/// 実況メッセージを格納するゲームオブジェクトのコンポーネント
+	/// </summary>
+	private UnityEngine.UI.Text textArea;
+
+	/// <summary>
 	/// 機体オブジェクト
 	/// </summary>
 	private GameObject airplane;
@@ -35,6 +79,11 @@ public class PhaseFlight : PhaseBase {
 	/// 地点表示コルーチン
 	/// </summary>
 	private Coroutine mapAddressCoroutine;
+
+	/// <summary>
+	/// 実況テキスト送りコルーチン
+	/// </summary>
+	private Coroutine messageCoroutine;
 
 	/// <summary>
 	/// コンストラクター
@@ -57,6 +106,10 @@ public class PhaseFlight : PhaseBase {
 		this.airplane = GameObject.Find("Airplane");
 		GameObject.Find("Flight_ScoreText").GetComponent<UnityEngine.UI.Text>().text = string.Format("{0:0.00} m", 0);
 		this.setScore(123.45f);
+
+		// 実況テキスト準備
+		PhaseFlight.StreamStep = FlightGameStep.BeforePrepare;
+		this.textArea = GameObject.Find("Flight_StreamWindow").transform.Find("Text").GetComponent<UnityEngine.UI.Text>();
 	}
 
 	/// <summary>
@@ -75,6 +128,37 @@ public class PhaseFlight : PhaseBase {
 			this.mapAddress = afterMapAddress;
 			this.mapAddressCoroutine = this.parent.StartCoroutine(this.showMapAddress());
 		}
+
+		if(this.isStreamStarted == false) {
+			// 実況テキスト送りを開始
+			this.isStreamStarted = true;
+			this.messageCoroutine = this.parent.StartCoroutine(this.nextStreamTextCharacter());
+		}
+
+#if UNITY_EDITOR
+		// デバッグ用の機能
+		if(Input.GetKeyDown(KeyCode.Alpha1) == true) {
+			PhaseFlight.StreamStep = FlightGameStep.BeforePrepare;
+		}
+		if(Input.GetKeyDown(KeyCode.Alpha2) == true) {
+			PhaseFlight.StreamStep = FlightGameStep.Preparing;
+		}
+		if(Input.GetKeyDown(KeyCode.Alpha3) == true) {
+			PhaseFlight.StreamStep = FlightGameStep.StartFlight;
+		}
+		if(Input.GetKeyDown(KeyCode.Alpha4) == true) {
+			PhaseFlight.StreamStep = FlightGameStep.Flighting;
+		}
+		if(Input.GetKeyDown(KeyCode.Alpha5) == true) {
+			PhaseFlight.StreamStep = FlightGameStep.StartSupport;
+		}
+		if(Input.GetKeyDown(KeyCode.Alpha6) == true) {
+			PhaseFlight.StreamStep = FlightGameStep.EndSupport;
+		}
+		if(Input.GetKeyDown(KeyCode.Alpha7) == true) {
+			PhaseFlight.StreamStep = FlightGameStep.EndFlight;
+		}
+#endif
 	}
 
 	/// <summary>
@@ -83,6 +167,12 @@ public class PhaseFlight : PhaseBase {
 	public override void Destroy() {
 		// メインカメラのアニメーション（舞台背景カメラワーク）を有効化
 		GameObject.Find("Main Camera").GetComponent<Animator>().enabled = true;
+
+		// コルーチン停止
+		this.parent.StopCoroutine(this.messageCoroutine);
+		if(this.mapAddressCoroutine != null) {
+			this.parent.StopCoroutine(this.mapAddressCoroutine);
+		}
 	}
 
 	/// <summary>
@@ -176,6 +266,75 @@ public class PhaseFlight : PhaseBase {
 			(string) this.parameters[0] ?? "none",
 			this.score
 		}));
+	}
+
+	/// <summary>
+	/// メッセージの文字を１文字進めるコルーチン
+	/// </summary>
+	private IEnumerator nextStreamTextCharacter() {
+		while(true) {
+			// 実況メッセージを取得
+			var newStreamText = this.getStreamText();
+			if(this.streamTextBuffer != newStreamText) {
+				// 実況メッセージが更新されている場合は初期化
+				this.streamTextBuffer = newStreamText;
+				this.textCursorIndex = 0;
+			}
+
+			if(this.textCursorIndex + 1 > this.streamTextBuffer.Length) {
+				// 最後まで達したとき：停止
+				yield return new WaitForSeconds(0.1f);
+				continue;
+			} else {
+				// 先に遅延
+				yield return new WaitForSeconds(PhaseManager.MessageSpeed);
+			}
+
+			// １文字進める
+			this.textCursorIndex++;
+			this.textArea.text = this.streamTextBuffer.Substring(0, this.textCursorIndex);
+		}
+	}
+
+	/// <summary>
+	/// 現在の実況ステップに対応する実況テキストを返します。
+	/// </summary>
+	/// <returns>実況テキスト</returns>
+	private string getStreamText() {
+		var buf = "";
+
+		// TODO: 実況ステップに対応した実況テキストを生成
+		switch(PhaseFlight.StreamStep) {
+			case FlightGameStep.BeforePrepare:
+				buf = "仕込み前の実況";
+				break;
+
+			case FlightGameStep.Preparing:
+				buf = "仕込み中の実況";
+				break;
+
+			case FlightGameStep.StartFlight:
+				buf = "飛行開始の実況";
+				break;
+
+			case FlightGameStep.Flighting:
+				buf = "飛行中の実況";
+				break;
+
+			case FlightGameStep.StartSupport:
+				buf = "援護開始の実況";
+				break;
+
+			case FlightGameStep.EndSupport:
+				buf = "援護終了の実況";
+				break;
+
+			case FlightGameStep.EndFlight:
+				buf = "着地時の実況";
+				break;
+		}
+
+		return buf;
 	}
 
 }
