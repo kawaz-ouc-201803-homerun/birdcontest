@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MainB : MonoBehaviour {
+public class MainAMeter : MonoBehaviour {
 
 	public float bscore;
 

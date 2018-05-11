@@ -52,11 +52,6 @@ public class ControllerManager : MonoBehaviour {
 	public GameObject DefaultCamera;
 
 	/// <summary>
-	/// Ready-Goオブジェクト
-	/// </summary>
-	public GameObject ReadyGo;
-
-	/// <summary>
 	/// 通信接続オブジェクト
 	/// </summary>
 	private NetworkController connector;
@@ -74,12 +69,15 @@ public class ControllerManager : MonoBehaviour {
 	/// <summary>
 	/// 制限時間秒数
 	/// </summary>
-	private int limitTimeSeconds;
+	public static int LimitTimeSeconds {
+		get;
+		private set;
+	}
 
 	/// <summary>
 	/// デフォルトの制限時間秒数
 	/// </summary>
-	private const int DefaultLimitTimeSeconds = 30;
+	private const int DefaultLimitTimeSeconds = 5;
 
 	/// <summary>
 	/// 完了報告として送信したデータ
@@ -117,7 +115,7 @@ public class ControllerManager : MonoBehaviour {
 			this.isControllerStarted = true;
 
 			// データ取り出し
-			this.limitTimeSeconds = result.LimitTimeSecond;
+			ControllerManager.LimitTimeSeconds = result.LimitTimeSecond;
 			if(ControllerSelector.SelectedRoleId != result.RoleId) {
 				Debug.LogError("この端末が受け付けている役割ID (" + ControllerSelector.SelectedRoleId + ") と、ゲームマスターが指示した役割ID (" + result.RoleId + ") が一致しません。双方の設定を確認して下さい。");
 			}
@@ -141,7 +139,7 @@ public class ControllerManager : MonoBehaviour {
 				// 開始指示が受信できない時の緊急対応用：自律的にゲームを開始できるようにする
 				this.isControllerStarted = true;
 				this.readyForStart = true;
-				this.limitTimeSeconds = ControllerManager.DefaultLimitTimeSeconds;
+				ControllerManager.LimitTimeSeconds = ControllerManager.DefaultLimitTimeSeconds;
 			}
 		}
 
@@ -190,92 +188,7 @@ public class ControllerManager : MonoBehaviour {
 		foreach(var controller in this.Controllers) {
 			controller.gameObject.SetActive(false);
 		}
-
-		// READY? GO! 表示
-		this.ReadyGo.transform.localScale = Vector3.zero;
-		this.ReadyGo.transform.Find("Text").GetComponent<Text>().text = "READY…？";
-		iTween.ScaleTo(
-			this.ReadyGo,
-			iTween.Hash(
-				"x", 1,
-				"y", 1,
-				"z", 1,
-				"time", 0.5f,
-				"easeType", iTween.EaseType.easeOutQuint,
-				"oncomplete", "AfterShowReady",
-				"oncompletetarget", this.gameObject
-			)
-		);
-	}
-
-	/// <summary>
-	/// [READY?] iTween表示完了後の処理
-	/// </summary>
-	public void AfterShowReady() {
-		iTween.ScaleTo(
-			this.ReadyGo,
-			iTween.Hash(
-				"x", 0,
-				"y", 0,
-				"z", 0,
-				"time", 0.3f,
-				"delay", 1.0f,
-				"easeType", iTween.EaseType.easeOutQuint,
-				"oncomplete", "AfterHideReady",
-				"oncompletetarget", this.gameObject
-			)
-		);
-	}
-
-	/// <summary>
-	/// [READY?] iTween消去完了後の処理
-	/// </summary>
-	public void AfterHideReady() {
-		this.ReadyGo.transform.localScale = Vector3.zero;
-		this.ReadyGo.transform.Find("Text").GetComponent<Text>().text = "GO!!!";
-		iTween.ScaleTo(
-			this.ReadyGo,
-			iTween.Hash(
-				"x", 1,
-				"y", 1,
-				"z", 1,
-				"time", 0.3f,
-				"easeType", iTween.EaseType.easeOutQuint,
-				"oncomplete", "AfterShowGo",
-				"oncompletetarget", this.gameObject
-			)
-		);
-	}
-
-	/// <summary>
-	/// [GO!!!] iTween表示完了後の処理
-	/// </summary>
-	public void AfterShowGo() {
-		iTween.ScaleTo(
-			this.ReadyGo,
-			iTween.Hash(
-				"x", 0,
-				"y", 0,
-				"z", 0,
-				"easeType", iTween.EaseType.easeOutQuint,
-				"time", 0.3f,
-				"delay", 1.0f,
-				"oncomplete", "AfterHideGo",
-				"oncompletetarget", this.gameObject
-			)
-		);
-	}
-
-	/// <summary>
-	/// [GO!!!] iTween消去完了後の処理
-	/// </summary>
-	public void AfterHideGo() {
-		// ゲーム開始
 		this.Controllers[ControllerSelector.SelectedRoleId].gameObject.SetActive(true);
-
-		// タイマー開始
-		this.TimerObject.SetActive(true);
-		this.TimerObject.GetComponent<Timer>().StartTimer(this.limitTimeSeconds);
 	}
 
 	/// <summary>

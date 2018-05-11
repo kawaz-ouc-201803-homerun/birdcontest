@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /// <summary>
 /// ボタン連打のミニゲーム
 /// </summary>
-public class SubGameButtonRepeat : MonoBehaviour {
+public class SubGameButtonRepeat : SubGameBase {
 
 	/// <summary>
 	/// 最大スコアにする秒間ボタン押下回数
@@ -41,14 +41,14 @@ public class SubGameButtonRepeat : MonoBehaviour {
 	/// <summary>
 	/// 初回処理
 	/// </summary>
-	public void Start() {
+	protected override void startSubGame() {
 		this.IsButtonDown = false;
 		this.ButtonDownCount = 0;
 		this.TimeCounter = 0;
 		this.Score = 0;
 		this.LastButtonDownCount = 0;
 
-		iTween.Stop();
+		iTween.Stop(this.gameObject);
 		var slider = this.transform.Find("Slider").GetComponent<Slider>();
 		slider.value = 0;
 		slider.maxValue = (SubGameButtonRepeat.MaxScoreThreshold % 2 == 0) ? SubGameButtonRepeat.MaxScoreThreshold * 2 : SubGameButtonRepeat.MaxScoreThreshold * 2 - 1;
@@ -59,7 +59,7 @@ public class SubGameButtonRepeat : MonoBehaviour {
 	/// <summary>
 	/// 毎フレーム更新処理
 	/// </summary>
-	public void Update() {
+	protected override void updateSubGame() {
 		// ボタン押下判定
 		if(Input.GetButtonDown("Click") == true) {
 			if(this.IsButtonDown == false) {
@@ -98,6 +98,22 @@ public class SubGameButtonRepeat : MonoBehaviour {
 			// スコア表示更新
 			this.transform.Find("ScoreWindow/RealTimeScore").GetComponent<Text>().text = "獲得スコア ＝ " + string.Format("{0:0.00}", this.Score);
 		}
+	}
+
+	/// <summary>
+	/// 画面に表示するミニゲーム結果をテキストで返します。
+	/// </summary>
+	/// <returns>ミニゲーム結果テキスト</returns>
+	public override string GetResultText() {
+		return "獲得スコア ＝ " + ((int)this.Score);
+	}
+
+	/// <summary>
+	/// 進捗報告として送るデータを辞書型配列にセットします。
+	/// </summary>
+	/// <param name="dictionary">セットする対象の辞書型配列</param>
+	public override void SetProgressData(ref Dictionary<string, string> dictionary) {
+		dictionary["param"] = ((int)this.Score).ToString();
 	}
 
 	/// <summary>

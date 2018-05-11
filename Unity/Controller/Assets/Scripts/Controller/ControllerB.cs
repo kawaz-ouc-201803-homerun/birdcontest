@@ -8,15 +8,14 @@ using UnityEngine;
 public class ControllerB : ControllerBase {
 
 	/// <summary>
-	/// 連打ミニゲームのオブジェクト
-	/// </summary>
-	public SubGameButtonRepeat SubGame;
-
-	/// <summary>
 	/// 初回処理
 	/// </summary>
 	public override void Start() {
 		base.Start();
+
+		// ミニゲームを表示
+		this.activeSubGame = this.SubGames[0];
+		this.activeSubGame.gameObject.SetActive(true);
 	}
 
 	/// <summary>
@@ -24,28 +23,9 @@ public class ControllerB : ControllerBase {
 	/// </summary>
 	public override void Update() {
 		base.Update();
-	}
-
-
-	/// <summary>
-	/// 進捗報告として送るデータを生成します。
-	/// </summary>
-	/// <returns>進捗報告として送る辞書型配列</returns>
-	protected override Dictionary<string, string> createProgressData() {
-		var dictionary = base.createProgressData();
-
-		// データ格納
-		dictionary["param"] = ((int)this.SubGame.Score).ToString();
-
-		return dictionary;
-	}
-
-	/// <summary>
-	/// 画面に表示するミニゲーム結果をテキストで返します。
-	/// </summary>
-	/// <returns>ミニゲーム結果テキスト</returns>
-	public override string GetResultText() {
-		return "獲得スコア ＝ " + ((int)this.SubGame.Score);
+		if(this.doneReadyGo == false) {
+			this.doReadyGo();
+		}
 	}
 
 	/// <summary>
@@ -53,7 +33,15 @@ public class ControllerB : ControllerBase {
 	/// </summary>
 	public override void StartNewGame() {
 		this.Start();
-		this.SubGame.Start();
+		this.activeSubGame.Start();
+	}
+
+	/// <summary>
+	/// Ready-Go完了後にゲームを開始させます。
+	/// </summary>
+	protected override void AfterHideGo() {
+		base.AfterHideGo();
+		this.activeSubGame.IsUpdateEnabled = true;
 	}
 
 }
