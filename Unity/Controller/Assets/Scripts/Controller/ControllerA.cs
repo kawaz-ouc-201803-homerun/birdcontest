@@ -8,6 +8,15 @@ using UnityEngine;
 public class ControllerA : ControllerBase {
 
 	/// <summary>
+	/// 選択肢
+	/// </summary>
+	public enum Option {
+		Car,		// 自動車による牽引
+		Human,		// 人力手押し
+		Bomb,		// 爆弾
+	}
+
+	/// <summary>
 	/// 開始準備完了したかどうか
 	/// </summary>
 	private bool isReadyForStart = false;
@@ -48,11 +57,11 @@ public class ControllerA : ControllerBase {
 	}
 
 	/// <summary>
-	/// 「３ボタン連続押し」を開始
+	/// 「メータータイミング押し」を開始
 	/// </summary>
-	public void StartSubGame_3Button() {
+	public void StartSubGame_MeterStop() {
 		this.transform.Find("Options").gameObject.SetActive(false);
-		this.activeSubGame = this.SubGames[0];
+		this.activeSubGame = this.SubGames[(int)Option.Car];
 		this.activeSubGame.Start();
 		this.isReadyForStart = true;
 	}
@@ -62,17 +71,17 @@ public class ControllerA : ControllerBase {
 	/// </summary>
 	public void StartSubGame_ButtonRepeat() {
 		this.transform.Find("Options").gameObject.SetActive(false);
-		this.activeSubGame = this.SubGames[1];
+		this.activeSubGame = this.SubGames[(int)Option.Human];
 		this.activeSubGame.Start();
 		this.isReadyForStart = true;
 	}
 
 	/// <summary>
-	/// 「メータータイミング押し」を開始
+	/// 「３ボタン連続押し」を開始
 	/// </summary>
-	public void StartSubGame_MeterStop() {
+	public void StartSubGame_PushButtons() {
 		this.transform.Find("Options").gameObject.SetActive(false);
-		this.activeSubGame = this.SubGames[2];
+		this.activeSubGame = this.SubGames[(int)Option.Bomb];
 		this.activeSubGame.Start();
 		this.isReadyForStart = true;
 	}

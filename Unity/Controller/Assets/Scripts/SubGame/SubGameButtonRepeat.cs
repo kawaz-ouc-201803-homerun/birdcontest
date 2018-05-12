@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// ボタン連打のミニゲーム
+/// コントローラーを使うため、入力が正しく取れていない時はInputManagerの設定を確認して下さい。
 /// </summary>
 public class SubGameButtonRepeat : SubGameBase {
 

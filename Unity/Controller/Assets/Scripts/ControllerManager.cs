@@ -12,6 +12,19 @@ using UnityEngine.UI;
 public class ControllerManager : MonoBehaviour {
 
 	/// <summary>
+	/// デフォルトの制限時間秒数
+	/// </summary>
+	public const int DefaultLimitTimeSeconds = 30;
+
+	/// <summary>
+	/// 制限時間秒数
+	/// </summary>
+	public static int LimitTimeSeconds {
+		get;
+		private set;
+	}
+
+	/// <summary>
 	/// タイマーオブジェクト
 	/// </summary>
 	public GameObject TimerObject;
@@ -65,19 +78,6 @@ public class ControllerManager : MonoBehaviour {
 	/// 端末個別の動作が開始しているかどうか
 	/// </summary>
 	private bool isControllerStarted;
-
-	/// <summary>
-	/// 制限時間秒数
-	/// </summary>
-	public static int LimitTimeSeconds {
-		get;
-		private set;
-	}
-
-	/// <summary>
-	/// デフォルトの制限時間秒数
-	/// </summary>
-	private const int DefaultLimitTimeSeconds = 5;
 
 	/// <summary>
 	/// 完了報告として送信したデータ
