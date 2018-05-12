@@ -188,6 +188,9 @@ public class PhaseManager : MonoBehaviour {
 				this.Phase.Destroy();
 			}
 
+			// GC実行
+			System.GC.Collect();
+
 			// 暗転後にフェーズ切り替え、対応するUIブロックに表示を切り替える
 			for(int i = 0; i < PhaseManager.PhaseIndexMap.Count; i++) {
 				this.PhaseUIs[i].SetActive(false);

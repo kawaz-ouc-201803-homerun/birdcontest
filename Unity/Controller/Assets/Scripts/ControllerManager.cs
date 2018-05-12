@@ -158,6 +158,9 @@ public class ControllerManager : MonoBehaviour {
 
 				var fader = GameObject.Find("FadeCanvas").GetComponent<Fade>();
 				fader.FadeIn(2.0f, new Action(() => {
+					// GC実行
+					System.GC.Collect();
+
 					// フェードアウト後、再び開始指示待ち状態へ戻ってフェードイン
 					this.Start();
 					this.TimerObject.SetActive(false);
