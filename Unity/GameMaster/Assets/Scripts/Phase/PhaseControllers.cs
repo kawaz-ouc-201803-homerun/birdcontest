@@ -484,15 +484,15 @@ public class PhaseControllers : PhaseBase {
 			// 役割とキャラクター名は常時表示
 			switch(roleId) {
 				case (int)NetworkConnector.RoleIds.A_Prepare:
-					buf.Write("【助走役：クエリちゃん】\n");
+					buf.Write("助走－クエリちゃん\n");
 					break;
 
 				case (int)NetworkConnector.RoleIds.B_Flight:
-					buf.Write("【飛行役：ユニティちゃん】\n");
+					buf.Write("飛行－ユニティちゃん\n");
 					break;
 
 				case (int)NetworkConnector.RoleIds.C_Assist:
-					buf.Write("【援護役：○○ちゃん】\n");
+					buf.Write("援護－サファイアートちゃん\n");
 					break;
 			}
 			if(this.isControllerError[roleId] == true) {
