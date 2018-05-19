@@ -106,7 +106,7 @@ public class ControllerManager : MonoBehaviour {
 
 		// ゲームマスターからの接続待機
 		this.connector = new NetworkController(ControllerSelector.GameMasterIPAddress);
-		this.connector.ControllerWaitForStart(ControllerSelector.SelectedRoleId, new System.Action<ModelControllerStart>((result) => {
+		this.connector.ControllerWaitForStart(ControllerSelector.SelectedRoleId, new Action<ModelControllerStart>((result) => {
 			// 通信切断
 			this.connector.CloseConnectionsAll();
 
@@ -133,6 +133,16 @@ public class ControllerManager : MonoBehaviour {
 	/// 毎フレーム更新処理
 	/// </summary>
 	public void Update() {
+		if(Input.GetKeyDown(KeyCode.Escape) == true) {
+			// プログラムを閉じる
+			this.connector.CloseConnectionsAll();
+#if UNITY_EDITOR
+			UnityEditor.EditorApplication.isPlaying = false;
+#endif
+			Application.Quit();
+			return;
+		}
+
 		if(this.isControllerStarted == false) {
 			// 端末固有の動作開始前
 			if(Input.GetKeyDown(KeyCode.F10) == true) {

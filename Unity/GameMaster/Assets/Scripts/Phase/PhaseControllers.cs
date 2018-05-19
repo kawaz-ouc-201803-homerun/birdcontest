@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -22,6 +23,34 @@ public class PhaseControllers : PhaseBase {
 		LackPower,
 		Count,
 	}
+
+	/// <summary>
+	/// 端末A：選択肢の番号
+	/// </summary>
+	public enum OptionA {
+		Car,        // 自動車による牽引
+		Human,      // 人力手押し
+		Bomb,       // 爆弾
+	}
+
+	/// <summary>
+	/// 端末C：選択肢の番号
+	/// </summary>
+	public enum OptionC {
+		Human,       // 気合
+		Bomb,        // 爆弾
+		Wairo,       // 贈賄
+	}
+
+	/// <summary>
+	/// 賄賂ミニゲームのステップ数
+	/// </summary>
+	public const int WairoStepLength = 4;
+
+	/// <summary>
+	/// 賄賂ミニゲームの最大スコア
+	/// </summary>
+	public const int WairoScoreMax = 3;
 
 	/// <summary>
 	/// 操作端末のIPアドレス
@@ -55,9 +84,14 @@ public class PhaseControllers : PhaseBase {
 	private const int ControllerLimitSeconds = 30;
 
 	/// <summary>
-	/// 各端末の進捗状況を更新する間隔
+	/// 各端末の進捗状況を更新する間隔秒数
 	/// </summary>
 	private const float ControllerProgressRefreshSeconds = 2.0f;
+
+	/// <summary>
+	/// 実況の A-C、B 表示を切り替える間隔秒数
+	/// </summary>
+	private const float StreamTextChangeSeconds = 5.0f;
 
 	/// <summary>
 	/// オーディエンス投票を締め切るまでの残り秒数
@@ -126,6 +160,16 @@ public class PhaseControllers : PhaseBase {
 	private float controllerProgressRefreshTimer;
 
 	/// <summary>
+	/// 実況の A-C、B 表示切替をするための Timer.deltaTime 加算用
+	/// </summary>
+	private float streamChangeTimer;
+
+	/// <summary>
+	/// 実況の A-C、B 表示切替フラグ
+	/// </summary>
+	private bool streamFlipper;
+
+	/// <summary>
 	/// 実況テキストエリアの元文章
 	/// </summary>
 	private string textSource;
@@ -190,6 +234,8 @@ public class PhaseControllers : PhaseBase {
 		this.textArea.text = "";
 		this.textSource = "";
 		this.textCursorIndex = 0;
+		this.streamChangeTimer = 0;
+		this.streamFlipper = false;
 	}
 
 	/// <summary>
@@ -233,9 +279,17 @@ public class PhaseControllers : PhaseBase {
 		}
 
 		// 実況更新
-		var afterText = this.getStreamText();
+		var afterText = this.getStreamText(PhaseControllers.ControllerProgresses);
 		var beforeText = this.textSource;
 		this.textSource = afterText;
+
+		this.streamChangeTimer += Time.deltaTime;
+		if(this.streamChangeTimer >= PhaseControllers.StreamTextChangeSeconds) {
+			// 一定時間ごとに実況の A-C、B 表示を切り替え
+			this.streamFlipper = !this.streamFlipper;
+			this.streamChangeTimer = 0;
+		}
+
 		if(afterText != beforeText) {
 			// テキストが変更になったときにメッセージ送りを開始する
 			GameObject.Find("Controller_StreamText").GetComponent<UnityEngine.UI.Text>().text = "";
@@ -329,7 +383,9 @@ public class PhaseControllers : PhaseBase {
 		this.connector.CloseAudiencePredicts(this.eventId, null);
 
 		// コルーチン停止
-		this.parent.StopCoroutine(this.messageCoroutine);
+		if(this.messageCoroutine != null) {
+			this.parent.StopCoroutine(this.messageCoroutine);
+		}
 	}
 
 	/// <summary>
@@ -479,7 +535,6 @@ public class PhaseControllers : PhaseBase {
 	/// <param name="progress">操作端末の進捗情報</param>
 	/// <returns>文字列化された進捗情報</returns>
 	private string conrollerProgressToString(int roleId, Dictionary<string, string> progress) {
-		// TODO: それぞれのI/F仕様に応じた表示
 		using(var buf = new System.IO.StringWriter()) {
 			// 役割とキャラクター名は常時表示
 			switch(roleId) {
@@ -516,15 +571,15 @@ public class PhaseControllers : PhaseBase {
 			switch(roleId) {
 				case (int)NetworkConnector.RoleIds.A_Prepare:
 					switch(int.Parse(progress["option"])) {
-						case 0:
+						case (int)OptionA.Human:
 							buf.Write("人力手押し");
 							break;
 
-						case 1:
+						case (int)OptionA.Car:
 							buf.Write("クルマでけん引");
 							break;
 
-						case 2:
+						case (int)OptionA.Bomb:
 							buf.Write("ボム");
 							break;
 					}
@@ -536,16 +591,20 @@ public class PhaseControllers : PhaseBase {
 
 				case (int)NetworkConnector.RoleIds.C_Assist:
 					switch(int.Parse(progress["option"])) {
-						case 0:
+						case (int)OptionC.Human:
 							buf.Write("全力応援");
 							break;
 
-						case 1:
+						case (int)OptionC.Bomb:
 							buf.Write("ボム");
 							break;
 
-						case 2:
-							buf.Write("主催者へワイロを贈る");
+						case (int)OptionC.Wairo:
+							buf.Write("大会主催者にワイロ");
+							if(progress.ContainsKey("wairoStep") == true) {
+								// 選択肢を進めた回数（今、何問め？）
+								buf.Write(" [" + (int)(int.Parse(progress["wairoStep"]) / (float)PhaseControllers.WairoStepLength * 100f) + " %]");
+							}
 							break;
 					}
 					break;
@@ -585,24 +644,24 @@ public class PhaseControllers : PhaseBase {
 					// 選択肢に応じて基本バランスが変わる
 					option = int.Parse(progress["option"]);
 					switch(option) {
-						case 0:
+						case (int)OptionA.Human:
 							// 人力
-							values[(int)PowerMeter.StartPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.4f;
+							values[(int)PowerMeter.StartPower] = 0.1f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.4f;
 							values[(int)PowerMeter.FlightPower] = 0;
-							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.5f;
+							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.5f;
 							break;
 
-						case 1:
+						case (int)OptionA.Car:
 							// 牽引
-							values[(int)PowerMeter.StartPower] = 0.4f + int.Parse(progress["param"]) / 100.0f / 0.4f;
+							values[(int)PowerMeter.StartPower] = 0.4f + int.Parse(progress["param"]) / 100.0f * 0.4f;
 							values[(int)PowerMeter.FlightPower] = 0;
-							values[(int)PowerMeter.LackPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.4f;
+							values[(int)PowerMeter.LackPower] = 0.1f + int.Parse(progress["param"]) / 100.0f * 0.4f;
 							break;
 
-						case 2:
+						case (int)OptionA.Bomb:
 							// 爆弾
 							values[(int)PowerMeter.StartPower] = 1.0f;
-							values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.8f;
+							values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.8f;
 							values[(int)PowerMeter.LackPower] = 0;
 							break;
 					}
@@ -611,7 +670,7 @@ public class PhaseControllers : PhaseBase {
 				case (int)NetworkConnector.RoleIds.B_Flight:
 					// 基本バランスは固定で、スコアに応じて増減する
 					values[(int)PowerMeter.StartPower] = 0;
-					values[(int)PowerMeter.FlightPower] = int.Parse(progress["param"]) / 100.0f / 1.0f;
+					values[(int)PowerMeter.FlightPower] = int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 1.0f;
 					values[(int)PowerMeter.LackPower] = 0;
 					break;
 
@@ -619,25 +678,25 @@ public class PhaseControllers : PhaseBase {
 					// 選択肢に応じて基本バランスが変わる
 					option = int.Parse(progress["option"]);
 					switch(option) {
-						case 0:
+						case (int)OptionC.Human:
 							// 応援
 							values[(int)PowerMeter.StartPower] = 0;
-							values[(int)PowerMeter.FlightPower] = 0.1f + int.Parse(progress["param"]) / 100.0f / 0.25f;
-							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.3f;
+							values[(int)PowerMeter.FlightPower] = 0.1f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.25f;
+							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.3f;
 							break;
 
-						case 1:
+						case (int)OptionC.Bomb:
 							// 爆弾
 							values[(int)PowerMeter.StartPower] = 0;
-							values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.5f;
+							values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.5f;
 							values[(int)PowerMeter.LackPower] = 0;
 							break;
 
-						case 2:
+						case (int)OptionC.Wairo:
 							// 賄賂
 							values[(int)PowerMeter.StartPower] = 0;
 							values[(int)PowerMeter.FlightPower] = 0;
-							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / 100.0f / 0.8f;
+							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / (float)PhaseControllers.WairoScoreMax * 0.8f;
 							break;
 					}
 					break;
@@ -656,13 +715,76 @@ public class PhaseControllers : PhaseBase {
 	/// 現在の端末操作状況を基に、実況テキストを返します。
 	/// </summary>
 	/// <returns>実況テキスト</returns>
-	private string getStreamText() {
-		string buf = "";
+	private string getStreamText(Dictionary<string, string>[] progresses) {
+		if(progresses == null || progresses.Length == 0) {
+			// 進捗オブジェクトがない
+			return "ただいまプレイヤーの準備中です……";
+		}
 
-		// TODO: 状況に応じた分岐
-		buf = "実況テキスト";
+		using(var buf = new StringWriter()) {
 
-		return buf;
+			int optionA =
+				(progresses[(int)NetworkConnector.RoleIds.A_Prepare] == null) ? -1 :
+					(progresses[(int)NetworkConnector.RoleIds.A_Prepare].ContainsKey("option")
+						? int.Parse(progresses[(int)NetworkConnector.RoleIds.A_Prepare]["option"]) : -1);
+			int optionC =
+				(progresses[(int)NetworkConnector.RoleIds.C_Assist] == null) ? -1 :
+					(progresses[(int)NetworkConnector.RoleIds.C_Assist].ContainsKey("option")
+						? int.Parse(progresses[(int)NetworkConnector.RoleIds.C_Assist]["option"]) : -1);
+
+			bool controllerB = (progresses[(int)NetworkConnector.RoleIds.B_Flight] != null);
+
+			if(controllerB == false || (this.streamFlipper == false && optionA != -1 && optionC != -1)) {
+
+				// AとCの選択肢の組み合わせで実況を表示する
+
+				if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Bomb) {
+					buf.WriteLine("これは不穏な火薬の香りが漂っていますねー……！");
+				} else if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Human) {
+					buf.WriteLine("どこかから応援の発声練習が聞こえてきましたが……\nおや、爆弾が……？");
+				} else if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Wairo) {
+					buf.WriteLine("爆発音とともにチームの一人が大会本部へ駆けだした！\n一体何があったのでしょうか！");
+				} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Bomb) {
+					buf.WriteLine("車にガソリンを入れるかたわら、爆弾に火が着く！\n今のうちに119番通報の準備をお願いします！");
+				} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Human) {
+					buf.WriteLine("発声練習の横で独りで懸命にガソリンを入れていくゥ！\n少しは給油を手伝う気は無いのか！");
+				} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Wairo) {
+					buf.WriteLine("車とガソリンを用意しているようですが……\nおっと、何やらアタッシュケースをまさぐっていますね…？");
+				} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Bomb) {
+					buf.WriteLine("正当派に人力で助走をつけ……お、おや!?\n何やら導火線に火をつけていますが！？");
+				} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Human) {
+					buf.WriteLine("人力で助走をつけ、さらに応援で気合を注入！\nこれはチームの体力的にキツそうだ……！");
+				} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Wairo) {
+					buf.WriteLine("ひたむきに人間の力で飛行機を進め……\nおや、何やら札束を持って大会本部へ向かっているようですが……！？");
+				}
+
+			} else if(controllerB == true) {
+
+				// Bの状況を表示する
+
+				int paramB =
+					progresses[(int)NetworkConnector.RoleIds.B_Flight].ContainsKey("param")
+						? int.Parse(progresses[(int)NetworkConnector.RoleIds.B_Flight]["param"]) : -1;
+
+				if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 70) {
+					buf.WriteLine("飛行役のユニティちゃんは\n気合充分といった、ある種威風を纏っている！\nこれは期待が出来そうです！");
+				} else if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 40) {
+					buf.WriteLine("飛行役のユニティちゃんは\nなかなか順調なペースで\nウォーミングアップが出来ているようです！");
+				} else {
+					// buf.WriteLine("一方飛行役のユニティちゃん、\n若干パイロットの士気が落ちている！\nついには漫画を読み始めるまでありそうだ！");
+					// TODO: 「落ちている」ではなく、初期状態なので文章の訂正が必要
+					buf.WriteLine("飛行役のユニティちゃんは\nパワーを貯めている！");
+				}
+
+			} else {
+
+				// どの端末も開始できていない
+				return "ただいまプレイヤーの準備中です……";
+
+			}
+
+			return buf.ToString();
+		}
 	}
 
 	/// <summary>

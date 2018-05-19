@@ -42,12 +42,12 @@ public abstract class ControllerBase : MonoBehaviour {
 	/// <summary>
 	/// ミニゲームオブジェクト
 	/// </summary>
-	public SubGameBase[] SubGames;
+	public SubGame.SubGameBase[] SubGames;
 
 	/// <summary>
 	/// アクティブなミニゲーム
 	/// </summary>
-	protected SubGameBase activeSubGame;
+	protected SubGame.SubGameBase activeSubGame;
 
 	/// <summary>
 	/// 初回処理

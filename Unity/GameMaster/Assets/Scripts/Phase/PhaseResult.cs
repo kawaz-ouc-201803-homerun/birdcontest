@@ -94,14 +94,14 @@ public class PhaseResult : PhaseBase {
 
 			Debug.Log("オーディエンス投票データ取得OK");
 
-			// TODO: デバッグ用
-			for(int i = 0; i < 10; i++) {
-				result.audiencePredicts.Add(new ModelAudiencePredict() {
-					nickname = "SAT",
-					predict = this.rand.Next(115, 125),
-					receiveTime = "2018/04/01 " + this.rand.Next(0, 24).ToString("00") + ":" + this.rand.Next(0, 60).ToString("00") + ":" + this.rand.Next(0, 60).ToString("00")
-				});
-			}
+			// デバッグ用にダミーの投票データを仕込む
+			//for(int i = 0; i < 10; i++) {
+			//	result.audiencePredicts.Add(new ModelAudiencePredict() {
+			//		nickname = "SAT",
+			//		predict = this.rand.Next(115, 125),
+			//		receiveTime = "2018/04/01 " + this.rand.Next(0, 24).ToString("00") + ":" + this.rand.Next(0, 60).ToString("00") + ":" + this.rand.Next(0, 60).ToString("00")
+			//	});
+			//}
 
 			// 順位データ整理：最も近い順、投稿早い順
 			float score = (float)this.parameters[1];

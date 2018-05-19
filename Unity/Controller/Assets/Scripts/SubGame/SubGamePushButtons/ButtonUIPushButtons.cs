@@ -3,43 +3,47 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// ３ボタン同時押しミニゲーム
-/// 入力すべきボタンを表示するUI
-/// </summary>
-public class ButtonUIPushButtons : MonoBehaviour {
+namespace SubGame {
 
 	/// <summary>
-	/// ボタン表示を隠すかどうか
+	/// ３ボタン同時押しミニゲーム
+	/// 入力すべきボタンを表示するUI
 	/// </summary>
-	public static bool IsHidden;
+	public class ButtonUIPushButtons : MonoBehaviour {
 
-	/// <summary>
-	/// 入力すべきボタンを示すテキストUIオブジェクト
-	/// </summary>
-	public Text[] TextButtons;
+		/// <summary>
+		/// ボタン表示を隠すかどうか
+		/// </summary>
+		public static bool IsHidden;
 
-	/// <summary>
-	/// 初回処理
-	/// </summary>
-	void Start() {
-	}
+		/// <summary>
+		/// 入力すべきボタンを示すテキストUIオブジェクト
+		/// </summary>
+		public Text[] TextButtons;
 
-	/// <summary>
-	/// 毎フレーム更新処理
-	/// </summary>
-	void Update() {
-		// 左手のボタン（＝スティック）
-		this.TextButtons[0].text = 
-			ButtonUIPushButtons.IsHidden ? "" : SubGamePushButtons.AxisName;
+		/// <summary>
+		/// 初回処理
+		/// </summary>
+		void Start() {
+		}
 
-		// LRのボタン
-		this.TextButtons[1].text =
-			ButtonUIPushButtons.IsHidden ? "" : ((int)SubGamePushButtons.AvailableKeys[1] - SubGamePushButtons.KeyCodeBase + 1).ToString();
+		/// <summary>
+		/// 毎フレーム更新処理
+		/// </summary>
+		void Update() {
+			// 左手のボタン（＝スティック）
+			this.TextButtons[0].text =
+				ButtonUIPushButtons.IsHidden ? "" : SubGamePushButtons.AxisName;
 
-		// 右手のボタン
-		this.TextButtons[2].text =
-			ButtonUIPushButtons.IsHidden ? "" : ((int)SubGamePushButtons.AvailableKeys[0] - SubGamePushButtons.KeyCodeBase + 1).ToString();
+			// LRのボタン
+			this.TextButtons[1].text =
+				ButtonUIPushButtons.IsHidden ? "" : ((int)SubGamePushButtons.AvailableKeys[1] - SubGamePushButtons.KeyCodeBase + 1).ToString();
+
+			// 右手のボタン
+			this.TextButtons[2].text =
+				ButtonUIPushButtons.IsHidden ? "" : ((int)SubGamePushButtons.AvailableKeys[0] - SubGamePushButtons.KeyCodeBase + 1).ToString();
+		}
+
 	}
 
 }
