@@ -21,13 +21,6 @@ public class RotationControl : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		/*if (rotationX >= -30) {
-			rotationX = transform.localEulerAngles.x;
-		}
-		else{
-			rotationX = -30;
-		}*/
-
 		transform.rotation = Quaternion.Euler (rotationX, rotationY, rotationZ);
 	}
 }
