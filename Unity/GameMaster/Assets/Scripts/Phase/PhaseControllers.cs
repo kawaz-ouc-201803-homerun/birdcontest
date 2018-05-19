@@ -771,9 +771,7 @@ public class PhaseControllers : PhaseBase {
 				} else if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 40) {
 					buf.WriteLine("飛行役のユニティちゃんは\nなかなか順調なペースで\nウォーミングアップが出来ているようです！");
 				} else {
-					// buf.WriteLine("一方飛行役のユニティちゃん、\n若干パイロットの士気が落ちている！\nついには漫画を読み始めるまでありそうだ！");
-					// TODO: 「落ちている」ではなく、初期状態なので文章の訂正が必要
-					buf.WriteLine("飛行役のユニティちゃんは\nパワーを貯めている！");
+					buf.WriteLine("飛行役のユニティちゃんが準備を始めたようです！");
 				}
 
 			} else {
