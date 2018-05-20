@@ -71,27 +71,27 @@ public class PhaseControllers : PhaseBase {
 	/// <summary>
 	/// オーディエンス投票を監視する間隔秒数
 	/// </summary>
-	private const float AudienceWatchSeconds = 5.0f;
+	public const float AudienceWatchSeconds = 5.0f;
 
 	/// <summary>
 	/// オーディエンス投票を締め切る直前の待機秒数
 	/// </summary>
-	private const int ClosingAudienceWaitSeconds = 30;
+	public const int ClosingAudienceWaitSeconds = 30;
 
 	/// <summary>
 	/// 操作端末に与えられるゲーム時間
 	/// </summary>
-	private const int ControllerLimitSeconds = 30;
+	public const int ControllerLimitSeconds = 30;
 
 	/// <summary>
 	/// 各端末の進捗状況を更新する間隔秒数
 	/// </summary>
-	private const float ControllerProgressRefreshSeconds = 2.0f;
+	public const float ControllerProgressRefreshSeconds = 2.0f;
 
 	/// <summary>
 	/// 実況の A-C、B 表示を切り替える間隔秒数
 	/// </summary>
-	private const float StreamTextChangeSeconds = 5.0f;
+	public const float StreamTextChangeSeconds = 5.0f;
 
 	/// <summary>
 	/// オーディエンス投票を締め切るまでの残り秒数
@@ -121,18 +121,18 @@ public class PhaseControllers : PhaseBase {
 	/// <summary>
 	/// オーディエンス投票を締め切る直前に画面に出すテキスト
 	/// </summary>
-	private const string ClosingTextSource = @"${REMAIN_SECOND} 秒後に投票を締め切ります...
+	public const string ClosingTextSource = @"${REMAIN_SECOND} 秒後に投票を締め切ります...
 まだ投票できていない人は今のうちに済ませてね！";
 
 	/// <summary>
 	/// 画面上部のスクロール文字列の元のテキスト（平常運行時）
 	/// </summary>
-	private const string TopDescriptionSourceNormal = @"ただいま３名のプレイヤーが飛行の準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分です）。観客の皆さんも結果を予想してみましょう！ スマホから画面のＱＲコードを読み込んで投票してみて下さい♪";
+	public const string TopDescriptionSourceNormal = @"ただいま３名のプレイヤーが飛行の準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分です）。観客の皆さんも結果を予想してみましょう！ スマホから画面のＱＲコードを読み込んで投票してみて下さい♪";
 
 	/// <summary>
 	/// 画面上部のスクロール文字列の元のテキスト（オーディエンス投票障害発生時）
 	/// </summary>
-	private const string TopDescriptionSourceError = @"ただいま３名のプレイヤーが飛行の準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分です）。観客の皆さんも結果を予想をして頂きたいところですが、あいにくただいま障害発生中のため投票できません。";
+	public const string TopDescriptionSourceError = @"ただいま３名のプレイヤーが飛行の準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分です）。観客の皆さんも結果を予想をして頂きたいところですが、あいにくただいま障害発生中のため投票できません。";
 
 	/// <summary>
 	/// 各端末の操作が完了したかどうか
@@ -279,7 +279,7 @@ public class PhaseControllers : PhaseBase {
 		}
 
 		// 実況更新
-		var afterText = this.getStreamText(PhaseControllers.ControllerProgresses);
+		var afterText = this.getStreamText();
 		var beforeText = this.textSource;
 		this.textSource = afterText;
 
@@ -316,7 +316,7 @@ public class PhaseControllers : PhaseBase {
 			if(this.isAudienceEventError == true) {
 
 				// オーディエンス投票が障害発生中のときはすぐに次のフェーズへ移行する
-				this.ChangeToFlightPhase();
+				this.parent.ChangePhase(this.GetNextPhase());
 				this.IsUpdateEnabled = false;
 
 			} else {
@@ -340,7 +340,7 @@ public class PhaseControllers : PhaseBase {
 					this.closingAudienceRemainSeconds -= Time.deltaTime;
 					if(this.closingAudienceRemainSeconds < 0) {
 						// タイムアップ：次のフェーズへ移行
-						this.ChangeToFlightPhase();
+						this.parent.ChangePhase(this.GetNextPhase());
 						this.IsUpdateEnabled = false;
 						return;
 					}
@@ -564,6 +564,9 @@ public class PhaseControllers : PhaseBase {
 			// バリデーション
 			if(progress.ContainsKey("roleId") == true && int.Parse(progress["roleId"]) != roleId) {
 				Debug.LogError("GMで管理している役割IDと操作端末が申告してきた役割IDが一致しません。");
+
+				// 受信したデータを読むためには申告してきた役割IDに合わせないといけない
+				roleId = int.Parse(progress["roleId"]);
 			}
 
 			// 具体的な数値はメーターでグラフィカルに表示するため、ここではそれ以外の情報を入れる
@@ -715,86 +718,101 @@ public class PhaseControllers : PhaseBase {
 	/// 現在の端末操作状況を基に、実況テキストを返します。
 	/// </summary>
 	/// <returns>実況テキスト</returns>
-	private string getStreamText(Dictionary<string, string>[] progresses) {
-		if(progresses == null || progresses.Length == 0) {
+	private string getStreamText() {
+		if(PhaseControllers.ControllerProgresses == null || PhaseControllers.ControllerProgresses.Length == 0) {
 			// 進捗オブジェクトがない
-			return "ただいまプレイヤーの準備中です……";
+			return @"ただいまプレイヤーの準備中です……";
 		}
 
-		using(var buf = new StringWriter()) {
+		int optionA =
+			(PhaseControllers.ControllerProgresses[(int)NetworkConnector.RoleIds.A_Prepare] == null) ? -1 :
+				(PhaseControllers.ControllerProgresses[(int)NetworkConnector.RoleIds.A_Prepare].ContainsKey("option")
+					? int.Parse(PhaseControllers.ControllerProgresses[(int)NetworkConnector.RoleIds.A_Prepare]["option"]) : -1);
+		int optionC =
+			(PhaseControllers.ControllerProgresses[(int)NetworkConnector.RoleIds.C_Assist] == null) ? -1 :
+				(PhaseControllers.ControllerProgresses[(int)NetworkConnector.RoleIds.C_Assist].ContainsKey("option")
+					? int.Parse(PhaseControllers.ControllerProgresses[(int)NetworkConnector.RoleIds.C_Assist]["option"]) : -1);
 
-			int optionA =
-				(progresses[(int)NetworkConnector.RoleIds.A_Prepare] == null) ? -1 :
-					(progresses[(int)NetworkConnector.RoleIds.A_Prepare].ContainsKey("option")
-						? int.Parse(progresses[(int)NetworkConnector.RoleIds.A_Prepare]["option"]) : -1);
-			int optionC =
-				(progresses[(int)NetworkConnector.RoleIds.C_Assist] == null) ? -1 :
-					(progresses[(int)NetworkConnector.RoleIds.C_Assist].ContainsKey("option")
-						? int.Parse(progresses[(int)NetworkConnector.RoleIds.C_Assist]["option"]) : -1);
+		bool controllerB = (PhaseControllers.ControllerProgresses[(int)NetworkConnector.RoleIds.B_Flight] != null);
 
-			bool controllerB = (progresses[(int)NetworkConnector.RoleIds.B_Flight] != null);
+		if(controllerB == false || (this.streamFlipper == false && optionA != -1 && optionC != -1)) {
 
-			if(controllerB == false || (this.streamFlipper == false && optionA != -1 && optionC != -1)) {
+			// AとCの選択肢の組み合わせで実況を表示する
 
-				// AとCの選択肢の組み合わせで実況を表示する
-
-				if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Bomb) {
-					buf.WriteLine("これは不穏な火薬の香りが漂っていますねー……！");
-				} else if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Human) {
-					buf.WriteLine("どこかから応援の発声練習が聞こえてきましたが……\nおや、爆弾が……？");
-				} else if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Wairo) {
-					buf.WriteLine("爆発音とともにチームの一人が大会本部へ駆けだした！\n一体何があったのでしょうか！");
-				} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Bomb) {
-					buf.WriteLine("車にガソリンを入れるかたわら、爆弾に火が着く！\n今のうちに119番通報の準備をお願いします！");
-				} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Human) {
-					buf.WriteLine("発声練習の横で独りで懸命にガソリンを入れていくゥ！\n少しは給油を手伝う気は無いのか！");
-				} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Wairo) {
-					buf.WriteLine("車とガソリンを用意しているようですが……\nおっと、何やらアタッシュケースをまさぐっていますね…？");
-				} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Bomb) {
-					buf.WriteLine("正当派に人力で助走をつけ……お、おや!?\n何やら導火線に火をつけていますが！？");
-				} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Human) {
-					buf.WriteLine("人力で助走をつけ、さらに応援で気合を注入！\nこれはチームの体力的にキツそうだ……！");
-				} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Wairo) {
-					buf.WriteLine("ひたむきに人間の力で飛行機を進め……\nおや、何やら札束を持って大会本部へ向かっているようですが……！？");
-				}
-
-			} else if(controllerB == true) {
-
-				// Bの状況を表示する
-
-				int paramB =
-					progresses[(int)NetworkConnector.RoleIds.B_Flight].ContainsKey("param")
-						? int.Parse(progresses[(int)NetworkConnector.RoleIds.B_Flight]["param"]) : -1;
-
-				if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 70) {
-					buf.WriteLine("飛行役のユニティちゃんは\n気合充分といった、ある種威風を纏っている！\nこれは期待が出来そうです！");
-				} else if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 40) {
-					buf.WriteLine("飛行役のユニティちゃんは\nなかなか順調なペースで\nウォーミングアップが出来ているようです！");
-				} else {
-					buf.WriteLine("飛行役のユニティちゃんが準備を始めたようです！");
-				}
-
-			} else {
-
-				// どの端末も開始できていない
-				return "ただいまプレイヤーの準備中です……";
-
+			if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Bomb) {
+				return @"これは不穏な火薬の香りが漂っていますねー……！";
+			} else if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Human) {
+				return @"どこかから応援の発声練習が聞こえてきましたが……
+おや、爆弾が……？";
+			} else if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Wairo) {
+				return @"爆発音とともにチームの一人が大会本部へ駆けだした！
+一体何があったのでしょうか！";
+			} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Bomb) {
+				return @"車にガソリンを入れるかたわら、爆弾に火が着く！
+今のうちに119番通報の準備をお願いします！";
+			} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Human) {
+				return @"発声練習の横で独りで懸命にガソリンを入れていくゥ！
+少しは給油を手伝う気は無いのか！";
+			} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Wairo) {
+				return @"車とガソリンを用意しているようですが……
+おっと、何やらアタッシュケースをまさぐっていますね…？";
+			} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Bomb) {
+				return @"正当派に人力で助走をつけ……お、おや！？
+何やら導火線に火をつけていますが！？";
+			} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Human) {
+				return @"人力で助走をつけ、さらに応援で気合を注入！
+これはチームの体力的にキツそうだ……！";
+			} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Wairo) {
+				return @"ひたむきに人間の力で飛行機を進め……
+おや、何やら札束を持って大会本部へ向かっているようですが……！？";
 			}
 
-			return buf.ToString();
+			return "";
+
+		} else if(controllerB == true) {
+
+			// Bの状況を表示する
+
+			int paramB =
+				PhaseControllers.ControllerProgresses[(int)NetworkConnector.RoleIds.B_Flight].ContainsKey("param")
+					? int.Parse(PhaseControllers.ControllerProgresses[(int)NetworkConnector.RoleIds.B_Flight]["param"]) : -1;
+
+			if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 70) {
+				return @"飛行役のユニティちゃんは
+気合充分といった、ある種威風を纏っている！
+これは期待が出来そうです！";
+			} else if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 40) {
+				return @"飛行役のユニティちゃんは
+なかなか順調なペースで
+ウォーミングアップが出来ているようです！";
+			} else {
+				return @"飛行役のユニティちゃんが準備を始めたようです！";
+			}
+
+		} else {
+
+			// どの端末も開始できていない
+			return @"ただいまプレイヤーの準備中です……";
+
 		}
 	}
 
 	/// <summary>
-	/// 端末操作フェーズを終えて飛行フェーズへ移行します。
+	/// 前のフェーズのインスタンスを生成して返します。
 	/// </summary>
-	public void ChangeToFlightPhase() {
-		this.parent.ChangePhase(new PhaseFlight(this.parent, new object[] {
-			this.eventId,
-			PhaseControllers.ControllerProgresses[0],
-			PhaseControllers.ControllerProgresses[1],
-			PhaseControllers.ControllerProgresses[2],
-		}));
+	/// <returns>前のフェーズのインスタンス</returns>
+	public override PhaseBase GetPreviousPhase() {
+		return new PhaseIdle(this.parent);
 	}
 
+	/// <summary>
+	/// 次のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>次のフェーズのインスタンス</returns>
+	public override PhaseBase GetNextPhase() {
+		return new PhaseFlight(this.parent, new object[] {
+			this.eventId,
+			PhaseControllers.ControllerProgresses,
+		});
+	}
 }

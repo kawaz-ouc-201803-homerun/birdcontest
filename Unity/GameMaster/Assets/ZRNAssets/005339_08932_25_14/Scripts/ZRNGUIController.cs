@@ -8,8 +8,8 @@ public class ZRNGUIController : MonoBehaviour {
 	private int operateCameraNumber;
 	private bool shadowOn;
 
-	private const string ZENRIN_URL = "http://www.zenrin.co.jp/";
-	private const string PQ_URL = "http://www.pocket-queries.co.jp/";
+	public const string ZENRIN_URL = "http://www.zenrin.co.jp/";
+	public const string PQ_URL = "http://www.pocket-queries.co.jp/";
 
 	[SerializeField]
 	GameObject[] QueryObjects;

@@ -14,12 +14,12 @@ public class PhaseIdle : PhaseBase {
 	/// <summary>
 	/// メッセージをすべて表示しきってから待機する秒数
 	/// </summary>
-	private const float MessageAllViewSeconds = 30.0f;
+	public const float MessageAllViewSeconds = 30.0f;
 
 	/// <summary>
 	/// テキストエリアの元文章
 	/// </summary>
-	private const string TextSource = @"あなた達 ""３人"" は「" + PhaseManager.GameTitle + @"」に出場するチームメイトだ。
+	public const string TextSource = @"あなた達 ""３人"" は「" + PhaseManager.GameTitle + @"」に出場するチームメイトだ。
 一人は助走をつけ、一人は人力飛行機を漕ぎ、一人はそれを手助けする。
 それぞれがメチャクチャに動いて、より遠くを目指せ！";
 
@@ -98,6 +98,23 @@ public class PhaseIdle : PhaseBase {
 			this.textCursorIndex++;
 			this.textArea.text = PhaseIdle.TextSource.Substring(0, this.textCursorIndex);
 		}
+	}
+
+	/// <summary>
+	/// 前のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>前のフェーズのインスタンス</returns>
+	public override PhaseBase GetPreviousPhase() {
+		// このフェーズが一番最初なのでこれ以上は戻せない
+		return null;
+	}
+
+	/// <summary>
+	/// 次のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>次のフェーズのインスタンス</returns>
+	public override PhaseBase GetNextPhase() {
+		return new PhaseControllers(this.parent);
 	}
 
 }

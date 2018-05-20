@@ -56,4 +56,16 @@ public abstract class PhaseBase {
 	public virtual void Destroy() {
 	}
 
+	/// <summary>
+	/// 前のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>前のフェーズのインスタンス</returns>
+	public abstract PhaseBase GetPreviousPhase();
+
+	/// <summary>
+	/// 次のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>次のフェーズのインスタンス</returns>
+	public abstract PhaseBase GetNextPhase();
+	
 }

@@ -16,7 +16,7 @@ public class PhaseFlight : PhaseBase {
 	/// </summary>
 	public enum FlightGameStep {
 		BeforePrepare,      // 仕込み前
-		Preparing,       // 仕込み開始後
+		Preparing,          // 仕込み開始後
 		StartFlight,        // 飛行開始
 		Flighting,          // 飛行中間
 		StartSupport,       // 援護開始
@@ -27,7 +27,7 @@ public class PhaseFlight : PhaseBase {
 	/// <summary>
 	/// 地点表示を行う秒数
 	/// </summary>
-	private const float MapAddressShowTimeSecond = 3.0f;
+	public const float MapAddressShowTimeSecond = 3.0f;
 
 	/// <summary>
 	/// 飛距離
@@ -86,13 +86,25 @@ public class PhaseFlight : PhaseBase {
 	private Coroutine messageCoroutine;
 
 	/// <summary>
+	/// オーディエンス投票イベントID
+	/// </summary>
+	private string eventId;
+
+	/// <summary>
+	/// 操作端末の結果データの配列
+	/// </summary>
+	private Dictionary<string, string>[] controllerData;
+
+	/// <summary>
 	/// コンストラクター
 	/// </summary>
 	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
-	/// <param name="parameters">[0]=イベントID, [1]=SceneA結果, [2]=SceneB結果, [3]=SceneC結果</param>
+	/// <param name="parameters">[0]=イベントID, [1]=操作端末の結果データの配列</param>
 	public PhaseFlight(PhaseManager parent, object[] parameters) : base(parent, parameters) {
 		this.score = 0;
 		this.mapAddress = "";
+		this.eventId = parameters[0] as string;
+		this.controllerData = parameters[1] as Dictionary<string, string>[];
 	}
 
 	/// <summary>
@@ -259,16 +271,6 @@ public class PhaseFlight : PhaseBase {
 	}
 
 	/// <summary>
-	/// 飛行フェーズを終えて結果フェーズへ移行します。
-	/// </summary>
-	public void ChangeToResultPhase() {
-		this.parent.ChangePhase(new PhaseResult(this.parent, new object[] {
-			(string) this.parameters[0] ?? "none",
-			this.score
-		}));
-	}
-
-	/// <summary>
 	/// メッセージの文字を１文字進めるコルーチン
 	/// </summary>
 	private IEnumerator nextStreamTextCharacter() {
@@ -301,40 +303,120 @@ public class PhaseFlight : PhaseBase {
 	/// </summary>
 	/// <returns>実況テキスト</returns>
 	private string getStreamText() {
-		var buf = "";
+		var optionA = int.Parse(this.controllerData[(int)NetworkConnector.RoleIds.A_Prepare]["option"]);
+		var paramB = int.Parse(this.controllerData[(int)NetworkConnector.RoleIds.B_Flight]["param"]);
+		var optionC = int.Parse(this.controllerData[(int)NetworkConnector.RoleIds.C_Assist]["option"]);
 
-		// TODO: 実況ステップに対応した実況テキストを生成
 		switch(PhaseFlight.StreamStep) {
 			case FlightGameStep.BeforePrepare:
-				buf = "仕込み前の実況";
-				break;
+				return @"いよいよフライトの時間がやってまいりました！
+このチームは一体どのようなフライトを見せてくれるのでしょうか！";
 
 			case FlightGameStep.Preparing:
-				buf = "仕込み中の実況";
-				break;
+				switch(optionA) {
+					case (int)PhaseControllers.OptionA.Bomb:
+						return @"爆弾を積み上げて着火したようです！
+リスキーな手段ですが…おおっと、よく見ればパイロットが衝撃で気絶しているっ！？";
+
+					case (int)PhaseControllers.OptionA.Human:
+						return @"ここはオーソドックスな人力加速！
+やはり最後に頼れるのは人間の力だということを証明してくれるのかっ！";
+
+					case (int)PhaseControllers.OptionA.Car:
+						return @"暴走族のごとくアクセルを吹かして――ぐんっと加速！
+さすが車は馬力が違う！";
+				}
+				return @"";
 
 			case FlightGameStep.StartFlight:
-				buf = "飛行開始の実況";
-				break;
+				switch(optionA) {
+					case (int)PhaseControllers.OptionA.Bomb:
+						return @"ここで爆弾が炸裂ゥ！
+お、おや……なんと、爆発の衝撃でパイロットの意識が飛んでいる！";
+
+					case (int)PhaseControllers.OptionA.Human:
+						return @"助走をつけて難なくスタートしていく！
+しかしこの初速でどこまで飛べるのか……！？";
+
+					case (int)PhaseControllers.OptionA.Car:
+						return @"乗り物×乗り物のパワーでぐんぐん加速していく！
+なお会場にタイヤ痕をつけたため後程罰金されるそうですね……。";
+				}
+				return @"";
 
 			case FlightGameStep.Flighting:
-				buf = "飛行中の実況";
-				break;
+				if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 70) {
+					return @"かなり調子よく飛んでいく！
+これは期待大ですね…！";
+				} else if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 40) {
+					return @"平均的な滑空を見せていく！
+それだけに、この後のサポートの成否が試されます！";
+				} else {
+					return @"他のチームよりも少し機体が安定しません…！
+ここは飛行中のサポートに期待したいところです！";
+				}
 
 			case FlightGameStep.StartSupport:
-				buf = "援護開始の実況";
-				break;
+				switch(optionC) {
+					case (int)PhaseControllers.OptionC.Bomb:
+						return @"ここで飛行中のサポートに回る……
+おや、おもむろに爆弾を取り出しました！？";
+
+					case (int)PhaseControllers.OptionC.Human:
+						return @"急にチームメンバーが応援をして気合を注入しだした！
+果たして効果があるのでしょうか！";
+
+					case (int)PhaseControllers.OptionC.Wairo:
+						return @"なぜか飛行中のサポートに動き出す様子がない！
+何らかのトラブルでしょうか！？";
+				}
+				return @"";
 
 			case FlightGameStep.EndSupport:
-				buf = "援護終了の実況";
-				break;
+				switch(optionC) {
+					case (int)PhaseControllers.OptionC.Bomb:
+						return @"無慈悲に起爆！
+さすがの推進力のようですが、機体の損傷は大丈夫なのかーっ！";
+
+					case (int)PhaseControllers.OptionC.Human:
+						return @"気絶した者さえ起こしてしまうほど熱のある応援！
+さあ、ラストスパートに向けて引き続きフライトは続きます！";
+
+					case (int)PhaseControllers.OptionC.Wairo:
+						return @"これは！ 計測されている飛距離と運営側が発表している飛距離に食い違いが生まれている！？
+一体何が起こったのでしょうか！";
+				}
+				return @"";
 
 			case FlightGameStep.EndFlight:
-				buf = "着地時の実況";
-				break;
+				if(optionA == (int)PhaseControllers.OptionA.Bomb && optionC == (int)PhaseControllers.OptionC.Bomb) {
+					return @"ここで着地、見事なフライトでした！";
+				} else {
+					return @"おおーっと！ 二度目の爆弾は流石に耐えきれなかった！
+バカの一つ覚えは行けませんねェ！";
+				}
 		}
 
-		return buf;
+		return @"";
+	}
+
+	/// <summary>
+	/// 前のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>前のフェーズのインスタンス</returns>
+	public override PhaseBase GetPreviousPhase() {
+		return new PhaseControllers(this.parent);
+	}
+
+	/// <summary>
+	/// 次のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>次のフェーズのインスタンス</returns>
+	public override PhaseBase GetNextPhase() {
+		return new PhaseResult(this.parent, new object[] {
+			this.eventId,
+			this.score,
+		});
 	}
 
 }

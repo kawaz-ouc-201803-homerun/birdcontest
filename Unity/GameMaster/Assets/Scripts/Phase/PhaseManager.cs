@@ -38,7 +38,7 @@ public class PhaseManager : MonoBehaviour {
 	/// <summary>
 	/// トランジションにかける秒数
 	/// </summary>
-	private const float TransitionTimeSecond = 2.0f;
+	public const float TransitionTimeSecond = 2.0f;
 
 	/// <summary>
 	/// フェーズごとのUI親オブジェクト
@@ -103,26 +103,9 @@ public class PhaseManager : MonoBehaviour {
 
 			if(this.previousKeyCounter == 1) {
 				// 前のフェーズへ戻る
-				switch(this.Phase.GetType().Name) {
-					case "PhaseIdle":
-						// これ以上戻れない
-						break;
-
-					case "PhaseControllers":
-						this.ChangePhase(new PhaseIdle(this));
-						break;
-
-					case "PhaseFlight":
-						this.ChangePhase(new PhaseControllers(this));
-						break;
-
-					case "PhaseResult":
-						this.ChangePhase(new PhaseFlight(this, null));
-						break;
-
-					case "PhaseCredit":
-						this.ChangePhase(new PhaseResult(this, null));
-						break;
+				var previousPhase = this.Phase.GetPreviousPhase();
+				if(previousPhase != null) {
+					this.ChangePhase(previousPhase);
 				}
 			}
 		} else {
@@ -134,30 +117,10 @@ public class PhaseManager : MonoBehaviour {
 			this.nextKeyCounter++;
 
 			if(this.nextKeyCounter == 1) {
-				// 前のフェーズへ戻る
-				switch(this.Phase.GetType().Name) {
-					case "PhaseIdle":
-						this.ChangePhase(new PhaseControllers(this));
-						break;
-
-					case "PhaseControllers":
-						// this.ChangePhase(new PhaseFlight(this, null));
-						((PhaseControllers)this.Phase).ChangeToFlightPhase();
-						break;
-
-					case "PhaseFlight":
-						// this.ChangePhase(new PhaseResult(this, null));
-						((PhaseFlight)this.Phase).ChangeToResultPhase();
-						break;
-
-					case "PhaseResult":
-						this.ChangePhase(new PhaseCredit(this));
-						break;
-
-					case "PhaseCredit":
-						// 最初のフェーズに戻す
-						this.ChangePhase(new PhaseIdle(this));
-						break;
+				// 次のフェーズへ進む
+				var nextPhase = this.Phase.GetNextPhase();
+				if(nextPhase != null) {
+					this.ChangePhase(nextPhase);
 				}
 			}
 		} else {

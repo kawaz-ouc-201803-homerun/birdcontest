@@ -15,22 +15,22 @@ public class PhaseResult : PhaseBase {
 	/// <summary>
 	/// 日時文字列の書式
 	/// </summary>
-	private const string DateTimeFormat = "yyyy/MM/dd HH:mm:ss";
+	public const string DateTimeFormat = "yyyy/MM/dd HH:mm:ss";
 
 	/// <summary>
 	/// ランキングの距離差分書式
 	/// </summary>
-	private const string RankingScoreFormat = "+0.00;-0.00;";
+	public const string RankingScoreFormat = "+0.00;-0.00;";
 
 	/// <summary>
 	/// ニアピン賞を採用する最低参加人数
 	/// </summary>
-	private const int AvailableNearpinMinCount = 3;
+	public const int AvailableNearpinMinCount = 3;
 
 	/// <summary>
 	/// ランキングの自動スクロールにかける秒数
 	/// </summary>
-	private const float RankingScrollTimeSecond = 10.0f;
+	public const float RankingScrollTimeSecond = 10.0f;
 
 	/// <summary>
 	/// ニアピン賞のテキスト
@@ -198,6 +198,23 @@ public class PhaseResult : PhaseBase {
 			// 一番上に戻す
 			scrollbar.GetComponent<UnityEngine.UI.Scrollbar>().value = 1f;
 		}
+	}
+
+	/// <summary>
+	/// 前のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>前のフェーズのインスタンス</returns>
+	public override PhaseBase GetPreviousPhase() {
+		// このフェーズでは端末の結果データを持っていないので飛行フェーズを復元できない
+		return null;
+	}
+
+	/// <summary>
+	/// 次のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>次のフェーズのインスタンス</returns>
+	public override PhaseBase GetNextPhase() {
+		return new PhaseCredit(this.parent);
 	}
 
 }

@@ -60,38 +60,43 @@ public class ButtonController : MonoBehaviour {
 				//ボタン１回目
 				case "Bomb":    //爆弾を押した
 					score = 1;
-					break;
+					return;
 				case "Coin":    //賄賂を押した
 					score = 2;
-					break;
-				case "Kiai":    //気合いを押した
+					return;
+				case "Kiai":    //気合を押した
 					score = 0;
-					break;
-				//ボタン２回目
-				case "No":
-					score = 0;
-					isWindow = 2;
-					foreach(GameObject obj in setsumei) {   //説明を消す
-						StartCoroutine(TextHihyouji(obj));
-					}
-					break;
-				case "Yes":
-					isWindow = 3;
-					foreach(GameObject obj in setsumei) {   //説明を消す
-						StartCoroutine(TextHihyouji(obj));
-					}
-					StartCoroutine(RotationAnimation(matometekesuObject, 2f));
-					if(score == 2) {    //賄賂ミニゲームへ
-						isWairo = true;
-						wairo.SetActive(true);
-						StartCoroutine(RotationAnimation(wairo, 10f));
-						StartCoroutine(TextWindowScaleAnimation(0.1f));
-						StartCoroutine(Wairo());
-					}
-					break;
-				default:
-					break;
+					return;
 			}
+		}
+
+		switch(str) {
+			//ボタン２回目
+			case "No":
+				score = 0;
+				isWindow = 2;
+				WindowController.isClickable = true;
+				foreach(GameObject obj in setsumei) {   //説明を消す
+					StartCoroutine(TextHihyouji(obj));
+				}
+				break;
+			case "Yes":
+				isWindow = 3;
+				WindowController.isClickable = true;
+				foreach(GameObject obj in setsumei) {   //説明を消す
+					StartCoroutine(TextHihyouji(obj));
+				}
+				StartCoroutine(RotationAnimation(matometekesuObject, 2f));
+				if(score == 2) {    //賄賂ミニゲームへ
+					isWairo = true;
+					wairo.SetActive(true);
+					StartCoroutine(RotationAnimation(wairo, 10f));
+					StartCoroutine(TextWindowScaleAnimation(0.1f));
+					StartCoroutine(Wairo());
+				}
+				break;
+			default:
+				break;
 		}
 	}
 

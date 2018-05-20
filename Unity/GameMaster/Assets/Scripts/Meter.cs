@@ -13,7 +13,7 @@ public class Meter : MonoBehaviour {
 	/// <summary>
 	/// メーターを滑らかに変化させるのに要する秒数
 	/// </summary>
-	private const float ChangeEaseSeconds = 1.0f;
+	public const float ChangeEaseSeconds = 1.0f;
 	
 	/// <summary>
 	/// 内部的に紐づけるスライダーコンポーネント

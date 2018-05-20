@@ -15,17 +15,26 @@ public class PhaseCredit : PhaseBase {
 	}
 
 	/// <summary>
-	/// ゲームオブジェクトの初期化
-	/// </summary>
-	public override void Start () {
-		
-	}
-
-	/// <summary>
 	/// 毎フレーム更新処理
 	/// </summary>
 	public override void Update () {
-		
+	}
+
+	/// <summary>
+	/// 前のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>前のフェーズのインスタンス</returns>
+	public override PhaseBase GetPreviousPhase() {
+		// このフェーズでは結果データを持っていないので結果フェーズを復元できない
+		return null;
+	}
+
+	/// <summary>
+	/// 次のフェーズのインスタンスを生成して返します。
+	/// </summary>
+	/// <returns>次のフェーズのインスタンス</returns>
+	public override PhaseBase GetNextPhase() {
+		return new PhaseIdle(this.parent);
 	}
 
 }

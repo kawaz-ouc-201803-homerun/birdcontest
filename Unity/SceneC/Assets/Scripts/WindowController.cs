@@ -106,7 +106,8 @@ public class WindowController : MonoBehaviour {
 
 		yield return new WaitForSeconds(0.1f);  //待つ
 
-		isClickable = true;
+		// 説明ウィンドウ表示中は他のボタンを押せないようにする
+		// isClickable = true;
 
 	}
 
