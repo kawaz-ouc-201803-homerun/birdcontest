@@ -60,7 +60,9 @@ namespace SubGame {
 		/// <summary>
 		/// 初回処理
 		/// </summary>
-		protected override void startSubGame() {
+		public override void StartSubGame() {
+			base.StartSubGame();
+			
 			// スコア初期化
 			ScoreUIPushButtons.Score = 0;
 			ButtonUIPushButtons.IsHidden = true;

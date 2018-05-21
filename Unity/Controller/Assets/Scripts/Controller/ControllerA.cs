@@ -19,6 +19,11 @@ namespace ControllerA {
 		}
 
 		/// <summary>
+		/// 選択肢プレハブオブジェクト
+		/// </summary>
+		public GameObject OtomoOptions;
+
+		/// <summary>
 		/// 開始準備完了したかどうか
 		/// </summary>
 		private bool isReadyForStart = false;
@@ -55,6 +60,16 @@ namespace ControllerA {
 		/// ゲームサイクル２周目以降に必要な初期化処理を実行します。
 		/// </summary>
 		public override void StartNewGame() {
+			// 大友プレハブを破棄して再生成する
+			Object.DestroyImmediate(this.OtomoOptions);
+			this.OtomoOptions =
+				Object.Instantiate(
+					(GameObject)Resources.Load("Prefabs/OtomoOptionsA"),
+					Vector3.zero,
+					Quaternion.identity,
+					this.transform.Find("Options")
+				);
+			
 			// 画面初期化
 			this.transform.Find("Options").gameObject.SetActive(true);
 			foreach(var subGame in this.SubGames) {
@@ -81,7 +96,7 @@ namespace ControllerA {
 			this.transform.Find("Options").gameObject.SetActive(false);
 			this.selectedOptionIndex = (int)Option.Car;
 			this.activeSubGame = this.SubGames[this.selectedOptionIndex];
-			this.activeSubGame.Start();
+			this.activeSubGame.StartSubGame();
 			this.isReadyForStart = true;
 		}
 
@@ -92,7 +107,7 @@ namespace ControllerA {
 			this.transform.Find("Options").gameObject.SetActive(false);
 			this.selectedOptionIndex = (int)Option.Human;
 			this.activeSubGame = this.SubGames[this.selectedOptionIndex];
-			this.activeSubGame.Start();
+			this.activeSubGame.StartSubGame();
 			this.isReadyForStart = true;
 		}
 
@@ -103,7 +118,7 @@ namespace ControllerA {
 			this.transform.Find("Options").gameObject.SetActive(false);
 			this.selectedOptionIndex = (int)Option.Bomb;
 			this.activeSubGame = this.SubGames[this.selectedOptionIndex];
-			this.activeSubGame.Start();
+			this.activeSubGame.StartSubGame();
 			this.isReadyForStart = true;
 		}
 

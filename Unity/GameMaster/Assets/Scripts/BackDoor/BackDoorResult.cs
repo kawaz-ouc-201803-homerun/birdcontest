@@ -57,6 +57,9 @@ public class BackDoorResult : BackDoorBase {
 	/// <returns>UI用の文字列</returns>
 	private string convertDictionaryToString(Dictionary<string, string> dictionary) {
 		bool wrote = false;
+		if(dictionary == null) {
+			return "";
+		}
 
 		using(var buf = new StringWriter()) {
 			foreach(var key in dictionary.Keys) {
@@ -82,10 +85,13 @@ public class BackDoorResult : BackDoorBase {
 	/// <param name="data">UI用の文字列</param>
 	/// <returns>辞書型配列</returns>
 	private Dictionary<string, string> convertStringToDictionary(string data) {
+		var dictionary = new Dictionary<string, string>();
+		if(string.IsNullOrEmpty(data) == true) {
+			return null;
+		}
+
 		// 一つのデータごとに分離
 		var split = data.Split(';');
-		var dictionary = new Dictionary<string, string>();
-
 		foreach(var oneData in split) {
 			var keyValuePair = oneData.Split('=');
 			dictionary[keyValuePair[0]] = keyValuePair[1];

@@ -33,7 +33,9 @@ namespace SubGame {
 		/// <summary>
 		/// 初回処理
 		/// </summary>
-		protected override void startSubGame() {
+		public override void StartSubGame() {
+			base.StartSubGame();
+
 			this.Score = 0;
 			this.TimeCounter = 0;
 

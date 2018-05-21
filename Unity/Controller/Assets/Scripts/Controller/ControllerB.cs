@@ -14,10 +14,7 @@ namespace ControllerB {
 		/// </summary>
 		public override void Start() {
 			base.Start();
-
-			// ミニゲームを表示
-			this.activeSubGame = this.SubGames[0];
-			this.activeSubGame.gameObject.SetActive(true);
+			this.StartNewGame();
 		}
 
 		/// <summary>
@@ -34,8 +31,10 @@ namespace ControllerB {
 		/// ゲームサイクル２周目以降に必要な初期化処理を実行します。
 		/// </summary>
 		public override void StartNewGame() {
-			this.Start();
-			this.activeSubGame.Start();
+			// ミニゲームを表示
+			this.activeSubGame = this.SubGames[0];
+			this.activeSubGame.gameObject.SetActive(true);
+			this.activeSubGame.StartSubGame();
 		}
 
 		/// <summary>

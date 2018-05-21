@@ -604,10 +604,13 @@ public class PhaseControllers : PhaseBase {
 
 						case (int)OptionC.Wairo:
 							buf.Write("大会主催者にワイロ");
-							if(progress.ContainsKey("wairoStep") == true) {
-								// 選択肢を進めた回数（今、何問め？）
-								buf.Write(" [" + (int)(int.Parse(progress["wairoStep"]) / (float)PhaseControllers.WairoStepLength * 100f) + " %]");
-							}
+
+							// NOTE: 他のミニゲームも制限時間があるのにそれを表示していないことから、賄賂ミニゲームの進行度も表示しないことにした
+							//if(progress.ContainsKey("wairoStep") == true) {
+							//	// 選択肢を進めた回数（今、何問め？）
+							//	buf.Write(" [" + (int)(int.Parse(progress["wairoStep"]) / (float)PhaseControllers.WairoStepLength * 100f) + " %]");
+							//}
+
 							break;
 					}
 					break;
@@ -651,21 +654,25 @@ public class PhaseControllers : PhaseBase {
 							// 人力
 							values[(int)PowerMeter.StartPower] = 0.1f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.4f;
 							values[(int)PowerMeter.FlightPower] = 0;
-							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.5f;
+							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.3f;
 							break;
 
 						case (int)OptionA.Car:
-							// 牽引
-							values[(int)PowerMeter.StartPower] = 0.4f + int.Parse(progress["param"]) / 100.0f * 0.4f;
+							// 牽引：50%が最大出力、それを超えるとゼロに等しい状態になる
+							values[(int)PowerMeter.StartPower] = 
+								0.3f + (
+									(int.Parse(progress["param"]) <= 100.0f / 2) ?
+										int.Parse(progress["param"]) / (100.0f / 2) : 0
+								) * 0.4f;
 							values[(int)PowerMeter.FlightPower] = 0;
-							values[(int)PowerMeter.LackPower] = 0.1f + int.Parse(progress["param"]) / 100.0f * 0.4f;
+							values[(int)PowerMeter.LackPower] = 0.1f;
 							break;
 
 						case (int)OptionA.Bomb:
 							// 爆弾
-							values[(int)PowerMeter.StartPower] = 1.0f;
-							values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.8f;
-							values[(int)PowerMeter.LackPower] = 0;
+							values[(int)PowerMeter.StartPower] = 0.5f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.5f;
+							values[(int)PowerMeter.FlightPower] = 0;
+							values[(int)PowerMeter.LackPower] = 0.2f;
 							break;
 					}
 					break;
@@ -684,22 +691,22 @@ public class PhaseControllers : PhaseBase {
 						case (int)OptionC.Human:
 							// 応援
 							values[(int)PowerMeter.StartPower] = 0;
-							values[(int)PowerMeter.FlightPower] = 0.1f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.25f;
-							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.3f;
+							values[(int)PowerMeter.FlightPower] = 0.3f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.3f;
+							values[(int)PowerMeter.LackPower] = 0.5f;
 							break;
 
 						case (int)OptionC.Bomb:
 							// 爆弾
-							values[(int)PowerMeter.StartPower] = 0;
-							values[(int)PowerMeter.FlightPower] = 0.2f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.5f;
-							values[(int)PowerMeter.LackPower] = 0;
+							values[(int)PowerMeter.StartPower] = 0.5f + int.Parse(progress["param"]) / (float)ControllerLimitSeconds * 0.5f;
+							values[(int)PowerMeter.FlightPower] = 0;
+							values[(int)PowerMeter.LackPower] = 0.2f;
 							break;
 
 						case (int)OptionC.Wairo:
 							// 賄賂
 							values[(int)PowerMeter.StartPower] = 0;
 							values[(int)PowerMeter.FlightPower] = 0;
-							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / (float)PhaseControllers.WairoScoreMax * 0.8f;
+							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["wairoScore"]) / (float)PhaseControllers.WairoScoreMax * 0.8f;
 							break;
 					}
 					break;
@@ -740,9 +747,9 @@ public class PhaseControllers : PhaseBase {
 			// AとCの選択肢の組み合わせで実況を表示する
 
 			if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Bomb) {
-				return @"これは不穏な火薬の香りが漂っていますねー……！";
+				return @"これは不穏な火薬の香りが漂っていますねー！";
 			} else if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Human) {
-				return @"どこかから応援の発声練習が聞こえてきましたが……
+				return @"どこかから応援の発声練習が聞こえてきましたが…
 おや、爆弾が……？";
 			} else if(optionA == (int)OptionA.Bomb && optionC == (int)OptionC.Wairo) {
 				return @"爆発音とともにチームの一人が大会本部へ駆けだした！
@@ -751,20 +758,20 @@ public class PhaseControllers : PhaseBase {
 				return @"車にガソリンを入れるかたわら、爆弾に火が着く！
 今のうちに119番通報の準備をお願いします！";
 			} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Human) {
-				return @"発声練習の横で独りで懸命にガソリンを入れていくゥ！
+				return @"発声練習の横で懸命にガソリンを入れていくゥ！
 少しは給油を手伝う気は無いのか！";
 			} else if(optionA == (int)OptionA.Car && optionC == (int)OptionC.Wairo) {
-				return @"車とガソリンを用意しているようですが……
+				return @"車とガソリンを用意しているようですが…
 おっと、何やらアタッシュケースをまさぐっていますね…？";
 			} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Bomb) {
-				return @"正当派に人力で助走をつけ……お、おや！？
+				return @"正当派に人力で助走をつけ…お、おや！？
 何やら導火線に火をつけていますが！？";
 			} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Human) {
 				return @"人力で助走をつけ、さらに応援で気合を注入！
-これはチームの体力的にキツそうだ……！";
+これはチームの体力的にキツそうだ…！";
 			} else if(optionA == (int)OptionA.Human && optionC == (int)OptionC.Wairo) {
-				return @"ひたむきに人間の力で飛行機を進め……
-おや、何やら札束を持って大会本部へ向かっているようですが……！？";
+				return @"ひたむきに人間の力で飛行機を進め…おや？
+何やら札束を持って大会本部へ向かっているようですが…！？";
 			}
 
 			return "";

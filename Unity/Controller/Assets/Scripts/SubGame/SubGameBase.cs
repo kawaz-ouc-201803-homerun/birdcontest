@@ -20,9 +20,7 @@ namespace SubGame {
 		/// 初回処理
 		/// </summary>
 		public void Start() {
-			// デフォルトでUpdateを無効にする
 			this.IsUpdateEnabled = false;
-			this.startSubGame();
 		}
 
 		/// <summary>
@@ -37,7 +35,10 @@ namespace SubGame {
 		/// <summary>
 		/// 初回処理の実体
 		/// </summary>
-		protected abstract void startSubGame();
+		public virtual void StartSubGame() {
+			// デフォルトでUpdateを無効にする
+			this.IsUpdateEnabled = false;
+		}
 
 		/// <summary>
 		/// 毎フレーム更新処理の実体
