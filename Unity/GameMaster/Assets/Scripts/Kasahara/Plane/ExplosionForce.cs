@@ -6,13 +6,7 @@ using UnityEngine;
 namespace UnityStandardAssets.Effects{
 public class ExplosionForce : MonoBehaviour {
 		public float explosionForce = 4;
-
-	// Use this for initialization
-	void Start () {
-		
-	}
 	
-	// Update is called once per frame
 	void Update () {
 			if (Input.GetKeyDown (KeyCode.Return)) {
 				

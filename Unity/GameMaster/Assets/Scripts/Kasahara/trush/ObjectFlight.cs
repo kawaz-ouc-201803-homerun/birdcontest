@@ -31,25 +31,41 @@ public class ObjectFlight : MonoBehaviour {
 
 			power = power - Time.deltaTime * 10;
 
-		
+
 
 			plane.AddForce (transform.forward * power, ForceMode.Acceleration);
 
-			if (rotationX > 360 - 30 || rotationX == 0) {
-			
+			if (rotationX > 360 - 45 || rotationX == 0) {
+
 				plane.AddTorque (transform.right * -1, ForceMode.Acceleration);
 				rotationX = transform.localEulerAngles.x;
 
 			}
 
-			if (rotationX <= 360 - 30) {
-			
-				transform.rotation = Quaternion.Euler (360 - 30, rotationY, rotationZ);
+			if (rotationX <= 360 - 45) {
+
+				transform.rotation = Quaternion.Euler (360 - 45, rotationY, rotationZ);
 
 			}
 		}
 
 		if (power <= 0) {
+
+			if (rotationX <= 360 || rotationX <= 45) {
+
+				rotationX = rotationX + 10 * Time.deltaTime;
+
+				plane.transform.rotation = Quaternion.Euler(rotationX, rotationY, rotationZ);
+
+			}
+
+			if (rotationX >= 45 && rotationX < 360 - 45) {
+				plane.transform.rotation = Quaternion.Euler (45, rotationY, rotationZ);
+			}
+
+			if (rotationX >= 0 && rotationX <= 1) {
+				plane.transform.rotation = Quaternion.Euler (0, rotationY, rotationZ);
+			}
 
 			Debug.Log ("0だよ");
 		}

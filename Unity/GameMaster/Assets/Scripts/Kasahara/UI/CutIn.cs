@@ -4,13 +4,48 @@ using UnityEngine;
 
 public class CutIn : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
+	public Animator cutin;
+	public Animation cutinanimation;
+	public GameObject image;
+	public bool stopflug = false;
+	public float time;
+	public float sumtime;
+
+	void OnTriggerEnter(Collider other){
 		
+		if (other.gameObject.tag == "Player") {
+			
+			stopflug = true;
+			image.SetActive (true);
+			Time.timeScale = 0;
+			cutin.SetTrigger ("Start");
+
+		}
 	}
-	
-	//Time.timescale = 0　でも動くようUpdateで呼び出す
-	void Update () {
-		
+
+	void Update(){
+
+		if (stopflug == false) {
+
+			return;
+
+		}
+
+		if (stopflug == true) {
+			time = Time.unscaledDeltaTime;
+			sumtime = sumtime + time;
+
+			if (sumtime >= 3.5f) {
+				StopAnimation ();
+			}
+		}
+
+	}
+
+	void StopAnimation(){
+
+		image.SetActive (false);
+		Time.timeScale = 1;
+
 	}
 }

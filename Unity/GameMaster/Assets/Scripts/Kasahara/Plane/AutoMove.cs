@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class AutoMove : ParentClass {
 
+	//飛行機に助走をつけるスクリプト
+
 	//飛行機にアタッチ
 
 	[HideInInspector]

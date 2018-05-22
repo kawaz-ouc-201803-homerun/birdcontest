@@ -6,7 +6,7 @@ using System;
 
 public class DistanceCounter : MonoBehaviour {
 	//変数設定
-	//スタート時の座標
+	//スタート時の座標（DataContainerTestから代入）
 	public float startpositionX;
 	public float startpositionZ;
 	//飛行中の座標
@@ -18,20 +18,13 @@ public class DistanceCounter : MonoBehaviour {
 	//知りたい座標のGaeObjectの設定
 	public GameObject target;
 
-	// Use this for initialization
-	void Start () {
-		
-		//startpositionX = target.transform.position.x;
-		//startpositionZ = target.transform.position.z;
-
-	}
-
 	// Update is called once per frame
 	void Update () {
 
 		//それぞれに座標を挿入
 		currentpositionX = target.transform.position.x;
 		currentpositionZ = target.transform.position.z;
+
 		//飛距離の計算　（√（二乗＋二乗））
 		distance = Mathf.Sqrt ((currentpositionX - startpositionX) * (currentpositionX - startpositionX) + (currentpositionZ - startpositionZ) * (currentpositionZ - startpositionZ));
 

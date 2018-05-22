@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PompPedal : ParentClass {
 
+	//離陸後に飛行機に推進力を与えるスクリプト
+
 	public float pedalpower;		//DataContainerから代入されるのでこちらでの変更は不要
 	public GameObject starter;
 

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraSwitching : MonoBehaviour {
+
+	//カメラを切り替えるスクリプト
+
 	// 変数を定義する（データを入れる箱を作る）
 	[SerializeField]
 	private GameObject PilotCamera;   // インスペクターでパイロット視点カメラを紐づける
