@@ -1,7 +1,13 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: c221f6c8b1305424287aca1d2790baaa
 folderAsset: yes
 timeCreated: 1525278493
+=======
+guid: b1b43a03bb9565b469e005bcbfca1689
+folderAsset: yes
+timeCreated: 1527086472
+>>>>>>> kasahara/gamemaster
 licenseType: Free
 DefaultImporter:
   externalObjects: {}
