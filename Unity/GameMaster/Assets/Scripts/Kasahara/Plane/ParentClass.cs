@@ -2,10 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ParentClass : MonoBehaviour {
+/// <summary>
+/// 機体に対して振る舞うための基底クラス
+/// </summary>
+public class PlaneBehaviourParent : MonoBehaviour {
 
-	public Rigidbody planerigidbody;	//飛行機のRigidbodyを定義
-	public GameObject plane;	//飛行機を定義
+	/// <summary>
+	/// 操作対象の機体オブジェクト
+	/// </summary>
+	public GameObject Plane;
 
+	/// <summary>
+	/// 操作対象の機体のRigidbodyコンポーネント
+	/// </summary>
+	public Rigidbody PlaneRigidbody;
 
 }

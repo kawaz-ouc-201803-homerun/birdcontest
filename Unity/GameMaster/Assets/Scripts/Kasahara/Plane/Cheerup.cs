@@ -2,79 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cheerup : MonoBehaviour {
+/// <summary>
+/// 援護役：応援カットイン
+/// </summary>
+public class Cheerup : CutInParent {
 
-	//応援の処理と、カットインアニメーションを再生するためのスクリプト
-
-	public Rigidbody plane;
-
-	//カットイン演出のための変数
-	public GameObject panel;	//サファイアートちゃんの画像が子になっているPanelを代入
-	public Animator cutin;		//上と同じPanelを代入
-	public float time;
-	public float sumtime = 0;
-
-	public float upper;		//paramCから代入
-
-	public static bool cheerupOnSwitch = false;		//OnTriggerEnterの実行フラグをデフォルトでオフに（フラグの切り替えはDataContainerTestから）
+	/// <summary>
+	/// 応援によって機体を上昇させる力の大きさ
+	/// ＊ParamCから代入
+	/// </summary>
+	public float UpperPower;
 
 
-	//TriggerタグがついているPlaneに触ったらこのスクリプトをオンに
-	void OnTriggerEnter(Collider other){
-
-		//フラグがオフなら何もしない
-		if (cheerupOnSwitch == false) {
-			return;
+	/// <summary>
+	/// 毎フレーム更新処理
+	/// ＊カットイン終了後に適用したい処理をここに定義して下さい。
+	/// </summary>
+	protected override void FixedUpdate() {
+		if(this.UpperPower > 0) {
+			// １秒ごとに飛ぶ力を減衰させていく
+			this.UpperPower = this.UpperPower - 30f * Time.deltaTime;
+			this.PlaneRigidbody.AddForce(this.transform.up * this.UpperPower, ForceMode.Impulse);
 		}
-
-		if (other.gameObject.tag == "Trigger") {
-			
-			this.enabled = true;
-
-			//カットイン演出の処理
-			panel.SetActive (true);		//カットイン絵の表示
-			Time.timeScale = 0;		//ゲーム画面のポーズ
-			cutin.SetTrigger ("Start");		//アニメーション遷移
-
-		}
-			
-	}
-		
-	void FixedUpdate () {
-
-		if (upper > 0) {
-			upper = upper - 30f * Time.deltaTime;		//飛ぶ力を1秒ずつ減衰
-			plane.AddForce (transform.up * upper, ForceMode.Impulse);
-		}
-
-	}
-
-	void Update(){
-
-		//カットイン演出の処理
-		//アニメーションが終わったらTimeScaleを1に戻す
-		if (sumtime >= 0 || sumtime <= 3.5f) {
-
-			time = Time.unscaledDeltaTime;
-			sumtime = sumtime + time;
-
-		}
-
-		if (sumtime >= 3.5f && cheerupOnSwitch == true) {
-			cheerupOnSwitch = false;
-			StopAnimation ();
-
-		}
-
-	}
-		
-
-	//アニメーション終了のための処理
-	void StopAnimation(){
-
-		panel.SetActive (false);		//カットイン絵をオフに
-		Time.timeScale = 1;		//TimeScaleを1に
-
 	}
 
 }

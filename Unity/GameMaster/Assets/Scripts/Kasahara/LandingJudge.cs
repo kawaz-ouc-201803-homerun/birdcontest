@@ -2,24 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 飛行フェーズの終了判定
+/// </summary>
 public class LandingJudge : MonoBehaviour {
 
-	//Escapeキーを押してゲームを終了させる
-
+	// 終了時のイベントハンドラー
 	public UnityEngine.Events.UnityEvent LandingEvent;
 
-	void Update () {
-		
-		if (Input.GetKeyDown(KeyCode.Escape))
-		{
-			Debug.Log ("終了");
+	/// <summary>
+	/// 毎フレーム更新処理
+	/// </summary>
+	void Update() {
+		// TODO: 飛行機が静止してから一定時間が経過したら、自動的に終了扱いにする
 
-			if (this.LandingEvent != null) {
-				this.LandingEvent.Invoke ();
+		if(Input.GetKeyDown(KeyCode.Escape) == true) {
+			// Escapeキーで飛行を強制終了
+			if(this.LandingEvent != null) {
+				this.LandingEvent.Invoke();
 			}
-
 		}
-
 	}
 
 }

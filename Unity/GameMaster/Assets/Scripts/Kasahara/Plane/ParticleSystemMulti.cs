@@ -1,47 +1,56 @@
 ﻿using System;
 using UnityEngine;
 
-namespace UnityStandardAssets.Effects
-{
-	
-public class ParticleSystemMulti : MonoBehaviour {
+namespace UnityStandardAssets.Effects {
 
+	/// <summary>
+	/// 仕込み役/援護役：爆弾のパーティクルシステム
+	/// </summary>
+	public class ParticleSystemMulti : MonoBehaviour {
+
+		/// <summary>
+		/// パーティクル乗数
+		/// </summary>
 		public float multiplier = 1;
 
-		void Start () {
-			var particles = GetComponentsInChildren<ParticleSystem> ();
-			foreach (ParticleSystem particle in particles) {
+		/// <summary>
+		/// 初期処理
+		/// </summary>
+		void Start() {
+			var particles = this.GetComponentsInChildren<ParticleSystem>();
+			foreach(ParticleSystem particle in particles) {
 				ParticleSystem.MainModule mModule = particle.main;
-				mModule.startSizeMultiplier *= multiplier;
-				mModule.startSpeedMultiplier *= multiplier;
-				mModule.startLifetimeMultiplier *= Mathf.Lerp(multiplier, 1, 0.5f);
+				mModule.startSizeMultiplier *= this.multiplier;
+				mModule.startSpeedMultiplier *= this.multiplier;
+				mModule.startLifetimeMultiplier *= Mathf.Lerp(this.multiplier, 1, 0.5f);
 				particle.Stop();
 			}
 		}
 
-
-	// Use this for initialization
-	private void Update () 
-			{
-			if(Input.GetKeyDown(KeyCode.Return)){
-				ParticlesPlay ();
-				
+		/// <summary>
+		/// 毎フレーム更新処理
+		/// </summary>
+		private void Update() {
+			// NOTE: 現状、Enter/Returnキーで発動する
+			if(Input.GetKeyDown(KeyCode.Return) == true) {
+				this.particlesPlay();
 			}
-				}
+		}
 
-		private void ParticlesPlay(){
+		/// <summary>
+		/// パーティクル開始
+		/// </summary>
+		private void particlesPlay() {
 			var systems = GetComponentsInChildren<ParticleSystem>();
-			foreach (ParticleSystem system in systems)
-			{
+			foreach(ParticleSystem system in systems) {
 				ParticleSystem.MainModule mainModule = system.main;
-				mainModule.startSizeMultiplier *= multiplier;
-				mainModule.startSpeedMultiplier *= multiplier;
-				mainModule.startLifetimeMultiplier *= Mathf.Lerp(multiplier, 1, 0.5f);
+				mainModule.startSizeMultiplier *= this.multiplier;
+				mainModule.startSpeedMultiplier *= this.multiplier;
+				mainModule.startLifetimeMultiplier *= Mathf.Lerp(this.multiplier, 1, 0.5f);
 				system.Clear();
 				system.Play();
 			}
 		}
-	
-	
-}
+
+	}
 }
