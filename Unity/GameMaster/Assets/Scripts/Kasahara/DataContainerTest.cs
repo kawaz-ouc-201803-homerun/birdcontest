@@ -29,7 +29,7 @@ public class DataContainerTest : MonoBehaviour {
 
 		case 0:	//爆発
 			//飛行機の位置を変更
-			this.transform.position = new Vector3 (-137, 93, -69);
+			this.transform.position = new Vector3 (-137,86, -69);
 
 			//爆弾をオン
 			firstbomb.SetActive (true);
@@ -42,7 +42,7 @@ public class DataContainerTest : MonoBehaviour {
 		case 1:	//牽引
 			Debug.Log ("車");
 			//飛行機の位置を変更
-			this.transform.position = new Vector3 (-77, 96, -60);
+			this.transform.position = new Vector3 (-77, 86, -60);
 
 			//車をオン
 			car.SetActive(true);
@@ -58,7 +58,7 @@ public class DataContainerTest : MonoBehaviour {
 		case 2:	//人力
 			Debug.Log("人");
 			//飛行機の位置を変更
-			this.transform.position = new Vector3 (-77, 96, -60);
+			this.transform.position = new Vector3 (-77, 86, -60);
 
 			//クエリちゃんをオンに
 			querychan.SetActive(true);

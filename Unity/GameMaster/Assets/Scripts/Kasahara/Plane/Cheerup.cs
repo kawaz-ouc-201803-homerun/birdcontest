@@ -43,8 +43,8 @@ public class Cheerup : MonoBehaviour {
 	void FixedUpdate () {
 
 		if (upper > 0) {
-			upper = upper - 1f * Time.deltaTime;		//飛ぶ力を1秒ずつ減衰
-			plane.AddForce (transform.up * upper, ForceMode.VelocityChange);
+			upper = upper - 30f * Time.deltaTime;		//飛ぶ力を1秒ずつ減衰
+			plane.AddForce (transform.up * upper, ForceMode.Impulse);
 		}
 
 	}
