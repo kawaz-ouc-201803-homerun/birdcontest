@@ -22,7 +22,7 @@ public class AutoMove : PlaneBehaviourParent {
 	/// 毎フレーム更新処理
 	/// 機体に対し、一定の力を加え続けます。
 	/// </summary>
-	void FixedUpdate() {
+	public void FixedUpdate() {
 		// 推進力を毎秒 10 加える
 		this.MovePower = this.MovePower + 10 * Time.deltaTime;
 

@@ -39,7 +39,7 @@ public class DistanceCalculator : MonoBehaviour {
 	/// <summary>
 	/// 初期化処理
 	/// </summary>
-	void Start() {
+	public void Start() {
 		// 対象オブジェクトの初期座標を保管
 		this.startPositionX = this.Target.transform.position.x;
 		this.startPositionZ = this.Target.transform.position.z;
@@ -48,7 +48,7 @@ public class DistanceCalculator : MonoBehaviour {
 	/// <summary>
 	/// 毎フレーム更新処理
 	/// </summary>
-	void Update() {
+	public void Update() {
 		// それぞれに座標を挿入
 		this.currentPositionX = this.Target.transform.position.x;
 		this.currentPositionZ = this.Target.transform.position.z;

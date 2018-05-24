@@ -23,7 +23,7 @@ public class StopFollow : MonoBehaviour {
 	/// 慣性が残っている場合はそのまま減衰しますが、その場で静止するわけではありません。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
-	void OnTriggerEnter(Collider other) {
+	public void OnTriggerEnter(Collider other) {
 		if(other.gameObject.tag == "Car") {
 			this.PullCar.GetComponent<FollowTarget>().enabled = false;
 			this.PushHuman.GetComponent<FollowTarget>().enabled = false;

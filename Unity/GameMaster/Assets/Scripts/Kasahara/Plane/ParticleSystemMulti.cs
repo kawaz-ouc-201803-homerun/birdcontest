@@ -16,7 +16,7 @@ namespace UnityStandardAssets.Effects {
 		/// <summary>
 		/// 初期処理
 		/// </summary>
-		void Start() {
+		public void Start() {
 			var particles = this.GetComponentsInChildren<ParticleSystem>();
 			foreach(ParticleSystem particle in particles) {
 				ParticleSystem.MainModule mModule = particle.main;
@@ -30,7 +30,7 @@ namespace UnityStandardAssets.Effects {
 		/// <summary>
 		/// 毎フレーム更新処理
 		/// </summary>
-		private void Update() {
+		public void Update() {
 			// NOTE: 現状、Enter/Returnキーで発動する
 			if(Input.GetKeyDown(KeyCode.Return) == true) {
 				this.particlesPlay();

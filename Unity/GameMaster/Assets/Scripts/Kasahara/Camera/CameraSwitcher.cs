@@ -50,7 +50,7 @@ public class CameraSwitcher : MonoBehaviour {
 	/// <summary>
 	/// 初期化処理
 	/// </summary>
-	void Start() {
+	public void Start() {
 		if(this.DataContainer.OptionA == (int)PhaseControllers.OptionA.Human) {
 			// 人が飛行機を押すときだけ、後方俯瞰にする
 			this.ChangeCameraAngle(CameraID.ThirdPerson);

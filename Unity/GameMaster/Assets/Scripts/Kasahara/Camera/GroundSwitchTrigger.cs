@@ -17,7 +17,7 @@ public class GroundSwitchTrigger : MonoBehaviour {
 	/// 機体がこのオブジェクトに触れたときに発動させます。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
-	void OnTriggerEnter(Collider other) {
+	public void OnTriggerEnter(Collider other) {
 		if(other.gameObject.tag == "Player") {
 			this.camera.GetComponent<CameraSwitcher>().ChangeCameraAngle(CameraSwitcher.CameraID.Ground);
 		}

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -12,7 +11,17 @@ public class Cheerup : CutInParent {
 	/// ＊ParamCから代入
 	/// </summary>
 	public float UpperPower;
-	
+
+	/// <summary>
+	/// 音源オブジェクト
+	/// </summary>
+	public AudioSource CheerupAudioSource;
+
+	/// <summary>
+	/// 応援ボイス
+	/// </summary>
+	public AudioClip[] CheerupVoice;
+
 	/// <summary>
 	/// 毎フレーム更新処理
 	/// ＊カットイン終了後に適用したい処理をここに定義して下さい。
@@ -22,7 +31,19 @@ public class Cheerup : CutInParent {
 			// １秒ごとに飛ぶ力を減衰させていく
 			this.UpperPower = this.UpperPower - 30f * Time.deltaTime;
 			this.PlaneRigidbody.AddForce(this.transform.up * this.UpperPower, ForceMode.Impulse);
+
+			// ボイス再生
+			this.StartCoroutine(this.PlayVoice(Random.Range(0, this.CheerupVoice.Length)));
 		}
+	}
+
+	/// <summary>
+	/// 応援ボイスを再生します。
+	/// </summary>
+	/// <param name="audioClipIndex">再生するボイスのインデックス</param>
+	public IEnumerator PlayVoice(int audioClipIndex) {
+		yield return new WaitForSecondsRealtime(1f);
+		this.CheerupAudioSource.PlayOneShot(this.CheerupVoice[audioClipIndex]);
 	}
 
 }

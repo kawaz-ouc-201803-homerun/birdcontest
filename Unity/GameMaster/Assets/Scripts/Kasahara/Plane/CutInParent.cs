@@ -34,7 +34,7 @@ public class CutInParent : PlaneBehaviourParent {
 	/// トリガー対象が接したらこのスクリプトの処理を有効化します。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
-	void OnTriggerEnter(Collider other) {
+	public void OnTriggerEnter(Collider other) {
 		if(this.IsCutinEnabled == false || other.gameObject.tag != "Trigger") {
 			return;
 		}
@@ -61,7 +61,7 @@ public class CutInParent : PlaneBehaviourParent {
 	/// 毎フレーム更新処理
 	/// カットイン演出を行います。
 	/// </summary>
-	void Update() {
+	public void Update() {
 		if(this.sumTime <= CutInParent.CutinTimeSeconds) {
 			// タイムスケールに依存しないリアルの時間で計測する
 			this.sumTime += Time.unscaledDeltaTime;

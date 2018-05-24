@@ -13,7 +13,7 @@ public class LandingJudge : MonoBehaviour {
 	/// <summary>
 	/// 毎フレーム更新処理
 	/// </summary>
-	void Update() {
+	public void Update() {
 		// TODO: 飛行機が静止してから一定時間が経過したら、自動的に終了扱いにする
 
 		if(Input.GetKeyDown(KeyCode.Escape) == true) {

@@ -18,7 +18,7 @@ namespace UnityStandardAssets.Effects {
 		/// <summary>
 		/// 毎フレーム更新処理
 		/// </summary>
-		void Update() {
+		public void Update() {
 			// NOTE: 現状、Enter/Returnキーで発動する
 			if(Input.GetKeyDown(KeyCode.Return) == true) {
 				float multiplier = GetComponent<ParticleSystemMulti>().multiplier;

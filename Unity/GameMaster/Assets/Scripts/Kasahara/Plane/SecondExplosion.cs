@@ -45,7 +45,7 @@ public class SecondExplosion : PlaneBehaviourParent {
 	/// トリガー対象に接触したら開始します。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
-	void OnTriggerEnter(Collider other) {
+	public void OnTriggerEnter(Collider other) {
 		if(SecondExplosion.EnabledOnTrigegrEnter == false || other.gameObject.tag != "Trigger") {
 			return;
 		}
