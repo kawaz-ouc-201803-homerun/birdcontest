@@ -4,7 +4,12 @@ using UnityEngine.UI;
 /// <summary>
 /// 飛距離計算を行います。
 /// </summary>
-public class DistanceCounter : MonoBehaviour {
+public class DistanceCalculator : MonoBehaviour {
+
+	/// <summary>
+	/// 飛距離
+	/// </summary>
+	public float Distance;
 
 	/// <summary>
 	/// 対象オブジェクト
@@ -30,11 +35,6 @@ public class DistanceCounter : MonoBehaviour {
 	/// 対象オブジェクトの現在位置Z
 	/// </summary>
 	private float currentPositionZ;
-
-	/// <summary>
-	/// 飛距離
-	/// </summary>
-	public float Distance;
 
 	/// <summary>
 	/// 初期化処理

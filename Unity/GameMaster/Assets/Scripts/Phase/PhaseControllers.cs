@@ -706,7 +706,7 @@ public class PhaseControllers : PhaseBase {
 							// 賄賂
 							values[(int)PowerMeter.StartPower] = 0;
 							values[(int)PowerMeter.FlightPower] = 0;
-							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["wairoScore"]) / (float)PhaseControllers.WairoScoreMax * 0.8f;
+							values[(int)PowerMeter.LackPower] = 0.2f + int.Parse(progress["param"]) / (float)PhaseControllers.WairoScoreMax * 0.8f;
 							break;
 					}
 					break;

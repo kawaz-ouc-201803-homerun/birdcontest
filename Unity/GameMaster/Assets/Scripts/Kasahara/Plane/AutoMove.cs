@@ -11,7 +11,7 @@ public class AutoMove : PlaneBehaviourParent {
 	/// <summary>
 	/// 前に進む力の大きさ
 	/// </summary>
-	private float movePower;
+	public float MovePower;
 
 	/// <summary>
 	/// 加える力の種類
@@ -24,10 +24,10 @@ public class AutoMove : PlaneBehaviourParent {
 	/// </summary>
 	void FixedUpdate() {
 		// 推進力を毎秒 10 加える
-		this.movePower = this.movePower + 10 * Time.deltaTime;
+		this.MovePower = this.MovePower + 10 * Time.deltaTime;
 
 		// 飛行機にmovepowerを加える
-		this.PlaneRigidbody.AddForce(this.transform.forward * this.movePower, this.PowerForce);
+		this.PlaneRigidbody.AddForce(this.transform.forward * this.MovePower, this.PowerForce);
 	}
 
 	/// <summary>

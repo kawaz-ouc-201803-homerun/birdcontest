@@ -2,20 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 仕込み訳の牽引車・クエリちゃんを飛行機から切り離します。
+/// ＊最初の視点切替のPlaneにアタッチして下さい。
+/// </summary>
 public class StopFollow : MonoBehaviour {
 
-	//車とクエリちゃんを飛行機から切り離すスクリプト
+	/// <summary>
+	/// 牽引車
+	/// </summary>
+	public GameObject PullCar;
 
-	//板につける
-	//牽引する車に"Car"というタグをつける
+	/// <summary>
+	/// 手押しする人
+	/// </summary>
+	public GameObject PushHuman;
 
-	public GameObject pullcar;      //牽引する車を代入
-	public GameObject pushhuman;        //クエリちゃんを代入
-
+	/// <summary>
+	/// トリガー対象が接したら追従のコンポーネントを無効化します。
+	/// 慣性が残っている場合はそのまま減衰しますが、その場で静止するわけではありません。
+	/// </summary>
+	/// <param name="other">接したオブジェクトのコライダー</param>
 	void OnTriggerEnter(Collider other) {
 		if(other.gameObject.tag == "Car") {
-			pullcar.GetComponent<FollowTarget>().enabled = false;
-			pushhuman.GetComponent<FollowTarget>().enabled = false;
+			this.PullCar.GetComponent<FollowTarget>().enabled = false;
+			this.PushHuman.GetComponent<FollowTarget>().enabled = false;
 		}
 	}
+
 }

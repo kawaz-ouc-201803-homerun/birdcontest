@@ -31,7 +31,7 @@ public class CutInParent : PlaneBehaviourParent {
 	public const float CutinTimeSeconds = 3.5f;
 
 	/// <summary>
-	/// トリガー対象が接したらこのスクリプトの処理を有効化する
+	/// トリガー対象が接したらこのスクリプトの処理を有効化します。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
 	void OnTriggerEnter(Collider other) {

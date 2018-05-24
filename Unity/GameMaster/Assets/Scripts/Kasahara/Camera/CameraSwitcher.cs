@@ -8,6 +8,12 @@ using UnityEngine;
 public class CameraSwitcher : MonoBehaviour {
 
 	/// <summary>
+	/// 端末操作結果データ
+	/// ＊インスペクターにて設定して下さい。
+	/// </summary>
+	public DataContainer DataContainer;
+
+	/// <summary>
 	/// カメラ視点ID
 	/// </summary>
 	public enum CameraID {
@@ -45,7 +51,7 @@ public class CameraSwitcher : MonoBehaviour {
 	/// 初期化処理
 	/// </summary>
 	void Start() {
-		if(DataContainer.OptionA == (int)PhaseControllers.OptionA.Human) {
+		if(this.DataContainer.OptionA == (int)PhaseControllers.OptionA.Human) {
 			// 人が飛行機を押すときだけ、後方俯瞰にする
 			this.ChangeCameraAngle(CameraID.ThirdPerson);
 		} else {

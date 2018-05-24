@@ -12,8 +12,7 @@ public class Cheerup : CutInParent {
 	/// ＊ParamCから代入
 	/// </summary>
 	public float UpperPower;
-
-
+	
 	/// <summary>
 	/// 毎フレーム更新処理
 	/// ＊カットイン終了後に適用したい処理をここに定義して下さい。

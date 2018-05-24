@@ -1455,6 +1455,16 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 265974055}
+--- !u!1 &282339886 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1990093724333154, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
+--- !u!95 &282339887 stripped
+Animator:
+  m_PrefabParentObject: {fileID: 95820265521315446, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &339840624
 GameObject:
   m_ObjectHideFlags: 0
@@ -1731,6 +1741,11 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 357408616}
+--- !u!1 &358565307 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1327867450194282, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &361273196
 GameObject:
   m_ObjectHideFlags: 0
@@ -1917,6 +1932,11 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 53c22e1773be7f84aad8ed8b7b58fa6e, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &388121645 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1686598895384406, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &438442606
 GameObject:
   m_ObjectHideFlags: 0
@@ -3488,6 +3508,11 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 678318222}
+--- !u!1 &685538438 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1426703364691590, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &705518929
 GameObject:
   m_ObjectHideFlags: 0
@@ -4502,6 +4527,16 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 901028665}
+--- !u!1 &910506451 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1054147346055750, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
+--- !u!95 &910506457 stripped
+Animator:
+  m_PrefabParentObject: {fileID: 95285080214493300, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &926994173
 GameObject:
   m_ObjectHideFlags: 0
@@ -4712,6 +4747,11 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+--- !u!1 &970896125 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1740589237009576, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &982780105
 GameObject:
   m_ObjectHideFlags: 0
@@ -5997,6 +6037,11 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1104940646}
+--- !u!1 &1106411430 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1810107786338354, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &1113002377
 GameObject:
   m_ObjectHideFlags: 0
@@ -6133,6 +6178,28 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1117610275}
+--- !u!1 &1118257318 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1275497207075412, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
+--- !u!114 &1118257319 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 114632756422279074, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
+  m_Script: {fileID: 11500000, guid: 1aa7a86501d882f4bba01718bae14e58, type: 3}
+--- !u!114 &1118257324 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 114874445213260366, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
+  m_Script: {fileID: 11500000, guid: 6514fa4f29ed2444aa7386b5a5dd75e7, type: 3}
+--- !u!54 &1118257327 stripped
+Rigidbody:
+  m_PrefabParentObject: {fileID: 54465294334309642, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &1122488366
 GameObject:
   m_ObjectHideFlags: 0
@@ -6757,6 +6824,209 @@ Prefab:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1426703364691590, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1192317771967336, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_Name
+      value: ThirdPersonCamera
+      objectReference: {fileID: 0}
+    - target: {fileID: 1803045681826990, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_Name
+      value: ControllerA_FirstBomb
+      objectReference: {fileID: 0}
+    - target: {fileID: 1686598895384406, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_Name
+      value: ControllerA_Car
+      objectReference: {fileID: 0}
+    - target: {fileID: 1054147346055750, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_Name
+      value: ControllerA_QueryChan
+      objectReference: {fileID: 0}
+    - target: {fileID: 1873152411844652, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_Name
+      value: CameraSwitcher
+      objectReference: {fileID: 0}
+    - target: {fileID: 1327867450194282, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_Name
+      value: ControllerC_SecoundBomb
+      objectReference: {fileID: 0}
+    - target: {fileID: 1275497207075412, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_Name
+      value: MainPlane
+      objectReference: {fileID: 0}
+    - target: {fileID: 4121852209010180, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_RootOrder
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4636108522042580, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_RootOrder
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4042962102904530, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_RootOrder
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 1636280674100310, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
+      propertyPath: m_Name
+      value: ThirdPersonSwitcher
+      objectReference: {fileID: 0}
+    - target: {fileID: 114391986594640012, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: PushHuman
+      value: 
+      objectReference: {fileID: 910506451}
+    - target: {fileID: 114391986594640012, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: PullCar
+      value: 
+      objectReference: {fileID: 388121645}
+    - target: {fileID: 114912329620796198, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: QueryChanAnimator
+      value: 
+      objectReference: {fileID: 910506457}
+    - target: {fileID: 114977466924406718, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: Plane
+      value: 
+      objectReference: {fileID: 1118257318}
+    - target: {fileID: 114977466924406718, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: PlaneRigidbody
+      value: 
+      objectReference: {fileID: 1118257327}
+    - target: {fileID: 114371347609931132, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: Plane
+      value: 
+      objectReference: {fileID: 1118257318}
+    - target: {fileID: 114371347609931132, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: PlaneRigidbody
+      value: 
+      objectReference: {fileID: 1118257327}
+    - target: {fileID: 114856446066923380, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: DataContainer
+      value: 
+      objectReference: {fileID: 1249737479}
+    - target: {fileID: 114856446066923380, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: pilotCamera
+      value: 
+      objectReference: {fileID: 1964556974}
+    - target: {fileID: 114856446066923380, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: sideCamera
+      value: 
+      objectReference: {fileID: 1106411430}
+    - target: {fileID: 114856446066923380, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: groundCamera
+      value: 
+      objectReference: {fileID: 1883680474}
+    - target: {fileID: 114874445213260366, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: Plane
+      value: 
+      objectReference: {fileID: 1118257318}
+    - target: {fileID: 114874445213260366, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: PlaneRigidbody
+      value: 
+      objectReference: {fileID: 1118257327}
+    - target: {fileID: 114045663837333494, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: Target
+      value: 
+      objectReference: {fileID: 1118257318}
+    - target: {fileID: 114874445213260366, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: TargetCharacterPanel
+      value: 
+      objectReference: {fileID: 282339886}
+    - target: {fileID: 114874445213260366, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: TargetCharacterAnimator
+      value: 
+      objectReference: {fileID: 282339887}
+    - target: {fileID: 114067754787660044, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: DataContainer
+      value: 
+      objectReference: {fileID: 1249737479}
+    - target: {fileID: 114199014610022394, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: Plane
+      value: 
+      objectReference: {fileID: 1118257318}
+    - target: {fileID: 114199014610022394, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: PlaneRigidbody
+      value: 
+      objectReference: {fileID: 1118257327}
+    - target: {fileID: 114705616648068058, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: Plane
+      value: 
+      objectReference: {fileID: 1118257318}
+    - target: {fileID: 114705616648068058, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: PlaneRigidbody
+      value: 
+      objectReference: {fileID: 1118257327}
+    - target: {fileID: 114993528505581692, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: Plane
+      value: 
+      objectReference: {fileID: 1118257318}
+    - target: {fileID: 114993528505581692, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: PlaneRigidbody
+      value: 
+      objectReference: {fileID: 1118257327}
+    - target: {fileID: 114632756422279074, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: Plane
+      value: 
+      objectReference: {fileID: 1118257318}
+    - target: {fileID: 114632756422279074, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: PlaneRigidbody
+      value: 
+      objectReference: {fileID: 1118257327}
+    - target: {fileID: 114993528505581692, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: DataContainer
+      value: 
+      objectReference: {fileID: 1249737479}
+    - target: {fileID: 114993528505581692, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: SecondBomb
+      value: 
+      objectReference: {fileID: 358565307}
+    - target: {fileID: 114993528505581692, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: Smoke
+      value: 
+      objectReference: {fileID: 970896125}
+    - target: {fileID: 114993528505581692, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: DummyPlane
+      value: 
+      objectReference: {fileID: 685538438}
+    - target: {fileID: 114632756422279074, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: TargetCharacterPanel
+      value: 
+      objectReference: {fileID: 2011639078}
+    - target: {fileID: 114632756422279074, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+        type: 2}
+      propertyPath: TargetCharacterAnimator
+      value: 
+      objectReference: {fileID: 2011639079}
     m_RemovedComponents:
     - {fileID: 114753390263101348, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
     - {fileID: 114006135638635316, guid: 65545b5b29fb8194689e0ea24f5dbb55, type: 2}
@@ -6972,6 +7242,30 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1246480493}
+--- !u!1 &1249737478 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1506793352814754, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
+--- !u!114 &1249737479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1249737478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a18e36b42330b45469da9cea8fb4a06e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RootObject: {fileID: 1249737478}
+  ControllerAQueryChan: {fileID: 910506451}
+  ControllerABomb: {fileID: 1548825091}
+  ControllerACar: {fileID: 388121645}
+  ControllerBPlane: {fileID: 1118257318}
+  ControllerCBomb: {fileID: 358565307}
+  ControllerCCheerup: {fileID: 1118257319}
+  ControllerCPayBribe: {fileID: 1118257324}
 --- !u!1 &1254392124
 GameObject:
   m_ObjectHideFlags: 0
@@ -8017,6 +8311,11 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1534397609}
+--- !u!1 &1548825091 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1803045681826990, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &1565877765
 GameObject:
   m_ObjectHideFlags: 0
@@ -10641,6 +10940,11 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+--- !u!1 &1883680474 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1480041012396634, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &1911137671
 GameObject:
   m_ObjectHideFlags: 0
@@ -10829,6 +11133,11 @@ Transform:
   m_Father: {fileID: 1746854891}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1964556974 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1779375500602476, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &1976679477
 GameObject:
   m_ObjectHideFlags: 0
@@ -10973,6 +11282,16 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2007432845}
+--- !u!1 &2011639078 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1724281627035514, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
+--- !u!95 &2011639079 stripped
+Animator:
+  m_PrefabParentObject: {fileID: 95986948992334996, guid: 65545b5b29fb8194689e0ea24f5dbb55,
+    type: 2}
+  m_PrefabInternal: {fileID: 1226814128}
 --- !u!1 &2012021507
 GameObject:
   m_ObjectHideFlags: 0

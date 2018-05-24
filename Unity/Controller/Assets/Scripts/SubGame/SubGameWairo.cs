@@ -442,8 +442,8 @@ namespace SubGame {
 		/// 進捗報告として送るデータを辞書型配列にセットします。
 		/// </summary>
 		public override void SetProgressData(ref Dictionary<string, string> dictionary) {
-			dictionary["wairoStep"] = this.wairoStep.ToString();
-			dictionary["wairoScore"] = this.wairoScore.ToString();
+			dictionary["param"] = this.wairoScore.ToString();
+			dictionary["step"] = this.wairoStep.ToString();
 		}
 
 	}
