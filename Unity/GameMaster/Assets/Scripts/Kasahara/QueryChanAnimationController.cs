@@ -18,11 +18,16 @@ public class QueryChanAnimationController : MonoBehaviour {
 	private float speed;
 
 	/// <summary>
-	/// 初期化処理
+	/// アニメーション開始
+	/// ＊AutoMoveのStartMoveEventにセットして下さい。
 	/// </summary>
-	public void Start() {
-		//飛行機を押すアニメーションの速度を最初は遅くしておく
-		this.speed = 0.01f;
+	public void StartAnimation() {
+		// クエリちゃんのアニメーションを開始
+		this.enabled = true;
+		this.QueryChanAnimator.SetTrigger("Start");
+
+		// 飛行機を押すアニメーションの速度を最初は遅くしておく
+		this.speed = 3.0f;
 		this.QueryChanAnimator.speed = this.speed;
 	}
 
@@ -30,7 +35,7 @@ public class QueryChanAnimationController : MonoBehaviour {
 	/// 毎フレーム更新処理
 	/// </summary>
 	public void Update() {
-		//アニメーションのスピードをだんだん上げていく
+		// アニメーションのスピードをだんだん上げていく
 		if(this.speed <= 8) {
 			this.speed = this.speed + 2.5f * Time.deltaTime;
 			this.QueryChanAnimator.speed = this.speed;

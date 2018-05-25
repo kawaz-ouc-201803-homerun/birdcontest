@@ -2,6 +2,7 @@
 
 /// <summary>
 /// 離陸後に飛行機に推進力を与えます。
+/// ＊このスクリプトは飛行機に直接アタッチして下さい。
 /// </summary>
 public class PompPedal : PlaneBehaviourParent {
 
@@ -16,8 +17,9 @@ public class PompPedal : PlaneBehaviourParent {
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
 	public void OnTriggerEnter(Collider other) {
-		if(other.gameObject.tag == "Pedal") {
+		if(other.gameObject.tag == "Stopper") {
 			// NOTE: 以後、Update系のメソッドが走るようになる
+			Debug.Log("飛行役「ペダル航行」開始");
 			this.enabled = true;
 		}
 	}
@@ -28,10 +30,12 @@ public class PompPedal : PlaneBehaviourParent {
 	/// </summary>
 	public void FixedUpdate() {
 		if(this.PedalPower > 0) {
-			// 斜め上＋前方方向に力を加える
-			this.PedalPower = this.PedalPower - Time.deltaTime * 10;
+			// 毎フレーム減衰させながら、前方に力を加える
+			this.PedalPower -= Time.deltaTime * 100f;
 			this.PlaneRigidbody.AddForce(this.transform.forward * this.PedalPower, ForceMode.Force);
-			this.PlaneRigidbody.AddForce(this.transform.up * this.PedalPower, ForceMode.Force);
+
+			// NOTE: バランス調整のため、上方向に力を加えるのはあくまでも仕込み役とサポート役に限定させる
+			// this.PlaneRigidbody.AddForce(this.transform.up * this.PedalPower, ForceMode.Force);
 		}
 	}
 }

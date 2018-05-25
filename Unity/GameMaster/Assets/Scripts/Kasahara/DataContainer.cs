@@ -105,19 +105,72 @@ public class DataContainer : MonoBehaviour {
 		this.ControllerData = controllerData;
 
 		// データを解析してそれぞれの変数に格納する
-		this.OptionA = int.Parse((controllerData[0] as Dictionary<string, string>)["option"]);
-		this.ParamA = int.Parse((controllerData[0] as Dictionary<string, string>)["param"]);
-		this.ParamB = int.Parse((controllerData[1] as Dictionary<string, string>)["param"]);
-		this.OptionC = int.Parse((controllerData[2] as Dictionary<string, string>)["option"]);
-		this.ParamC = int.Parse((controllerData[2] as Dictionary<string, string>)["param"]);
+		this.OptionA = int.Parse((controllerData[(int)NetworkConnector.RoleIds.A_Prepare] as Dictionary<string, string>)["option"]);
+		this.ParamA = int.Parse((controllerData[(int)NetworkConnector.RoleIds.A_Prepare] as Dictionary<string, string>)["param"]);
+		this.ParamB = int.Parse((controllerData[(int)NetworkConnector.RoleIds.B_Flight] as Dictionary<string, string>)["param"]);
+		this.OptionC = int.Parse((controllerData[(int)NetworkConnector.RoleIds.C_Assist] as Dictionary<string, string>)["option"]);
+		this.ParamC = int.Parse((controllerData[(int)NetworkConnector.RoleIds.C_Assist] as Dictionary<string, string>)["param"]);
 
+		// 結果値のスケールを飛行フェーズの仕様に合わせて変換
 		// 端末A
 		switch(this.OptionA) {
 			case (int)PhaseControllers.OptionA.Bomb:
-				Debug.Log("仕込み役「爆弾」");
+				this.ParamA = (int)(1000f + this.ParamA / (float)PhaseControllers.ControllerLimitSeconds * 2500f);
+				break;
 
-				// 飛行機の位置を変更
-				this.transform.position = new Vector3(-137, 86, -69);
+			case (int)PhaseControllers.OptionA.Human:
+				this.ParamA = (int)(1f + this.ParamA / (float)PhaseControllers.ControllerLimitSeconds * (30f - 1));
+				break;
+
+			case (int)PhaseControllers.OptionA.Car:
+				this.ParamA = (int)(10f + this.ParamA / (float)PhaseControllers.ControllerAMeterMax * (30f - 1));
+				break;
+		}
+
+		// 端末B
+		this.ParamB = (int)(this.ParamB / (float)PhaseControllers.ControllerLimitSeconds * 500f);
+
+		// 端末C
+		switch(this.OptionC) {
+			case (int)PhaseControllers.OptionC.Bomb:
+				this.ParamC = (int)(1f + this.ParamC / (float)PhaseControllers.ControllerLimitSeconds * 800f);
+				break;
+
+			case (int)PhaseControllers.OptionC.Human:
+				this.ParamC = (int)(30f + this.ParamC / (float)PhaseControllers.ControllerLimitSeconds * 20f);
+				break;
+
+			case (int)PhaseControllers.OptionC.Wairo:
+				// 賄賂スコアに応じてスコアの上げ幅をパーセント値で決定する
+				switch(this.ParamC) {
+					case 0:
+						this.ParamC = 100;
+						break;
+
+					case 1:
+						this.ParamC = 125;
+						break;
+
+					case 2:
+						this.ParamC = 150;
+						break;
+
+					case 3:
+						this.ParamC = 200;
+						break;
+				}
+				break;
+		}
+
+		// 結果に応じて各種ゲームオブジェクトを初期化
+		// 端末A
+		switch(this.OptionA) {
+			case (int)PhaseControllers.OptionA.Bomb:
+				Debug.Log("仕込み役「爆弾」:威力=" + this.ParamA);
+
+				// 飛行機と爆弾の位置を変更
+				this.ControllerBPlane.transform.position = new Vector3(-135.51f, 84.45f, -68.16f);
+				this.ControllerABomb.transform.position = new Vector3(-100.51f, 45.45f, -58.16f);
 				this.ControllerABomb.SetActive(true);
 
 				// 結果値を爆発威力としてセット
@@ -125,43 +178,37 @@ public class DataContainer : MonoBehaviour {
 				break;
 
 			case (int)PhaseControllers.OptionA.Car:
-				Debug.Log("仕込み役「牽引」");
+				Debug.Log("仕込み役「牽引」:威力=" + this.ParamA);
 
 				// 飛行機の位置を変更
-				this.transform.position = new Vector3(-77, 86, -60);
+				this.ControllerBPlane.transform.position = new Vector3(-77, 86, -60);
 				this.ControllerACar.SetActive(true);
 
 				// 結果値を車の牽引力としてセット
-				this.GetComponent<AutoMove>().MovePower = this.ParamA;
+				this.ControllerACar.GetComponent<AutoMove>().MovePower = this.ParamA;
 				break;
 
 			case (int)PhaseControllers.OptionA.Human:
-				Debug.Log("仕込み役「人力」");
+				Debug.Log("仕込み役「人力」:威力=" + this.ParamA);
 
 				// 飛行機の位置を変更
-				this.transform.position = new Vector3(-77, 86, -60);
+				this.ControllerBPlane.transform.position = new Vector3(-77, 86, -60);
 				this.ControllerAQueryChan.SetActive(true);
 
-				// クエリちゃんのアニメーションを開始
-				this.ControllerAQueryChan.GetComponent<QueryChanAnimationController>().enabled = true;
-				this.ControllerAQueryChan.GetComponent<QueryChanAnimationController>().QueryChanAnimator.SetTrigger("Start");
-
 				// 結果値を飛行機を押す力としてセット
-				this.GetComponent<AutoMove>().MovePower = this.ParamA;
+				this.ControllerAQueryChan.GetComponent<AutoMove>().MovePower = this.ParamA;
 				break;
 		}
 
-
 		// 端末B
-		this.GetComponent<PompPedal>().PedalPower = this.ParamB;
-
+		this.ControllerBPlane.GetComponent<PompPedal>().PedalPower = this.ParamB;
 
 		// 端末C
 		switch(this.OptionC) {
 			case (int)PhaseControllers.OptionC.Bomb:
-				Debug.Log("援護役「爆弾」");
-				this.GetComponent<SecondExplosion>().enabled = true;
-				SecondExplosion.EnabledOnTrigegrEnter = true;
+				Debug.Log("援護役「爆弾」:威力=" + this.ParamC);
+				this.ControllerBPlane.GetComponent<SecondExplosion>().enabled = true;
+				this.ControllerBPlane.GetComponent<SecondExplosion>().EnabledOnTrigegrEnter = true;
 
 				if(this.OptionA == (int)PhaseControllers.OptionA.Bomb) {
 					// AもCも爆弾だった場合、飛行機の墜落演出を行うため爆発の威力を無効化する
@@ -173,13 +220,13 @@ public class DataContainer : MonoBehaviour {
 				break;
 
 			case (int)PhaseControllers.OptionC.Human:
-				Debug.Log("援護役「気合」");
+				Debug.Log("援護役「気合」:威力=" + this.ParamC);
 				this.ControllerCCheerup.IsCutinEnabled = true;
 				this.ControllerCCheerup.UpperPower = this.ParamC;
 				break;
 
 			case (int)PhaseControllers.OptionC.Wairo:
-				Debug.Log("援護役「賄賂」");
+				Debug.Log("援護役「賄賂」:倍率%=" + this.ParamC);
 				this.ControllerCPayBribe.IsCutinEnabled = true;
 				break;
 		}

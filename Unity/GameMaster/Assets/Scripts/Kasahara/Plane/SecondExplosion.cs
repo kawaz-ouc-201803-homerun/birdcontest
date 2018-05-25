@@ -39,16 +39,18 @@ public class SecondExplosion : PlaneBehaviourParent {
 	/// <summary>
 	/// トリガー対象に接触したら爆発させるかどうか
 	/// </summary>
-	public static bool EnabledOnTrigegrEnter = false;
+	public bool EnabledOnTrigegrEnter = false;
 
 	/// <summary>
 	/// トリガー対象に接触したら開始します。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
 	public void OnTriggerEnter(Collider other) {
-		if(SecondExplosion.EnabledOnTrigegrEnter == false || other.gameObject.tag != "Trigger") {
+		if(this.EnabledOnTrigegrEnter == false || other.gameObject.tag != "Trigger") {
 			return;
 		}
+
+		Debug.Log("援護役「爆弾トリガー」発動");
 
 		if(this.DataContainer.OptionA == (int)PhaseControllers.OptionA.Bomb
 		&& this.DataContainer.OptionC == (int)PhaseControllers.OptionC.Bomb) {
@@ -72,7 +74,7 @@ public class SecondExplosion : PlaneBehaviourParent {
 		// 爆発位置を現在座標に合わせて爆発実行
 		this.SecondBomb.transform.position = this.Plane.transform.position;
 		this.SecondBomb.SetActive(true);
-		SecondExplosion.EnabledOnTrigegrEnter = false;
+		this.EnabledOnTrigegrEnter = false;
 	}
 
 }

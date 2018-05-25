@@ -20,13 +20,20 @@ public class StopFollow : MonoBehaviour {
 
 	/// <summary>
 	/// トリガー対象が接したら追従のコンポーネントを無効化します。
-	/// 慣性が残っている場合はそのまま減衰しますが、その場で静止するわけではありません。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
 	public void OnTriggerEnter(Collider other) {
 		if(other.gameObject.tag == "Car") {
+			Debug.Log("仕込み役：追従停止");
+			
+			// 追従を停止してその場に静止させる
 			this.PullCar.GetComponent<FollowTarget>().enabled = false;
+			this.PullCar.GetComponent<Rigidbody>().velocity = Vector3.zero;
+			this.PullCar.GetComponent<Rigidbody>().isKinematic = true;
+
 			this.PushHuman.GetComponent<FollowTarget>().enabled = false;
+			this.PushHuman.GetComponent<Rigidbody>().velocity = Vector3.zero;
+			this.PushHuman.GetComponent<Rigidbody>().isKinematic = true;
 		}
 	}
 

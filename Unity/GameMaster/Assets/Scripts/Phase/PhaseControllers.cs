@@ -84,6 +84,11 @@ public class PhaseControllers : PhaseBase {
 	public const int ControllerLimitSeconds = 30;
 
 	/// <summary>
+	/// 端末Aのメーターミニゲームの最大スコア
+	/// </summary>
+	public const int ControllerAMeterMax = 50;
+
+	/// <summary>
 	/// 各端末の進捗状況を更新する間隔秒数
 	/// </summary>
 	public const float ControllerProgressRefreshSeconds = 2.0f;
@@ -661,8 +666,8 @@ public class PhaseControllers : PhaseBase {
 							// 牽引：50%が最大出力、それを超えるとゼロに等しい状態になる
 							values[(int)PowerMeter.StartPower] = 
 								0.3f + (
-									(int.Parse(progress["param"]) <= 100.0f / 2) ?
-										int.Parse(progress["param"]) / (100.0f / 2) : 0
+									(int.Parse(progress["param"]) <= PhaseControllers.ControllerAMeterMax) ?
+										int.Parse(progress["param"]) / PhaseControllers.ControllerAMeterMax : 0
 								) * 0.4f;
 							values[(int)PowerMeter.FlightPower] = 0;
 							values[(int)PowerMeter.LackPower] = 0.1f;

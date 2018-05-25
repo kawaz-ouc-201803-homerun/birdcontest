@@ -5,6 +5,7 @@ using UnityStandardAssets.Effects;
 
 /// <summary>
 /// 端末操作フェーズを飛ばして直接データを代入するデバッグ用の間接クラス
+/// ＊飛行フェーズのrootオブジェクトにアタッチして下さい。
 /// </summary>
 public class DataContainerDebugger : MonoBehaviour {
 
@@ -17,42 +18,27 @@ public class DataContainerDebugger : MonoBehaviour {
 	/// <summary>
 	/// 端末A：選択肢
 	/// </summary>
-	public PhaseControllers.OptionA OptionA {
-		get;
-		private set;
-	}
+	public PhaseControllers.OptionA OptionA;
 
 	/// <summary>
 	/// 端末A：結果値
 	/// </summary>
-	public int ParamA {
-		get;
-		private set;
-	}
+	public int ParamA;
 
 	/// <summary>
 	/// 端末B：結果値
 	/// </summary>
-	public int ParamB {
-		get;
-		private set;
-	}
+	public int ParamB;
 
 	/// <summary>
 	/// 端末C：選択肢
 	/// </summary>
-	public PhaseControllers.OptionC OptionC {
-		get;
-		private set;
-	}
+	public PhaseControllers.OptionC OptionC;
 
 	/// <summary>
 	/// 端末C：結果値
 	/// </summary>
-	public int ParamC {
-		get;
-		private set;
-	}
+	public int ParamC;
 
 	/// <summary>
 	/// 初期化処理
@@ -66,11 +52,11 @@ public class DataContainerDebugger : MonoBehaviour {
 				{ "param", this.ParamA.ToString() },
 			},
 			new Dictionary<string, string>() {
-
+				{ "param", this.ParamB.ToString() },
 			},
 			new Dictionary<string, string>() {
-				{ "option", ((int)this.OptionA).ToString() },
-				{ "param", this.ParamA.ToString() },
+				{ "option", ((int)this.OptionC).ToString() },
+				{ "param", this.ParamC.ToString() },
 			},
 		});
 #endif

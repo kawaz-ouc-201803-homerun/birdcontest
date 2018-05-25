@@ -14,38 +14,26 @@ public class CameraSwitcher : MonoBehaviour {
 	public DataContainer DataContainer;
 
 	/// <summary>
+	/// 切り替え対象のカメラ
+	/// ＊インスペクターでそれぞれの視点カメラを紐づけて下さい。
+	/// </summary>
+	[SerializeField]
+	private Camera[] cameras;
+
+	/// <summary>
+	/// 現在有効なカメラ視点のID
+	/// </summary>
+	private CameraID currentCameraId;
+
+	/// <summary>
 	/// カメラ視点ID
 	/// </summary>
 	public enum CameraID {
-		Pilot,          // 一人称
-		ThirdPerson,    // 三人称俯瞰
+		Pilot,          // 一人称視点
+		ThirdPerson,    // 後方俯瞰視点
 		Side,           // 横視点
 		Ground,         // 地上視点
 	}
-
-	/// <summary>
-	/// インスペクターでパイロット視点カメラを紐づける
-	/// </summary>
-	[SerializeField]
-	private GameObject pilotCamera;
-
-	/// <summary>
-	/// インスペクターで第三者視点カメラを紐づける
-	/// </summary>
-	[SerializeField]
-	private GameObject thirdPersonCamera;
-
-	/// <summary>
-	/// インスペクターで側面視点カメラを紐づける
-	/// </summary>
-	[SerializeField]
-	private GameObject sideCamera;
-
-	/// <summary>
-	/// インスペクターで地面からの視点カメラを紐づける
-	/// </summary>
-	[SerializeField]
-	private GameObject groundCamera;
 
 	/// <summary>
 	/// 初期化処理
@@ -65,10 +53,19 @@ public class CameraSwitcher : MonoBehaviour {
 	/// </summary>
 	/// <param name="cameraID">カメラ視点ID</param>
 	public void ChangeCameraAngle(CameraID cameraID) {
-		this.pilotCamera.SetActive(cameraID == CameraID.Pilot);
-		this.thirdPersonCamera.SetActive(cameraID == CameraID.ThirdPerson);
-		this.sideCamera.SetActive(cameraID == CameraID.Side);
-		this.groundCamera.SetActive(cameraID == CameraID.Ground);
+		foreach(var camera in this.cameras) {
+			camera.gameObject.SetActive(false);
+		}
+		this.cameras[(int)cameraID].gameObject.SetActive(true);
+		this.currentCameraId = cameraID;
+	}
+
+	/// <summary>
+	/// 現在有効なカメラを返します。
+	/// </summary>
+	/// <returns>現在有効なカメラ</returns>
+	public Camera GetCurrentCamera() {
+		return this.cameras[(int)this.currentCameraId];
 	}
 
 }

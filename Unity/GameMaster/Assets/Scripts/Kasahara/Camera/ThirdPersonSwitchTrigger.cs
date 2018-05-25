@@ -18,7 +18,7 @@ public class ThirdPersonSwitchTrigger : MonoBehaviour {
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
 	public void OnTriggerEnter(Collider other) {
-		if(other.gameObject.tag == "Player") {
+		if(other.gameObject.tag == "Player" && this.camera != null) {
 			this.camera.GetComponent<CameraSwitcher>().ChangeCameraAngle(CameraSwitcher.CameraID.ThirdPerson);
 		}
 	}

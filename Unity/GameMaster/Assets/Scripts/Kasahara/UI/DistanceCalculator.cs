@@ -17,6 +17,11 @@ public class DistanceCalculator : MonoBehaviour {
 	public GameObject Target;
 
 	/// <summary>
+	/// 飛距離のUIオブジェクトのTextコンポーネント
+	/// </summary>
+	public Text DistanceTextUI;
+
+	/// <summary>
 	/// 対象オブジェクトの初期位置X
 	/// </summary>
 	private float startPositionX;
@@ -61,9 +66,8 @@ public class DistanceCalculator : MonoBehaviour {
 			* (this.currentPositionZ - this.startPositionZ)
 		);
 
-		// TODO: 画面上に距離を表示させる
-		// テキストに表示
-		// this.GetComponent<Text>().text = this.Distance.ToString("0.00") + "m";
+		// 画面上に距離を表示させる
+		this.DistanceTextUI.text = this.Distance.ToString("0.00") + " m";
 	}
 
 }

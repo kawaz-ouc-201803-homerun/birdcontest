@@ -34,13 +34,14 @@ public class CutInParent : PlaneBehaviourParent {
 	/// トリガー対象が接したらこのスクリプトの処理を有効化します。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
-	public void OnTriggerEnter(Collider other) {
+	public virtual void OnTriggerEnter(Collider other) {
 		if(this.IsCutinEnabled == false || other.gameObject.tag != "Trigger") {
 			return;
 		}
 
 		// NOTE: 以後、Update系のメソッドが走るようになる
 		this.enabled = true;
+		Debug.Log("カットイントリガー発動");
 
 		// カットイン演出を開始
 		this.TargetCharacterPanel.SetActive(true);

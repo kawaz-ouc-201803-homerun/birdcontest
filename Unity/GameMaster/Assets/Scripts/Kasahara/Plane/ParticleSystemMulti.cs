@@ -28,19 +28,9 @@ namespace UnityStandardAssets.Effects {
 		}
 
 		/// <summary>
-		/// 毎フレーム更新処理
-		/// </summary>
-		public void Update() {
-			// NOTE: 現状、Enter/Returnキーで発動する
-			if(Input.GetKeyDown(KeyCode.Return) == true) {
-				this.particlesPlay();
-			}
-		}
-
-		/// <summary>
 		/// パーティクル開始
 		/// </summary>
-		private void particlesPlay() {
+		public void PlayExplosionParticles() {
 			var systems = GetComponentsInChildren<ParticleSystem>();
 			foreach(ParticleSystem system in systems) {
 				ParticleSystem.MainModule mainModule = system.main;
