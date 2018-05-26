@@ -12,22 +12,14 @@ using UnityEngine;
 public class PhaseFlight : PhaseBase {
 
 	/// <summary>
-	/// 飛行フェーズのステップ
+	/// 地点表示を行う時間秒数
 	/// </summary>
-	public enum FlightGameStep {
-		BeforePrepare,      // 仕込み前
-		Preparing,          // 仕込み開始後
-		StartFlight,        // 飛行開始
-		Flighting,          // 飛行中間
-		StartSupport,       // 援護開始
-		EndSupport,         // 援護終了
-		EndFlight,          // 飛行着地
-	}
+	public const float MapAddressShowTimeSeconds = 3.0f;
 
 	/// <summary>
-	/// 地点表示を行う秒数
+	/// 飛距離の滑らかな加算にかける時間秒数
 	/// </summary>
-	public const float MapAddressShowTimeSecond = 3.0f;
+	public const float ScoreEaseTimeSeconds = 2.0f;
 
 	/// <summary>
 	/// 飛距離
@@ -60,20 +52,26 @@ public class PhaseFlight : PhaseBase {
 	private static string lastStreamText;
 
 	/// <summary>
-	/// 実況のステップ
-	/// これが外部から変更されたとき、直後のフレームで実況テキストが更新されます。
-	/// </summary>
-	public static FlightGameStep StreamStep;
-
-	/// <summary>
 	/// 実況メッセージを格納するゲームオブジェクトのコンポーネント
 	/// </summary>
 	private UnityEngine.UI.Text textArea;
 
 	/// <summary>
-	/// 機体オブジェクト
+	/// 舞台背景カメラワークの材料
 	/// </summary>
-	private GameObject airplane;
+	private List<GameObject> backgroundSapporoObjects;
+
+	/// <summary>
+	/// 3DObject_Kasaharaオブジェクト
+	/// ＊プレハブから動的生成します。
+	/// </summary>
+	private GameObject flight3DObjects;
+
+	/// <summary>
+	/// FlightOpeningCameraオブジェクト
+	/// ＊プレハブから動的生成します。
+	/// </summary>
+	private GameObject flightOpeningCamera;
 
 	/// <summary>
 	/// 地点表示コルーチン
@@ -96,12 +94,18 @@ public class PhaseFlight : PhaseBase {
 	private Dictionary<string, string>[] controllerData;
 
 	/// <summary>
+	/// 着地が完了したかどうか
+	/// </summary>
+	private bool isFlightLanding = false;
+
+	/// <summary>
 	/// コンストラクター
 	/// </summary>
 	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
 	/// <param name="parameters">[0]=イベントID, [1]=操作端末の結果データの配列</param>
 	public PhaseFlight(PhaseManager parent, object[] parameters) : base(parent, parameters) {
 		this.score = 0;
+		this.isFlightLanding = false;
 		this.mapAddress = "";
 		this.eventId = parameters[0] as string;
 		this.controllerData = parameters[1] as Dictionary<string, string>[];
@@ -111,34 +115,87 @@ public class PhaseFlight : PhaseBase {
 	/// ゲームオブジェクト初期化
 	/// </summary>
 	public override void Start() {
-		// メインカメラのアニメーション（舞台背景カメラワーク）を無効化
-		GameObject.Find("Main Camera").GetComponent<Animator>().enabled = false;
+		// 舞台背景カメラワークを無効化
+		this.backgroundSapporoObjects = new List<GameObject>(new GameObject[] {
+			GameObject.Find("BackgroundSapporoCamera"),
+			GameObject.Find("BackgroundSapporoMap"),
+		});
+		this.backgroundSapporoObjects.ForEach(
+			(obj) => obj.SetActive(false)
+		);
 
-		// TODO: 機体オブジェクトを保管
-		this.airplane = GameObject.Find("Airplane");
-		GameObject.Find("Flight_ScoreText").GetComponent<UnityEngine.UI.Text>().text = string.Format("{0:0.00} m", 0);
-		this.setScore(123.45f);
+		// 再利用されるオブジェクト群（古いもの）を取得しておく
+		var previousRespawnObjects = new List<GameObject>(GameObject.FindGameObjectsWithTag("Respawn"));
+
+		// 飛行フェーズの3Dオブジェクトを生成
+		var previousFlight3DObjects = previousRespawnObjects.Find((obj) => obj.name.IndexOf("3DObjects_Kasahara") != -1);
+		if(previousFlight3DObjects != null) {
+			// 先に前回のオブジェクトを削除する
+			Debug.LogWarning("以前の [3DObjects_Kasahara] オブジェクトが残っているため、削除します");
+			GameObject.Destroy(previousFlight3DObjects);
+		}
+		this.flight3DObjects = GameObject.Instantiate<GameObject>(
+			Resources.Load<GameObject>("Prefabs/3DObjects_Kasahara"),
+			Vector3.zero,
+			Quaternion.identity,
+			null
+		);
+		this.flight3DObjects.GetComponent<DataContainerDebugger>().enabled = false;
+
+		// 操作端末の結果データを引き継ぐ
+		this.flight3DObjects.GetComponent<DataContainer>().Setup(this.controllerData);
+		this.setScore(0, true);
+
+		// 着地したときのイベントハンドラーをセット
+		this.flight3DObjects.GetComponent<LandingJudge>().LandingEvent.AddListener(this.EndFlight);
 
 		// 実況テキスト準備
-		PhaseFlight.StreamStep = FlightGameStep.BeforePrepare;
 		this.textArea = GameObject.Find("Flight_StreamWindow").transform.Find("Text").GetComponent<UnityEngine.UI.Text>();
+
+		// オープニングカメラワークを生成して開始
+		var previousOpeningCameraWorks = previousRespawnObjects.Find((obj) => obj.name.IndexOf("FlightOpeningCamera") != -1);
+		if(previousOpeningCameraWorks != null) {
+			// 先に前回のオブジェクトを削除する
+			Debug.LogWarning("以前の [FlightOpeningCamera] オブジェクトが残っているため、削除します");
+			GameObject.Destroy(previousOpeningCameraWorks);
+		}
+		this.flightOpeningCamera = GameObject.Instantiate<GameObject>(
+			Resources.Load<GameObject>("Prefabs/FlightOpeningCamera"),
+			Vector3.zero,
+			Quaternion.identity,
+			null
+		);
+		var openingCameraController = this.flightOpeningCamera.GetComponent<OpeningCameraController>();
+		openingCameraController.CameraSwitcher = this.flight3DObjects.transform.Find("MainPlane").gameObject.GetComponent<CameraSwitcher>();
+		openingCameraController.StartOpeningCameraWorks();
+		openingCameraController.ReadyForStartEvent.AddListener(new UnityEngine.Events.UnityAction(() => {
+			// オープニングが終わったら開始する
+			this.parent.StartCoroutine(this.readyGo());
+		}));
 	}
 
 	/// <summary>
 	/// 毎フレーム更新処理
 	/// </summary>
 	public override void Update() {
-		// TODO: 距離計算して setScore(..., true); する
+		// 飛距離の表示
+		if(this.isFlightLanding == false) {
+			this.setScore(this.flight3DObjects.GetComponent<DistanceCalculator>().Distance, true);
+		}
 
 		// 現在地点の表示
-		string afterMapAddress = this.getMapAddress(this.airplane.transform.position);
-		if(this.mapAddress != afterMapAddress) {
-			// 変更があったときに一時的に表示する
-			if(this.mapAddressCoroutine != null) {
-				this.parent.StopCoroutine(this.mapAddressCoroutine);
+		if(this.flight3DObjects.GetComponent<DataContainer>().ControllerBPlane != null) {
+			string afterMapAddress = this.getMapAddress(
+				this.flight3DObjects.GetComponent<DataContainer>().ControllerBPlane.transform.position
+			);
+			if(this.mapAddress != afterMapAddress) {
+				// 変更があったときに一時的に表示する
+				if(this.mapAddressCoroutine != null) {
+					this.parent.StopCoroutine(this.mapAddressCoroutine);
+				}
+				this.mapAddress = afterMapAddress;
+				this.mapAddressCoroutine = this.parent.StartCoroutine(this.showMapAddress());
 			}
-			this.mapAddress = afterMapAddress;
-			this.mapAddressCoroutine = this.parent.StartCoroutine(this.showMapAddress());
 		}
 
 		if(this.isStreamStarted == false) {
@@ -146,42 +203,28 @@ public class PhaseFlight : PhaseBase {
 			this.isStreamStarted = true;
 			this.messageCoroutine = this.parent.StartCoroutine(this.nextStreamTextCharacter());
 		}
-
-#if UNITY_EDITOR
-		// デバッグ用の機能
-		if(Input.GetKeyDown(KeyCode.Alpha1) == true) {
-			PhaseFlight.StreamStep = FlightGameStep.BeforePrepare;
-		}
-		if(Input.GetKeyDown(KeyCode.Alpha2) == true) {
-			PhaseFlight.StreamStep = FlightGameStep.Preparing;
-		}
-		if(Input.GetKeyDown(KeyCode.Alpha3) == true) {
-			PhaseFlight.StreamStep = FlightGameStep.StartFlight;
-		}
-		if(Input.GetKeyDown(KeyCode.Alpha4) == true) {
-			PhaseFlight.StreamStep = FlightGameStep.Flighting;
-		}
-		if(Input.GetKeyDown(KeyCode.Alpha5) == true) {
-			PhaseFlight.StreamStep = FlightGameStep.StartSupport;
-		}
-		if(Input.GetKeyDown(KeyCode.Alpha6) == true) {
-			PhaseFlight.StreamStep = FlightGameStep.EndSupport;
-		}
-		if(Input.GetKeyDown(KeyCode.Alpha7) == true) {
-			PhaseFlight.StreamStep = FlightGameStep.EndFlight;
-		}
-#endif
 	}
 
 	/// <summary>
 	/// このフェーズが破棄されるときに実行する処理
 	/// </summary>
 	public override void Destroy() {
-		// メインカメラのアニメーション（舞台背景カメラワーク）を有効化
-		GameObject.Find("Main Camera").GetComponent<Animator>().enabled = true;
+		// 舞台背景カメラワークを復元
+		this.backgroundSapporoObjects.ForEach(
+			(obj) => obj.SetActive(true)
+		);
+
+		// 動的生成したオブジェクトをすべて破棄
+		GameObject.Destroy(this.flight3DObjects);
+		GameObject.Destroy(this.flightOpeningCamera);
+
+		// [Finish] 表示を消去
+		GameObject.Find("FlightPhase").transform.Find("Flight_Finish").gameObject.SetActive(false);
 
 		// コルーチン停止
-		this.parent.StopCoroutine(this.messageCoroutine);
+		if(this.messageCoroutine != null) {
+			this.parent.StopCoroutine(this.messageCoroutine);
+		}
 		if(this.mapAddressCoroutine != null) {
 			this.parent.StopCoroutine(this.mapAddressCoroutine);
 		}
@@ -220,7 +263,7 @@ public class PhaseFlight : PhaseBase {
 	}
 
 	/// <summary>
-	/// 現在地点名称表示
+	/// 現在地点名称表示を行うコルーチン
 	/// </summary>
 	private IEnumerator showMapAddress() {
 		var window = GameObject.Find("Flight_AddressWindow");
@@ -236,7 +279,7 @@ public class PhaseFlight : PhaseBase {
 			window,
 			iTween.Hash(
 				"x", 960f,
-				"time", PhaseFlight.MapAddressShowTimeSecond,
+				"time", PhaseFlight.MapAddressShowTimeSeconds,
 				"easeType", iTween.EaseType.easeOutQuart,
 				"isLocal", true
 			)
@@ -250,7 +293,7 @@ public class PhaseFlight : PhaseBase {
 			window,
 			iTween.Hash(
 				"x", 1400f,
-				"time", PhaseFlight.MapAddressShowTimeSecond,
+				"time", PhaseFlight.MapAddressShowTimeSeconds,
 				"easeType", iTween.EaseType.easeOutQuart,
 				"isLocal", true
 			)
@@ -261,13 +304,23 @@ public class PhaseFlight : PhaseBase {
 	/// <summary>
 	/// 座標から大通付近の住所を割り出します。
 	/// </summary>
-	/// <param name="position">座標</param>
+	/// <param name="position">飛行機の座標</param>
 	/// <returns>住所テキスト</returns>
 	private string getMapAddress(Vector3 position) {
-
-		// TODO: 座標に応じて住所割り出し
-
-		return "札幌市 大通公園";
+		if(position.x >= -192f) {
+			return "札幌市 大通公園";
+		} else if(position.x >= -465f) {
+			return "大通西５丁目";
+		} else if(position.x >= -744f) {
+			return "大通西４丁目";
+		} else if(position.x >= -1017f) {
+			return "大通西３丁目";
+		} else if(position.x >= -1300f) {
+			return "大通西２丁目";
+		} else {
+			// 西１丁目だけど、切れてる
+			return "テレビ塔がない...";
+		}
 	}
 
 	/// <summary>
@@ -307,16 +360,16 @@ public class PhaseFlight : PhaseBase {
 		var paramB = int.Parse(this.controllerData[(int)NetworkConnector.RoleIds.B_Flight]["param"]);
 		var optionC = int.Parse(this.controllerData[(int)NetworkConnector.RoleIds.C_Assist]["option"]);
 
-		switch(PhaseFlight.StreamStep) {
-			case FlightGameStep.BeforePrepare:
+		switch(this.flight3DObjects.GetComponent<StreamTextStepController>().CurrentFlightGameStep) {
+			case StreamTextStepController.FlightStep.Opening:
 				return @"いよいよフライトの時間がやってまいりました！
 このチームは一体どのようなフライトを見せてくれるのでしょうか！";
 
-			case FlightGameStep.Preparing:
+			case StreamTextStepController.FlightStep.Preparing:
 				switch(optionA) {
 					case (int)PhaseControllers.OptionA.Bomb:
-						return @"爆弾を積み上げて着火したようです！
-リスキーな手段ですが…おおっと、よく見ればパイロットが衝撃で気絶しているっ！？";
+						return @"爆弾に着火している……！
+リスキーな手段ですが……一体どうなってしまうのか！？";
 
 					case (int)PhaseControllers.OptionA.Human:
 						return @"ここはオーソドックスな人力加速！
@@ -328,7 +381,7 @@ public class PhaseFlight : PhaseBase {
 				}
 				return @"";
 
-			case FlightGameStep.StartFlight:
+			case StreamTextStepController.FlightStep.StartFlight:
 				switch(optionA) {
 					case (int)PhaseControllers.OptionA.Bomb:
 						return @"ここで爆弾が炸裂ゥ！
@@ -344,7 +397,7 @@ public class PhaseFlight : PhaseBase {
 				}
 				return @"";
 
-			case FlightGameStep.Flighting:
+			case StreamTextStepController.FlightStep.Flighting:
 				if(paramB * 100f / PhaseControllers.ControllerLimitSeconds >= 70) {
 					return @"かなり調子よく飛んでいく！
 これは期待大ですね…！";
@@ -356,7 +409,7 @@ public class PhaseFlight : PhaseBase {
 ここは飛行中のサポートに期待したいところです！";
 				}
 
-			case FlightGameStep.StartSupport:
+			case StreamTextStepController.FlightStep.StartSupport:
 				switch(optionC) {
 					case (int)PhaseControllers.OptionC.Bomb:
 						return @"ここで飛行中のサポートに回る……
@@ -372,7 +425,7 @@ public class PhaseFlight : PhaseBase {
 				}
 				return @"";
 
-			case FlightGameStep.EndSupport:
+			case StreamTextStepController.FlightStep.EndSupport:
 				switch(optionC) {
 					case (int)PhaseControllers.OptionC.Bomb:
 						return @"無慈悲に起爆！
@@ -388,16 +441,94 @@ public class PhaseFlight : PhaseBase {
 				}
 				return @"";
 
-			case FlightGameStep.EndFlight:
+			case StreamTextStepController.FlightStep.EndFlight:
 				if(optionA == (int)PhaseControllers.OptionA.Bomb && optionC == (int)PhaseControllers.OptionC.Bomb) {
-					return @"ここで着地、見事なフライトでした！";
-				} else {
 					return @"おおーっと！ 二度目の爆弾は流石に耐えきれなかった！
 バカの一つ覚えは行けませんねェ！";
+				} else {
+					return @"ここで着地、見事なフライトでした！";
 				}
 		}
 
 		return @"";
+	}
+
+	/// <summary>
+	/// 開始合図を出し、実際に飛行を開始させるコルーチン
+	/// </summary>
+	private IEnumerator readyGo() {
+		yield return new WaitForSeconds(1.0f);
+
+		// [READY-GO] 表示
+		var readyGoContainer = GameObject.Find("FlightPhase").transform.Find("Flight_ReadyGo");
+		var animator = readyGoContainer.Find("Background/Flight_ReadyGoText").gameObject.GetComponent<Animator>();
+		readyGoContainer.gameObject.SetActive(true);
+		animator.enabled = true;
+		readyGoContainer.localScale = Vector3.zero;
+		iTween.ScaleTo(
+			readyGoContainer.gameObject,
+			new Vector3(1, 1, 1),
+			1.0f
+		);
+		yield return new WaitForSeconds(1.0f);
+
+		// アニメーションで [GO] に文字を切り替え
+		yield return new WaitForSeconds(2.5f);
+		iTween.ScaleTo(
+			readyGoContainer.gameObject,
+			new Vector3(0, 0, 0),
+			1.0f
+		);
+		yield return new WaitForSeconds(1.0f);
+		animator.enabled = false;
+
+		// 飛行開始
+		this.flight3DObjects.GetComponent<FlightStarter>().DoFlightStart();
+	}
+
+	/// <summary>
+	/// 飛行を終了させるコルーチン
+	/// </summary>
+	private IEnumerator endFlight() {
+		yield return new WaitForSeconds(1.0f);
+		this.isFlightLanding = true;
+
+		if(int.Parse(this.controllerData[(int)NetworkConnector.RoleIds.C_Assist]["option"]) == (int)PhaseControllers.OptionC.Wairo) {
+			// 賄賂演出を行う
+			var ratio = this.flight3DObjects.GetComponent<DataContainer>().ParamC / 100f;
+			var newScore = this.score * ratio;
+			this.setScore(newScore);
+
+			// 実況更新
+			this.flight3DObjects.GetComponent<StreamTextStepController>().CurrentFlightGameStep = StreamTextStepController.FlightStep.EndSupport;
+
+			yield return new WaitForSeconds(PhaseFlight.ScoreEaseTimeSeconds);
+			yield return new WaitForSeconds(2.0f);
+		}
+
+		// 実況更新
+		this.flight3DObjects.GetComponent<StreamTextStepController>().CurrentFlightGameStep = StreamTextStepController.FlightStep.EndFlight;
+
+		// [FINISH] 表示
+		var finishContainer = GameObject.Find("FlightPhase").transform.Find("Flight_Finish");
+		finishContainer.gameObject.SetActive(true);
+		finishContainer.localScale = Vector3.zero;
+		iTween.ScaleTo(
+			finishContainer.gameObject,
+			new Vector3(1, 1, 1),
+			1.0f
+		);
+		yield return new WaitForSeconds(3.0f);
+
+		// 次のフェーズへ移行する
+		this.parent.ChangePhase(this.GetNextPhase());
+	}
+
+	/// <summary>
+	/// 飛行を終了します。
+	/// </summary>
+	private void EndFlight() {
+		this.parent.StartCoroutine(this.endFlight());
 	}
 
 	/// <summary>

@@ -321,8 +321,8 @@ public class PhaseControllers : PhaseBase {
 			if(this.isAudienceEventError == true) {
 
 				// オーディエンス投票が障害発生中のときはすぐに次のフェーズへ移行する
-				this.parent.ChangePhase(this.GetNextPhase());
-				this.IsUpdateEnabled = false;
+				this.parent.StartCoroutine(this.changeNextPhaseWithValidator());
+				return;
 
 			} else {
 
@@ -345,8 +345,7 @@ public class PhaseControllers : PhaseBase {
 					this.closingAudienceRemainSeconds -= Time.deltaTime;
 					if(this.closingAudienceRemainSeconds < 0) {
 						// タイムアップ：次のフェーズへ移行
-						this.parent.ChangePhase(this.GetNextPhase());
-						this.IsUpdateEnabled = false;
+						this.parent.StartCoroutine(this.changeNextPhaseWithValidator());
 						return;
 					}
 				}
@@ -555,7 +554,12 @@ public class PhaseControllers : PhaseBase {
 					buf.Write("援護－サファイアートちゃん\n");
 					break;
 			}
-			if(this.isControllerError[roleId] == true) {
+			//if(PhaseControllers.BackDoorOperated == true) {
+			//	// バックドアによってデータが変更された
+			//	buf.Write("　＜＜データ改竄＞＞");
+			//	return buf.ToString();
+			//}
+			if(PhaseControllers.BackDoorOperated == false && this.isControllerError[roleId] == true) {
 				// 障害発生中
 				buf.Write("　＜＜障害発生中＞＞");
 				return buf.ToString();
@@ -664,7 +668,7 @@ public class PhaseControllers : PhaseBase {
 
 						case (int)OptionA.Car:
 							// 牽引：50%が最大出力、それを超えるとゼロに等しい状態になる
-							values[(int)PowerMeter.StartPower] = 
+							values[(int)PowerMeter.StartPower] =
 								0.3f + (
 									(int.Parse(progress["param"]) <= PhaseControllers.ControllerAMeterMax) ?
 										int.Parse(progress["param"]) / PhaseControllers.ControllerAMeterMax : 0
@@ -810,6 +814,28 @@ public class PhaseControllers : PhaseBase {
 	}
 
 	/// <summary>
+	/// 次のフェーズへ移行させるコルーチン
+	/// 端末操作データが不正であるとき、強制的にバックドアで修正させます。
+	/// </summary>
+	private IEnumerator changeNextPhaseWithValidator() {
+		// このフェーズの更新や通信はすべて停止させる
+		this.IsUpdateEnabled = false;
+
+		// 端末操作データが有効であるかどうかをチェックする
+		while(DataContainer.ValidationControllerData(PhaseControllers.ControllerProgresses) == false) {
+			Debug.LogError("端末操作データの形式が不正です。バックドアからデータを修正して下さい。");
+
+			// 正常なデータに戻るまでバックドアから修正を促し続ける
+			BackDoorResult.CanCancel = false;
+			GameObject.Find("BackDoors").GetComponent<BackDoorOpenTrigger>().ChangeBackDoor((int)BackDoorOpenTrigger.BackDoorUIIndex.Result);
+			yield return new WaitWhile(() => BackDoorOpenTrigger.IsBackDoorOpened == true);
+		}
+
+		// 次のシーンへ遷移する
+		this.parent.ChangePhase(this.GetNextPhase());
+	}
+
+	/// <summary>
 	/// 前のフェーズのインスタンスを生成して返します。
 	/// </summary>
 	/// <returns>前のフェーズのインスタンス</returns>
@@ -822,9 +848,18 @@ public class PhaseControllers : PhaseBase {
 	/// </summary>
 	/// <returns>次のフェーズのインスタンス</returns>
 	public override PhaseBase GetNextPhase() {
+		// 端末操作データが有効であるかどうかをチェックする
+		if(DataContainer.ValidationControllerData(PhaseControllers.ControllerProgresses) == false) {
+			// 不正な形式のときは、この時点でバックドアも開けないのでフェーズをやり直させる
+			// NOTE: この状況に陥るのは、シーン管理クラス側からEnterキーで強制的にシーンを遷移させようとしたときに限られる
+			Debug.LogError("端末操作データの形式が不正です。再度このフェーズをやり直します。");
+			return new PhaseControllers(this.parent);
+		}
+
 		return new PhaseFlight(this.parent, new object[] {
 			this.eventId,
 			PhaseControllers.ControllerProgresses,
 		});
 	}
+
 }

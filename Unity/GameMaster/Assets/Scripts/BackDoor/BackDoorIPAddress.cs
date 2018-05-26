@@ -45,4 +45,22 @@ public class BackDoorIPAddress : BackDoorBase {
 		GameObject.Find("BackDoors").GetComponent<BackDoorOpenTrigger>().ChangeBackDoor(-1);
 	}
 
+	/// <summary>
+	/// オンライン用のテンプレートを適用します。
+	/// </summary>
+	public void OnLoadOnlineTemplate() {
+		this.IPAddresses[(int)NetworkConnector.RoleIds.A_Prepare].text = "192.168.11.10";
+		this.IPAddresses[(int)NetworkConnector.RoleIds.B_Flight].text = "192.168.11.11";
+		this.IPAddresses[(int)NetworkConnector.RoleIds.C_Assist].text = "192.168.11.12";
+	}
+
+	/// <summary>
+	/// オンライン用のテンプレートを適用します。
+	/// </summary>
+	public void OnLoadOfflineTemplate() {
+		this.IPAddresses[(int)NetworkConnector.RoleIds.A_Prepare].text = "127.0.0.1";
+		this.IPAddresses[(int)NetworkConnector.RoleIds.B_Flight].text = "127.0.0.1";
+		this.IPAddresses[(int)NetworkConnector.RoleIds.C_Assist].text = "127.0.0.1";
+	}
+
 }

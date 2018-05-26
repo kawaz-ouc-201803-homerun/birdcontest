@@ -19,6 +19,11 @@ public class StopFollow : MonoBehaviour {
 	public GameObject PushHuman;
 
 	/// <summary>
+	/// 実況ステップ制御オブジェクト
+	/// </summary>
+	public StreamTextStepController StreamController;
+
+	/// <summary>
 	/// トリガー対象が接したら追従のコンポーネントを無効化します。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
@@ -34,6 +39,9 @@ public class StopFollow : MonoBehaviour {
 			this.PushHuman.GetComponent<FollowTarget>().enabled = false;
 			this.PushHuman.GetComponent<Rigidbody>().velocity = Vector3.zero;
 			this.PushHuman.GetComponent<Rigidbody>().isKinematic = true;
+
+			// 実況更新
+			this.StreamController.CurrentFlightGameStep = StreamTextStepController.FlightStep.StartFlight;
 		}
 	}
 

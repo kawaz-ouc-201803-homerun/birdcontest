@@ -30,7 +30,7 @@ public class PhaseResult : PhaseBase {
 	/// <summary>
 	/// ランキングの自動スクロールにかける秒数
 	/// </summary>
-	public const float RankingScrollTimeSecond = 10.0f;
+	public const float RankingScrollTimeSeconds = 10.0f;
 
 	/// <summary>
 	/// ニアピン賞のテキスト
@@ -174,7 +174,7 @@ public class PhaseResult : PhaseBase {
 				yield return new WaitForSeconds(0.5f);
 			}
 
-			yield return new WaitForSeconds(PhaseResult.RankingScrollTimeSecond / 2.0f);
+			yield return new WaitForSeconds(PhaseResult.RankingScrollTimeSeconds / 2.0f);
 
 			// 上から下へスクロール
 			var scrollbar = GameObject.Find("Result_RankingWindow").transform.Find("Scrollbar Vertical");
@@ -190,10 +190,10 @@ public class PhaseResult : PhaseBase {
 					})
 				)
 			);
-			yield return new WaitForSeconds(PhaseResult.RankingScrollTimeSecond);
+			yield return new WaitForSeconds(PhaseResult.RankingScrollTimeSeconds);
 
 			// スクロール完了後のウェイト
-			yield return new WaitForSeconds(PhaseResult.RankingScrollTimeSecond);
+			yield return new WaitForSeconds(PhaseResult.RankingScrollTimeSeconds);
 
 			// 一番上に戻す
 			scrollbar.GetComponent<UnityEngine.UI.Scrollbar>().value = 1f;

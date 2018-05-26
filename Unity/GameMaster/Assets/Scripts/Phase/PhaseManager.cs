@@ -38,7 +38,7 @@ public class PhaseManager : MonoBehaviour {
 	/// <summary>
 	/// トランジションにかける秒数
 	/// </summary>
-	public const float TransitionTimeSecond = 2.0f;
+	public const float TransitionTimeSeconds = 2.0f;
 
 	/// <summary>
 	/// フェーズごとのUI親オブジェクト
@@ -166,7 +166,7 @@ public class PhaseManager : MonoBehaviour {
 
 			if(hasBeforePhase == true) {
 				// 明転開始
-				this.DoTransitionIn(PhaseManager.TransitionTimeSecond);
+				this.DoTransitionIn(PhaseManager.TransitionTimeSeconds);
 			}
 		});
 

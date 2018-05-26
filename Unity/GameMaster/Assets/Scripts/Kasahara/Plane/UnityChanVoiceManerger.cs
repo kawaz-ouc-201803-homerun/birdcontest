@@ -3,7 +3,6 @@ using UnityEngine;
 
 /// <summary>
 /// ユニティちゃんのボイス再生制御
-/// ＊このスクリプトは飛行機に直接アタッチして下さい。
 /// </summary>
 public class UnityChanVoiceManerger : MonoBehaviour {
 
@@ -22,19 +21,7 @@ public class UnityChanVoiceManerger : MonoBehaviour {
 	/// </summary>
 	public enum UnityChanVoiceIndexes {
 		Starting,       // 発進時
-		TakingOff,      // 離陸時
-	}
-
-	/// <summary>
-	/// 最初のPlaneに触れたときに離陸ボイスを再生します。
-	/// </summary>
-	/// <param name="other">触れたオブジェクトのコライダー</param>
-	public void OnTriggerEnter(Collider other) {
-		// NOTE: Pedalタグ付きのPlaneは爆発の時には出現しないため、「爆発の衝撃によりパイロットが気絶する」設定を守れる
-		if(other.gameObject.tag == "Pedal") {
-			Debug.Log("ユニティちゃん離陸ボイストリガー発動");
-			this.PlayVoice(UnityChanVoiceIndexes.TakingOff);
-		}
+		Flying,      // 飛んでいるとき
 	}
 
 	/// <summary>

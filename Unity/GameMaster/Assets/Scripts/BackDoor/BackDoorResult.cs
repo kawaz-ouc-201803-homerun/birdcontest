@@ -14,7 +14,12 @@ public class BackDoorResult : BackDoorBase {
 	/// 入力された結果データ
 	/// </summary>
 	public InputField[] Results;
-	
+
+	/// <summary>
+	/// 入力をキャンセルできるかどうか
+	/// </summary>
+	public static bool CanCancel = true;
+
 	/// <summary>
 	/// ゲームオブジェクト初期化
 	/// </summary>
@@ -29,6 +34,11 @@ public class BackDoorResult : BackDoorBase {
 	/// 毎フレーム処理
 	/// </summary>
 	public override void Update() {
+		if(BackDoorResult.CanCancel == true && Input.GetKeyDown(KeyCode.Escape) == true) {
+			// Escapeキーでキャンセルして閉じる
+			GameObject.Find("BackDoors").GetComponent<BackDoorOpenTrigger>().ChangeBackDoor(-1);
+			BackDoorResult.CanCancel = true;
+		}
 	}
 
 	/// <summary>
@@ -49,6 +59,16 @@ public class BackDoorResult : BackDoorBase {
 
 		// バックドアを閉じる
 		GameObject.Find("BackDoors").GetComponent<BackDoorOpenTrigger>().ChangeBackDoor(-1);
+		BackDoorResult.CanCancel = true;
+	}
+
+	/// <summary>
+	/// テンプレートを適用します。
+	/// </summary>
+	public void OnLoadTemplate() {
+		this.Results[(int)NetworkConnector.RoleIds.A_Prepare].text = "option=0;param=0";
+		this.Results[(int)NetworkConnector.RoleIds.B_Flight].text = "param=0";
+		this.Results[(int)NetworkConnector.RoleIds.C_Assist].text = "option=0;param=0";
 	}
 
 	/// <summary>

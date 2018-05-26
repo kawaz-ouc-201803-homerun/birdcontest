@@ -6,6 +6,11 @@
 public class CutInParent : PlaneBehaviourParent {
 
 	/// <summary>
+	/// 実況ステップ制御オブジェクト
+	/// </summary>
+	public StreamTextStepController StreamController;
+
+	/// <summary>
 	/// 対象キャラクターの画像が子になっているPanel
 	/// </summary>
 	public GameObject TargetCharacterPanel;
@@ -43,11 +48,9 @@ public class CutInParent : PlaneBehaviourParent {
 		this.enabled = true;
 		Debug.Log("カットイントリガー発動");
 
-		// カットイン演出を開始
+		// 飛行をポーズしてカットイン演出を開始
 		this.TargetCharacterPanel.SetActive(true);
 		this.TargetCharacterAnimator.SetTrigger("Start");
-
-		// ポーズ開始
 		Time.timeScale = 0;
 	}
 
@@ -77,11 +80,13 @@ public class CutInParent : PlaneBehaviourParent {
 	/// アニメーション終了処理
 	/// </summary>
 	private void StopAnimation() {
+		// 飛行のポーズを解除
 		this.IsCutinEnabled = false;
 		this.TargetCharacterPanel.SetActive(false);
-
-		// ポーズ解除
 		Time.timeScale = 1;
+
+		// 実況更新は個別に行う
+		// this.StreamController.CurrentFlightGameStep = StreamTextStepController.FlightStep.EndSupport;
 	}
 
 }

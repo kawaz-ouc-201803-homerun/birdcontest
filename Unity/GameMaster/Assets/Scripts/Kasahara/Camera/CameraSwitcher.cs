@@ -23,7 +23,10 @@ public class CameraSwitcher : MonoBehaviour {
 	/// <summary>
 	/// 現在有効なカメラ視点のID
 	/// </summary>
-	private CameraID currentCameraId;
+	public int CurrentCameraId {
+		get;
+		private set;
+	}
 
 	/// <summary>
 	/// カメラ視点ID
@@ -36,36 +39,43 @@ public class CameraSwitcher : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// 初期化処理
-	/// </summary>
-	public void Start() {
-		if(this.DataContainer.OptionA == (int)PhaseControllers.OptionA.Human) {
-			// 人が飛行機を押すときだけ、後方俯瞰にする
-			this.ChangeCameraAngle(CameraID.ThirdPerson);
-		} else {
-			// カメラ視点の初期状態：一人称
-			this.ChangeCameraAngle(CameraID.Pilot);
-		}
-	}
-
-	/// <summary>
 	/// カメラアングルを切り替えます。
 	/// </summary>
 	/// <param name="cameraID">カメラ視点ID</param>
 	public void ChangeCameraAngle(CameraID cameraID) {
+		Debug.Log("カメラ有効: " + cameraID);
 		foreach(var camera in this.cameras) {
+			camera.gameObject.GetComponent<Camera>().enabled = false;
 			camera.gameObject.SetActive(false);
 		}
 		this.cameras[(int)cameraID].gameObject.SetActive(true);
-		this.currentCameraId = cameraID;
+		this.cameras[(int)cameraID].enabled = true;
+		this.CurrentCameraId = (int)cameraID;
+	}
+
+	/// <summary>
+	/// すべてのカメラアングルを無効化します。
+	/// ＊これは一時的に管轄外の別のカメラに切り替えるときに使用して下さい。
+	/// </summary>
+	public void DisenabledCameraAll() {
+		Debug.Log("カメラ無効状態");
+		foreach(var camera in this.cameras) {
+			camera.gameObject.GetComponent<Camera>().enabled = false;
+			camera.gameObject.SetActive(false);
+		}
+		this.CurrentCameraId = -1;
 	}
 
 	/// <summary>
 	/// 現在有効なカメラを返します。
 	/// </summary>
-	/// <returns>現在有効なカメラ</returns>
+	/// <returns>現在有効なカメラ。すべて無効になっているときはnull</returns>
 	public Camera GetCurrentCamera() {
-		return this.cameras[(int)this.currentCameraId];
+		if(this.CurrentCameraId < 0 || this.CurrentCameraId <= this.cameras.Length) {
+			return null;
+		} else {
+			return this.cameras[this.CurrentCameraId];
+		}
 	}
 
 }

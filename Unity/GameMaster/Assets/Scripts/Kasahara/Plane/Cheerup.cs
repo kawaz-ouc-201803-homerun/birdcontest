@@ -60,6 +60,9 @@ public class Cheerup : CutInParent {
 					// 上昇完了
 					this.isCheerupDone = true;
 					Debug.Log("応援終了");
+
+					// 実況更新
+					this.StreamController.CurrentFlightGameStep = StreamTextStepController.FlightStep.EndSupport;
 				}
 			}
 		}

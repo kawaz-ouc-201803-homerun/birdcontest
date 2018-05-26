@@ -13,6 +13,11 @@ public class PompPedal : PlaneBehaviourParent {
 	public float PedalPower;
 
 	/// <summary>
+	/// 実況ステップ制御オブジェクト
+	/// </summary>
+	public StreamTextStepController StreamController;
+
+	/// <summary>
 	/// トリガー対象に接触したら開始します。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
@@ -21,6 +26,9 @@ public class PompPedal : PlaneBehaviourParent {
 			// NOTE: 以後、Update系のメソッドが走るようになる
 			Debug.Log("飛行役「ペダル航行」開始");
 			this.enabled = true;
+
+			// 実況更新
+			this.StreamController.CurrentFlightGameStep = StreamTextStepController.FlightStep.StartFlight;
 		}
 	}
 

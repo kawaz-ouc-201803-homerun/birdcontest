@@ -19,6 +19,12 @@ public class SecondExplosion : PlaneBehaviourParent {
 	public DistanceCalculator DistanceCalculator;
 
 	/// <summary>
+	/// 着地判定を行うオブジェクト
+	/// ＊インスペクターにて設定して下さい。
+	/// </summary>
+	public LandingJudge LandingJudge;
+
+	/// <summary>
 	/// 爆弾オブジェクト
 	/// ＊インスペクターにて設定して下さい。
 	/// </summary>
@@ -42,6 +48,11 @@ public class SecondExplosion : PlaneBehaviourParent {
 	public bool EnabledOnTrigegrEnter = false;
 
 	/// <summary>
+	/// 実況ステップ制御オブジェクト
+	/// </summary>
+	public StreamTextStepController StreamController;
+
+	/// <summary>
 	/// トリガー対象に接触したら開始します。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
@@ -60,6 +71,8 @@ public class SecondExplosion : PlaneBehaviourParent {
 			this.DummyPlane.transform.position = this.Plane.transform.position;
 			// this.distanceCalculator.enabled = false;         // 元の飛行機を消すとエラー吐きまくるのであらかじめ機能を停止させておく
 			this.DistanceCalculator.Target = this.DummyPlane;   // 飛距離計算の対象をダミー機体に差し替える
+			this.LandingJudge.Plane = this.DummyPlane;
+			this.LandingJudge.PlaneRigidbody = this.DummyPlane.GetComponent<Rigidbody>();
 			GameObject.Destroy(this.Plane);
 			this.DummyPlane.SetActive(true);
 
@@ -75,6 +88,9 @@ public class SecondExplosion : PlaneBehaviourParent {
 		this.SecondBomb.transform.position = this.Plane.transform.position;
 		this.SecondBomb.SetActive(true);
 		this.EnabledOnTrigegrEnter = false;
+
+		// 実況更新
+		this.StreamController.CurrentFlightGameStep = StreamTextStepController.FlightStep.EndSupport;
 	}
 
 }
