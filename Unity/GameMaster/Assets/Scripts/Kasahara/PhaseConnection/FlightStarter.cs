@@ -27,12 +27,12 @@ public class FlightStarter : MonoBehaviour {
 	/// <summary>
 	/// 端末A：牽引
 	/// </summary>
-	public AutoMove ControllerACar;
+	public AutoMoveCar ControllerACar;
 
 	/// <summary>
 	/// 端末A：人力
 	/// </summary>
-	public AutoMove ControllerAHuman;
+	public AutoMoveHuman ControllerAHuman;
 
 	/// <summary>
 	/// 端末B：飛行機の機体

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 仕込み役：飛行機に助走をつける（物理）
+/// 仕込み役：人力で飛行機に助走をつける（物理）
 /// ＊このスクリプトは助走をつける主体となるオブジェクトにアタッチして下さい。
 /// </summary>
-public class AutoMove : PlaneBehaviourParent, IFlightStarter {
+public class AutoMoveHuman : PlaneBehaviourParent, IFlightStarter {
 
 	/// <summary>
 	/// 前に進む力の大きさ
@@ -47,7 +47,7 @@ public class AutoMove : PlaneBehaviourParent, IFlightStarter {
 	/// <summary>
 	/// 自律移動を開始します。
 	/// </summary>
-	public void DoFlightStart() {
+	public virtual void DoFlightStart() {
 		this.enabled = true;
 		if(this.StartMoveEvent != null) {
 			// 移動を開始したときにイベントを発生させる

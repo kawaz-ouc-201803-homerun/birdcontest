@@ -32,11 +32,11 @@ public class StopFollow : MonoBehaviour {
 			Debug.Log("仕込み役：追従停止");
 			
 			// 追従を停止してその場に静止させる
-			this.PullCar.GetComponent<FollowTarget>().enabled = false;
+			this.PullCar.GetComponent<FollowTarget>().IsFollowed = false;
 			this.PullCar.GetComponent<Rigidbody>().velocity = Vector3.zero;
 			this.PullCar.GetComponent<Rigidbody>().isKinematic = true;
 
-			this.PushHuman.GetComponent<FollowTarget>().enabled = false;
+			this.PushHuman.GetComponent<FollowTarget>().IsFollowed = false;
 			this.PushHuman.GetComponent<Rigidbody>().velocity = Vector3.zero;
 			this.PushHuman.GetComponent<Rigidbody>().isKinematic = true;
 

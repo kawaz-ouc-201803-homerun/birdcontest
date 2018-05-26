@@ -86,7 +86,7 @@ public class PhaseControllers : PhaseBase {
 	/// <summary>
 	/// 端末Aのメーターミニゲームの最大スコア
 	/// </summary>
-	public const int ControllerAMeterMax = 50;
+	public const int ControllerAMeterMax = (int)(Accelerator.RacingThreshold * 100f);
 
 	/// <summary>
 	/// 各端末の進捗状況を更新する間隔秒数

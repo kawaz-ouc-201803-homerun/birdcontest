@@ -69,6 +69,11 @@ public class DataContainer : MonoBehaviour {
 	public GameObject ControllerACar;
 
 	/// <summary>
+	/// 端末A：牽引車のエンジンSE制御オブジェクト
+	/// </summary>
+	public GameObject ControllerACarEngineSE;
+
+	/// <summary>
 	/// 端末B：結果値
 	/// </summary>
 	public int ParamB {
@@ -159,6 +164,7 @@ public class DataContainer : MonoBehaviour {
 				break;
 
 			case (int)PhaseControllers.OptionA.Car:
+				this.ParamA = (this.ParamA > (int)(Accelerator.RacingThreshold * 100f)) ? 0 : this.ParamA;
 				this.ParamA = (int)(10f + this.ParamA / (float)PhaseControllers.ControllerAMeterMax * (30f - 1));
 				break;
 		}
@@ -231,9 +237,10 @@ public class DataContainer : MonoBehaviour {
 				this.ControllerACar.transform.position = new Vector3(-90.36f, 84.2f, -61.48f);
 				this.ControllerACar.transform.eulerAngles = new Vector3(0f, -100f, 0f);
 				this.ControllerACar.SetActive(true);
+				this.ControllerACarEngineSE.SetActive(true);
 
 				// 端末操作の結果値を車の牽引力としてセット
-				this.ControllerACar.GetComponent<AutoMove>().MovePower = this.ParamA;
+				this.ControllerACar.GetComponent<AutoMoveCar>().MovePower = this.ParamA;
 
 				// 一人称視点で開始
 				this.Cameras.ChangeCameraAngle(CameraSwitcher.CameraID.Pilot);
@@ -247,7 +254,7 @@ public class DataContainer : MonoBehaviour {
 				this.ControllerAQueryChanPusher.SetActive(true);
 
 				// 端末操作の結果値を飛行機を押す力としてセット
-				this.ControllerAQueryChanPusher.GetComponent<AutoMove>().MovePower = this.ParamA;
+				this.ControllerAQueryChanPusher.GetComponent<AutoMoveHuman>().MovePower = this.ParamA;
 
 				// 三人称俯瞰視点で開始
 				this.Cameras.ChangeCameraAngle(CameraSwitcher.CameraID.ThirdPerson);
