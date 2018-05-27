@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 /// <summary>
 /// 援護役：爆弾
@@ -53,6 +54,16 @@ public class SecondExplosion : PlaneBehaviourParent {
 	public StreamTextStepController StreamController;
 
 	/// <summary>
+	/// サファイアートちゃんボイス再生制御オブジェクト
+	/// </summary>
+	public SapphiartChanVoicePlayer VoicePlayer;
+
+	/// <summary>
+	/// SE再生制御オブジェクト
+	/// </summary>
+	public SEPlayer SEPlayer;
+
+	/// <summary>
 	/// トリガー対象に接触したら開始します。
 	/// </summary>
 	/// <param name="other">接したオブジェクトのコライダー</param>
@@ -62,6 +73,16 @@ public class SecondExplosion : PlaneBehaviourParent {
 		}
 
 		Debug.Log("援護役「爆弾トリガー」発動");
+		this.StartCoroutine(this.doExplosion());
+	}
+
+	/// <summary>
+	/// 実際に爆発を行うコルーチン
+	/// </summary>
+	private IEnumerator doExplosion() {
+		// ボイス再生
+		this.VoicePlayer.PlaySE((int)SapphiartChanVoicePlayer.SEID.BombStart);
+		yield return new WaitForSeconds(0.35f);
 
 		if(this.DataContainer.OptionA == (int)PhaseControllers.OptionA.Bomb
 		&& this.DataContainer.OptionC == (int)PhaseControllers.OptionC.Bomb) {
@@ -84,6 +105,9 @@ public class SecondExplosion : PlaneBehaviourParent {
 			);
 		}
 
+		// ボイス＆SE再生
+		this.SEPlayer.PlaySE((int)SEPlayer.SEID.Explosion);
+
 		// 爆発位置を現在座標に合わせて爆発実行
 		this.SecondBomb.transform.position = this.Plane.transform.position;
 		this.SecondBomb.SetActive(true);
@@ -92,5 +116,4 @@ public class SecondExplosion : PlaneBehaviourParent {
 		// 実況更新
 		this.StreamController.CurrentFlightGameStep = StreamTextStepController.FlightStep.EndSupport;
 	}
-
 }

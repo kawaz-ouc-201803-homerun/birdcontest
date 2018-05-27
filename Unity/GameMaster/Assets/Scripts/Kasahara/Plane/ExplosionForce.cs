@@ -19,7 +19,17 @@ namespace UnityStandardAssets.Effects {
 		/// 実況ステップ制御オブジェクト
 		/// </summary>
 		public StreamTextStepController StreamController;
-		
+
+		/// <summary>
+		/// クエリちゃんボイス再生制御オブジェクト
+		/// </summary>
+		public QueryChanVoicePlayer VoicePlayer;
+
+		/// <summary>
+		/// SE再生制御オブジェクト
+		/// </summary>
+		public SEPlayer SEPlayer;
+
 		/// <summary>
 		/// 爆発を実行します。
 		/// </summary>
@@ -32,7 +42,10 @@ namespace UnityStandardAssets.Effects {
 		/// </summary>
 		private IEnumerator doExplosion() {
 			Debug.Log("初動爆発");
-			yield return new WaitForSeconds(3.0f);
+
+			// ボイス再生
+			this.VoicePlayer.PlaySE((int)QueryChanVoicePlayer.SEID.BombStart);
+			yield return new WaitForSeconds(2.0f);
 
 			var explosionParticle = GetComponent<ParticleSystemMulti>();
 			float multiplier = explosionParticle.multiplier;
@@ -54,6 +67,7 @@ namespace UnityStandardAssets.Effects {
 
 			// 爆発のパーティクル開始
 			explosionParticle.PlayExplosionParticles();
+			this.SEPlayer.PlaySE((int)SEPlayer.SEID.Explosion);
 
 			// 実況更新
 			this.StreamController.CurrentFlightGameStep = StreamTextStepController.FlightStep.StartFlight;

@@ -28,6 +28,11 @@ public class PhaseResult : PhaseBase {
 	public const int AvailableNearpinMinCount = 3;
 
 	/// <summary>
+	/// ニアピン賞を採用する最大誤差m数
+	/// </summary>
+	public const int AvailableNearpinMaxDelta = 20;
+
+	/// <summary>
 	/// ランキングの自動スクロールにかける秒数
 	/// </summary>
 	public const float RankingScrollTimeSeconds = 10.0f;
@@ -130,14 +135,26 @@ public class PhaseResult : PhaseBase {
 				return DateTime.Compare(x_time, y_time);
 			});
 
-			if(result.audiencePredicts.Count >= PhaseResult.AvailableNearpinMinCount) {
-				// ニアピン賞を出すために必要な人数要件を満たしている場合のみ表示
+			// ニアピン対象者の誤差を算出
+			var nearpinDeltaAbs = Mathf.Abs(result.audiencePredicts[0].predict - score);
+
+			if(result.audiencePredicts.Count >= PhaseResult.AvailableNearpinMinCount
+			&& nearpinDeltaAbs <= PhaseResult.AvailableNearpinMaxDelta) {
+				// ニアピン賞を出すために必要な要件を満たしている場合のみ表示
 				this.nearpinText = "ニアピン賞 ... "
 					+ result.audiencePredicts[0].nickname + " さん ("
 					+ (result.audiencePredicts[0].predict - score).ToString(PhaseResult.RankingScoreFormat)
 					+ " m)";
 			} else {
 				this.nearpinText = "ニアピン賞 ... 今回はありません";
+
+				// デバッグログに理由を書き出す
+				if(result.audiencePredicts.Count < PhaseResult.AvailableNearpinMinCount) {
+					Debug.Log("ニアピン賞なし：投票人数が " + PhaseResult.AvailableNearpinMinCount + " 人に達していません");
+				}
+				if(nearpinDeltaAbs > PhaseResult.AvailableNearpinMaxDelta) {
+					Debug.Log("ニアピン賞なし：トップの人の誤差が " + PhaseResult.AvailableNearpinMaxDelta + " m を超えています");
+				}
 			}
 
 			// ランキング作成
@@ -158,6 +175,9 @@ public class PhaseResult : PhaseBase {
 
 		// ランキングの自動スクローラーを起動
 		this.parent.StartCoroutine(this.rankingScroller());
+
+		// 場内アナウンス
+		this.parent.SystemSEPlayer.PlaySEWithEcho((int)SystemSEPlayer.SystemSEID.AnnounceResult);
 	}
 
 	/// <summary>

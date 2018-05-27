@@ -132,12 +132,12 @@ public class PhaseControllers : PhaseBase {
 	/// <summary>
 	/// 画面上部のスクロール文字列の元のテキスト（平常運行時）
 	/// </summary>
-	public const string TopDescriptionSourceNormal = @"ただいま３名のプレイヤーが飛行の準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分です）。観客の皆さんも結果を予想してみましょう！ スマホから画面のＱＲコードを読み込んで投票してみて下さい♪";
+	public const string TopDescriptionSourceNormal = @"ただいま３名のプレイヤーがフライトの準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分）。観客の皆さんは結果を予想してみましょう！ スマホからＱＲコードを読んで投票してみて下さい♪ 参加人数３人以上で、予想と結果の誤差が 10m 以内のトップの方には景品が当たります！";
 
 	/// <summary>
 	/// 画面上部のスクロール文字列の元のテキスト（オーディエンス投票障害発生時）
 	/// </summary>
-	public const string TopDescriptionSourceError = @"ただいま３名のプレイヤーが飛行の準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分です）。観客の皆さんも結果を予想をして頂きたいところですが、あいにくただいま障害発生中のため投票できません。";
+	public const string TopDescriptionSourceError = @"ただいま３名のプレイヤーがフライトの準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分）。観客の皆さんには結果を予想をして頂きたいところなのですが、あいにくながらただいまネットワークの通信障害が発生しているため投票できません。ご迷惑をおかけして申し訳ありません。";
 
 	/// <summary>
 	/// 各端末の操作が完了したかどうか
@@ -275,6 +275,7 @@ public class PhaseControllers : PhaseBase {
 				checkBoxImage.enabled = this.isControllerCompleted[i];
 
 				// チェックマークをiTween表示
+				this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.ControllerEnd);
 				iTween.ScaleTo(checkBox, new Vector3(1, 1, 1), 1.0f);
 			}
 		}
@@ -382,6 +383,9 @@ public class PhaseControllers : PhaseBase {
 	/// このフェーズが破棄されるときに実行する処理
 	/// </summary>
 	public override void Destroy() {
+		// 場内アナウンス（思ったより時間がかからないことが多いので止めた）
+		// this.parent.SystemSEPlayer.PlaySE(SystemSEPlayer.SystemSEID.AnnounceWait);
+
 		// 通信切断
 		this.connector.CloseConnectionsAll();
 		this.connector.CloseAudiencePredicts(this.eventId, null);

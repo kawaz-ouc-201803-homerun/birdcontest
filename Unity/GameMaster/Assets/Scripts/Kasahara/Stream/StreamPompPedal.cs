@@ -21,7 +21,7 @@ public class StreamPompPedal : MonoBehaviour {
 	/// <summary>
 	/// ユニティちゃんのボイス制御オブジェクト
 	/// </summary>
-	public UnityChanVoiceManerger UnityChanVoice;
+	public UnityChanVoicePlayer UnityChanVoice;
 
 	/// <summary>
 	/// 機体がこのオブジェクトに触れたときに発動させます。
@@ -33,7 +33,7 @@ public class StreamPompPedal : MonoBehaviour {
 
 			if(this.DataContainer.OptionA != (int)PhaseControllers.OptionA.Bomb) {
 				// ついでにユニティちゃんのボイスも再生する（爆発時は気絶しているので言葉を発しない）
-				this.UnityChanVoice.PlayVoice(UnityChanVoiceManerger.UnityChanVoiceIndexes.Flying);
+				this.UnityChanVoice.PlaySE((int)UnityChanVoicePlayer.UnityChanVoiceIndexes.Flying);
 			}
 		}
 	}

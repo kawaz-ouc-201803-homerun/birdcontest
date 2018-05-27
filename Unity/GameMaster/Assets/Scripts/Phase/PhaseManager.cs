@@ -15,6 +15,11 @@ using UnityEngine.SceneManagement;
 public class PhaseManager : MonoBehaviour {
 
 	/// <summary>
+	/// システムSE再生制御オブジェクト
+	/// </summary>
+	public SystemSEPlayer SystemSEPlayer;
+
+	/// <summary>
 	/// ゲームタイトル
 	/// </summary>
 	public const string GameTitle = "鳥人コンテスト";
@@ -186,6 +191,7 @@ public class PhaseManager : MonoBehaviour {
 			nextPhaseCallback();
 		} else {
 			// 前のシーンがある場合は暗転を挟む
+			this.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Dicision);
 			this.DoTransitionOut(1.0f, nextPhaseCallback);
 		}
 	}

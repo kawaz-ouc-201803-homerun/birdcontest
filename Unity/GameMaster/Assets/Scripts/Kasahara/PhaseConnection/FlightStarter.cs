@@ -42,7 +42,7 @@ public class FlightStarter : MonoBehaviour {
 	/// <summary>
 	/// 端末B：ユニティちゃんボイス
 	/// </summary>
-	public UnityChanVoiceManerger ControllerBPilot;
+	public UnityChanVoicePlayer ControllerBPilot;
 
 	/// <summary>
 	/// 実況ステップ制御オブジェクト
@@ -87,7 +87,7 @@ public class FlightStarter : MonoBehaviour {
 		this.StreamController.CurrentFlightGameStep = StreamTextStepController.FlightStep.Preparing;
 
 		// ユニティちゃんの発進ボイスを再生
-		this.ControllerBPilot.PlayVoice(UnityChanVoiceManerger.UnityChanVoiceIndexes.Starting);
+		// this.ControllerBPilot.PlaySE((int)UnityChanVoicePlayer.UnityChanVoiceIndexes.Starting);
 	}
 
 }

@@ -13,16 +13,6 @@ public class Cheerup : CutInParent {
 	public float UpperPower;
 
 	/// <summary>
-	/// 音源オブジェクト
-	/// </summary>
-	public AudioSource CheerupAudioSource;
-
-	/// <summary>
-	/// 応援ボイス
-	/// </summary>
-	public AudioClip[] CheerupVoice;
-
-	/// <summary>
 	/// 応援効果を実行したかどうか
 	/// </summary>
 	private bool isCheerupDone = false;
@@ -36,6 +26,11 @@ public class Cheerup : CutInParent {
 	/// 応援効果の開始時刻
 	/// </summary>
 	private float upperStartTime = 0;
+
+	/// <summary>
+	/// サファイアートちゃんボイス再生制御オブジェクト
+	/// </summary>
+	public SapphiartChanVoicePlayer VoicePlayer;
 
 	/// <summary>
 	/// 毎フレーム更新処理
@@ -75,17 +70,11 @@ public class Cheerup : CutInParent {
 	public override void OnTriggerEnter(Collider other) {
 		base.OnTriggerEnter(other);
 		if(this.IsCutinEnabled == true && other.gameObject.tag == "Trigger") {
-			this.StartCoroutine(this.PlayVoice(Random.Range(0, this.CheerupVoice.Length)));
+			this.VoicePlayer.PlaySE(Random.Range(
+				(int)SapphiartChanVoicePlayer.SEID.Cheerup1,
+				(int)SapphiartChanVoicePlayer.SEID.Cheerup3 + 1
+			));
 		}
-	}
-
-	/// <summary>
-	/// 応援ボイスを再生します。
-	/// </summary>
-	/// <param name="audioClipIndex">再生するボイスのインデックス</param>
-	public IEnumerator PlayVoice(int audioClipIndex) {
-		yield return new WaitForSecondsRealtime(1f);
-		this.CheerupAudioSource.PlayOneShot(this.CheerupVoice[audioClipIndex]);
 	}
 
 }

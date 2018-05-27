@@ -14,6 +14,24 @@ public class PayBribe : CutInParent {
 	private bool isCutinDone = false;
 
 	/// <summary>
+	/// SE再生制御オブジェクト
+	/// </summary>
+	public SEPlayer SEPlayer;
+
+	/// <summary>
+	/// トリガー対象が接したらこのスクリプトの処理を有効化します。
+	/// </summary>
+	/// <param name="other">接したオブジェクトのコライダー</param>
+	public override void OnTriggerEnter(Collider other) {
+		// SE再生
+		base.OnTriggerEnter(other);
+		if(this.enabled == true) {
+			// カットインが開始したときにSEを鳴らす
+			this.SEPlayer.PlaySE((int)SEPlayer.SEID.WairoCutIn);
+		}
+	}
+
+	/// <summary>
 	/// 毎フレーム更新処理
 	/// ＊カットイン終了後に適用したい処理をここに定義して下さい。
 	/// </summary>

@@ -460,6 +460,7 @@ public class PhaseFlight : PhaseBase {
 		yield return new WaitForSeconds(1.0f);
 
 		// [READY-GO] 表示
+		this.parent.SystemSEPlayer.PlaySEWithEcho((int)SystemSEPlayer.SystemSEID.Ready);
 		var readyGoContainer = GameObject.Find("FlightPhase").transform.Find("Flight_ReadyGo");
 		var animator = readyGoContainer.Find("Background/Flight_ReadyGoText").gameObject.GetComponent<Animator>();
 		readyGoContainer.gameObject.SetActive(true);
@@ -473,7 +474,9 @@ public class PhaseFlight : PhaseBase {
 		yield return new WaitForSeconds(1.0f);
 
 		// アニメーションで [GO] に文字を切り替え
-		yield return new WaitForSeconds(2.5f);
+		yield return new WaitForSeconds(1.5f);
+		this.parent.SystemSEPlayer.PlaySEWithEcho((int)SystemSEPlayer.SystemSEID.Go);
+		yield return new WaitForSeconds(1.0f);
 		iTween.ScaleTo(
 			readyGoContainer.gameObject,
 			new Vector3(0, 0, 0),
@@ -495,6 +498,7 @@ public class PhaseFlight : PhaseBase {
 
 		if(int.Parse(this.controllerData[(int)NetworkConnector.RoleIds.C_Assist]["option"]) == (int)PhaseControllers.OptionC.Wairo) {
 			// 賄賂演出を行う
+			this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.WairoScoreUp);
 			var ratio = this.flight3DObjects.GetComponent<DataContainer>().ParamC / 100f;
 			var newScore = this.score * ratio;
 			this.setScore(newScore);
@@ -510,6 +514,7 @@ public class PhaseFlight : PhaseBase {
 		this.flight3DObjects.GetComponent<StreamTextStepController>().CurrentFlightGameStep = StreamTextStepController.FlightStep.EndFlight;
 
 		// [FINISH] 表示
+		this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.FlightEnd);
 		var finishContainer = GameObject.Find("FlightPhase").transform.Find("Flight_Finish");
 		finishContainer.gameObject.SetActive(true);
 		finishContainer.localScale = Vector3.zero;
@@ -518,6 +523,19 @@ public class PhaseFlight : PhaseBase {
 			new Vector3(1, 1, 1),
 			1.0f
 		);
+		yield return new WaitForSeconds(2.0f);
+
+		// スコアに応じた評価アナウンス
+		if(this.score < 200) {
+			// 低評価
+			this.parent.SystemSEPlayer.PlaySEWithEcho((int)SystemSEPlayer.SystemSEID.Evaluation1);
+		} else if(this.score < 450) {
+			// 中評価
+			this.parent.SystemSEPlayer.PlaySEWithEcho((int)SystemSEPlayer.SystemSEID.Evaluation2);
+		} else {
+			// 高評価
+			this.parent.SystemSEPlayer.PlaySEWithEcho((int)SystemSEPlayer.SystemSEID.Evaluation3);
+		}
 		yield return new WaitForSeconds(3.0f);
 
 		// 次のフェーズへ移行する
