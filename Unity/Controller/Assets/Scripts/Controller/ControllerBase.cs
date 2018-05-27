@@ -50,6 +50,11 @@ public abstract class ControllerBase : MonoBehaviour {
 	protected SubGame.SubGameBase activeSubGame;
 
 	/// <summary>
+	/// SE再生制御オブジェクト
+	/// </summary>
+	public SEPlayer SEPlayer;
+
+	/// <summary>
 	/// 初回処理
 	/// </summary>
 	public virtual void Start() {

@@ -42,6 +42,11 @@ namespace SubGame {
 		public float LastButtonDownCount;
 
 		/// <summary>
+		/// SE再生制御オブジェクト
+		/// </summary>
+		public SEPlayer SEPlayer;
+
+		/// <summary>
 		/// 初回処理
 		/// </summary>
 		public override void StartSubGame() {
@@ -74,6 +79,8 @@ namespace SubGame {
 					// ボタン押下状態から離されたときに回数カウント
 					this.ButtonDownCount++;
 					this.IsButtonDown = false;
+
+					this.SEPlayer.PlaySE((int)SEPlayer.SEID.PushButton);
 				}
 			}
 

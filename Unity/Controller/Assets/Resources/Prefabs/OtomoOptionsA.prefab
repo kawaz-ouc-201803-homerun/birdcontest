@@ -963,6 +963,7 @@ MonoBehaviour:
   SubGameYesNoButton: {fileID: 1729138921157156}
   SubGameSelectorObject: {fileID: 1486661207669850}
   descriptionController: {fileID: 114082396693970774}
+  SEPlayer: {fileID: 0}
 --- !u!114 &114595983684969414
 MonoBehaviour:
   m_ObjectHideFlags: 1

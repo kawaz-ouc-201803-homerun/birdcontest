@@ -69,6 +69,7 @@ namespace ControllerA {
 					Quaternion.identity,
 					this.transform.Find("Options")
 				);
+			this.OtomoOptions.transform.Find("SubGameSelectorController").GetComponent<ControllerAButtonController>().SEPlayer = this.SEPlayer;
 			
 			// 画面初期化
 			this.transform.Find("Options").gameObject.SetActive(true);

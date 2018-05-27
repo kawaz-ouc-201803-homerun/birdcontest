@@ -109,6 +109,11 @@ namespace SubGame {
 		public Text[] WairoOptionText;
 
 		/// <summary>
+		/// SE再生制御オブジェクト
+		/// </summary>
+		public SEPlayer SEPlayer;
+
+		/// <summary>
 		/// 初期化処理
 		/// </summary>
 		public override void StartSubGame() {
@@ -156,6 +161,7 @@ namespace SubGame {
 			);
 			if(this.isTextable == false && this.quizNum == 0 && isButtonDown == true) {
 				this.isTextable = true;
+				this.SEPlayer.PlaySE((int)SEPlayer.SEID.PushButton);
 			}
 		}
 
@@ -164,6 +170,7 @@ namespace SubGame {
 		/// </summary>
 		/// <param name="parameter">選択肢固有のパラメーター。0=スコア変動なし、1=スコア加算</param>
 		public void ButtonOnClick(int parameter) {
+			this.SEPlayer.PlaySE((int)SEPlayer.SEID.Decision);
 			this.WairoOptionButton.SetActive(false);
 
 			if(this.quizNum == 0) {

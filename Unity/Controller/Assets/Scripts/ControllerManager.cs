@@ -90,6 +90,11 @@ public class ControllerManager : MonoBehaviour {
 	private string emergencyText;
 
 	/// <summary>
+	/// SE再生制御オブジェクト
+	/// </summary>
+	public SEPlayer SEPlayer;
+
+	/// <summary>
 	/// 初回処理
 	/// </summary>
 	public void Start() {
@@ -163,6 +168,8 @@ public class ControllerManager : MonoBehaviour {
 		if(this.EndScreen.activeInHierarchy == true) {
 			// 終了画面にいるとき、ユーザー入力（Enterキー）でアイドル画面に戻す
 			if(Input.GetKeyDown(KeyCode.Return) == true) {
+				this.SEPlayer.PlaySE((int)SEPlayer.SEID.Decision);
+
 				// 通信切断
 				this.connector.CloseConnectionsAll();
 
@@ -195,6 +202,8 @@ public class ControllerManager : MonoBehaviour {
 	/// STARTボタン押下時
 	/// </summary>
 	public void OnStart() {
+		this.SEPlayer.PlaySE((int)SEPlayer.SEID.Decision);
+
 		// 各種役割に応じた最初の画面に入る
 		this.StartScreen.SetActive(false);
 		this.MainScreen.SetActive(true);
@@ -208,6 +217,8 @@ public class ControllerManager : MonoBehaviour {
 	/// ゲームマスターからの指示を受けて操作端末を開始します。
 	/// </summary>
 	private void startController() {
+		this.SEPlayer.PlaySE((int)SEPlayer.SEID.ControllerStart);
+
 		// アイドル画面から共通スタート画面へ
 		this.IdleScreen.SetActive(false);
 		this.StartScreen.SetActive(true);

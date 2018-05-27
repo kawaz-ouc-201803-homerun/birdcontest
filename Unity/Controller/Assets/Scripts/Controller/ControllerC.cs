@@ -69,6 +69,8 @@ namespace ControllerC {
 					Quaternion.identity,
 					this.transform.Find("Options")
 				);
+			this.OtomoOptions.transform.Find("SubGameSelectorController").GetComponent<ControllerCButtonController>().SEPlayer = this.SEPlayer;
+
 			Object.DestroyImmediate(this.SubGames[(int)Option.Wairo]);
 			this.SubGames[(int)Option.Wairo] =
 				Object.Instantiate(

@@ -58,6 +58,11 @@ namespace SubGame {
 		private int axisDirection;
 
 		/// <summary>
+		/// SE再生制御オブジェクト
+		/// </summary>
+		public SEPlayer SEPlayer;
+
+		/// <summary>
 		/// 初回処理
 		/// </summary>
 		public override void StartSubGame() {
@@ -109,6 +114,7 @@ namespace SubGame {
 
 				// 点数加算
 				ScoreUIPushButtons.Score++;
+				this.SEPlayer.PlaySE((int)SEPlayer.SEID.PushButton);
 
 				// 次の入力ボタンを決定する
 				this.SetRandomKey();
@@ -138,7 +144,7 @@ namespace SubGame {
 		/// </summary>
 		private void SetRandomKey() {
 			// ゲームパッドの右手: 1~4 ボタンの中から選ぶ
-			SubGamePushButtons.AvailableKeys[0] = (KeyCode)Random.Range((int)KeyCode.Joystick1Button0, (int)KeyCode.Joystick1Button4);
+			SubGamePushButtons.AvailableKeys[0] = (KeyCode)Random.Range((int)KeyCode.Joystick1Button0, (int)KeyCode.Joystick1Button3 + 1);
 
 			// ゲームパッドのLR: 5~8 ボタンの中から選ぶ
 			SubGamePushButtons.AvailableKeys[1] = (KeyCode)Random.Range((int)KeyCode.Joystick1Button4, (int)KeyCode.Joystick1Button7 + 1);

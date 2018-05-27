@@ -50,6 +50,11 @@ namespace OtomoOptions {
 		public OptionDescriptionController descriptionController;
 
 		/// <summary>
+		/// SE再生制御オブジェクト
+		/// </summary>
+		public SEPlayer SEPlayer;
+
+		/// <summary>
 		/// 初期化処理
 		/// </summary>
 		public virtual void Start() {
@@ -69,6 +74,7 @@ namespace OtomoOptions {
 		public void ButtonOnClick(string parameter) {
 			if(this.descriptionController.IsSubGameButtonClickable == true) {
 				// ミニゲーム選択ボタンの押下処理
+				this.SEPlayer.PlaySE((int)SEPlayer.SEID.Decision);
 				this.CurrentWindowState = WindowState.Visible;
 				this.setSelectedSubGameId(parameter);
 				return;
@@ -78,6 +84,7 @@ namespace OtomoOptions {
 			switch(parameter) {
 				case "No":
 					// 「やっぱりやめる」
+					this.SEPlayer.PlaySE((int)SEPlayer.SEID.Cancel);
 					this.CurrentWindowState = WindowState.Hidden;
 					this.descriptionController.IsSubGameButtonClickable = true;
 					foreach(GameObject obj in this.DescriptionWindow) {
@@ -87,6 +94,7 @@ namespace OtomoOptions {
 
 				case "Yes":
 					// 「これでいく」
+					this.SEPlayer.PlaySE((int)SEPlayer.SEID.Decision);
 					this.CurrentWindowState = WindowState.Disposed;
 					this.descriptionController.IsSubGameButtonClickable = true;
 					foreach(GameObject obj in this.DescriptionWindow) {
