@@ -56,6 +56,16 @@ public class PhaseManager : MonoBehaviour {
 	public PhaseBase Phase;
 
 	/// <summary>
+	/// BGM音源
+	/// </summary>
+	public AudioSource BGMAudioSource;
+
+	/// <summary>
+	/// 現在再生中のBGMファイル名
+	/// </summary>
+	private string currentBGMFileName;
+
+	/// <summary>
 	/// フェーズのインデックス
 	/// </summary>
 	public int PhaseIndex {
@@ -163,6 +173,7 @@ public class PhaseManager : MonoBehaviour {
 
 			// 初回処理をここで実行
 			this.Phase.Start();
+			this.playPhaseBGM();
 
 			if(hasBeforePhase == true) {
 				// 明転開始
@@ -195,6 +206,34 @@ public class PhaseManager : MonoBehaviour {
 	/// <param name="callback">処理完了後に呼び出されるコールバック関数</param>
 	public void DoTransitionOut(float time, Action callback = null) {
 		GameObject.Find("FadeCanvas").GetComponent<Fade>().FadeIn(time, callback);
+	}
+
+	/// <summary>
+	/// 現在のフェーズのBGMを再生します。
+	/// </summary>
+	private void playPhaseBGM() {
+		if(this.Phase == null) {
+			Debug.Log("有効なシーンが存在しないため、BGMを再生しません。");
+			return;
+		}
+
+		// 各フェーズがファイル名を返し、それに対応するAudioClipをリソースから取り出す
+		var fileName = this.Phase.GetBGMFileName();
+		if(this.currentBGMFileName == fileName) {
+			// 同じファイルの時はスキップする
+			return;
+		}
+		var audioClip = Resources.Load<AudioClip>(fileName);
+		if(audioClip == null) {
+			Debug.LogWarning("BGMリソースを取得できませんでした: " + fileName);
+			return;
+		}
+		this.BGMAudioSource.Stop();
+		this.BGMAudioSource.clip = audioClip;
+		this.BGMAudioSource.loop = true;
+		this.BGMAudioSource.Play();
+
+		this.currentBGMFileName = fileName;
 	}
 
 }

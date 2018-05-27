@@ -15,7 +15,7 @@ public class PhaseResult : PhaseBase {
 	/// <summary>
 	/// 日時文字列の書式
 	/// </summary>
-	public const string DateTimeFormat = "yyyy/MM/dd HH:mm:ss";
+	public const string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
 	/// <summary>
 	/// ランキングの距離差分書式
@@ -58,6 +58,11 @@ public class PhaseResult : PhaseBase {
 	private System.Random rand;
 
 	/// <summary>
+	/// オーディエンス投票データを取得できたかどうか
+	/// </summary>
+	private bool isPostDataCollected = false;
+
+	/// <summary>
 	/// コンストラクター
 	/// </summary>
 	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
@@ -65,6 +70,7 @@ public class PhaseResult : PhaseBase {
 	public PhaseResult(PhaseManager parent, object[] parameters) : base(parent, parameters) {
 		this.connector = new NetworkGameMaster(PhaseControllers.ControllerIPAddresses);
 		this.rand = new System.Random();
+		this.isPostDataCollected = false;
 	}
 
 	/// <summary>
@@ -83,6 +89,10 @@ public class PhaseResult : PhaseBase {
 
 		// 非同期でオーディエンス投票データを取り出す
 		this.connector.GetAudiencePredicts((string)this.parameters[0], new System.Action<ModelAudiencePredictsResponse>((result) => {
+			if(this.isPostDataCollected == true) {
+				Debug.LogWarning("二重にオーディエンス投票データを取得しました。最初の１回目のみ有効です。");
+				return;
+			}
 			if(result == null) {
 				// 取得失敗
 				Debug.LogError("オーディエンス投票データ取得失敗: "
@@ -92,6 +102,7 @@ public class PhaseResult : PhaseBase {
 				return;
 			}
 
+			this.isPostDataCollected = true;
 			Debug.Log("オーディエンス投票データ取得OK");
 
 			// デバッグ用にダミーの投票データを仕込む
@@ -215,6 +226,14 @@ public class PhaseResult : PhaseBase {
 	/// <returns>次のフェーズのインスタンス</returns>
 	public override PhaseBase GetNextPhase() {
 		return new PhaseCredit(this.parent);
+	}
+
+	/// <summary>
+	/// このフェーズのBGMファイル名を返します。
+	/// </summary>
+	/// <returns>BGMファイル名</returns>
+	public override string GetBGMFileName() {
+		return "Sounds/BGM/AC【エンディング】mist";
 	}
 
 }

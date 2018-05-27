@@ -550,4 +550,12 @@ public class PhaseFlight : PhaseBase {
 		});
 	}
 
+	/// <summary>
+	/// このフェーズのBGMファイル名を返します。
+	/// </summary>
+	/// <returns>BGMファイル名</returns>
+	public override string GetBGMFileName() {
+		return "Sounds/BGM/AC【飛行】shoujokyoku";
+	}
+
 }

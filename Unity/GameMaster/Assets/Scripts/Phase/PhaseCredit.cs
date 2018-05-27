@@ -37,4 +37,12 @@ public class PhaseCredit : PhaseBase {
 		return new PhaseIdle(this.parent);
 	}
 
+	/// <summary>
+	/// このフェーズのBGMファイル名を返します。
+	/// </summary>
+	/// <returns>BGMファイル名</returns>
+	public override string GetBGMFileName() {
+		return "Sounds/BGM/AC【エンディング】mist";
+	}
+
 }
