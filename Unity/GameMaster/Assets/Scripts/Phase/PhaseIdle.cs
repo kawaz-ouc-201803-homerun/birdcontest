@@ -117,4 +117,12 @@ public class PhaseIdle : PhaseBase {
 		return new PhaseControllers(this.parent);
 	}
 
+	/// <summary>
+	/// このフェーズのBGMファイル名を返します。
+	/// </summary>
+	/// <returns>BGMファイル名</returns>
+	public override string GetBGMFileName() {
+		return "Sounds/BGM/AC【タイトル】hoshinomatataki";
+	}
+
 }

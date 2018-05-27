@@ -13,7 +13,6 @@ namespace ControllerB {
 		/// 初回処理
 		/// </summary>
 		public override void Start() {
-			base.Start();
 			this.StartNewGame();
 		}
 
@@ -32,6 +31,7 @@ namespace ControllerB {
 		/// </summary>
 		public override void StartNewGame() {
 			// ミニゲームを表示
+			base.Start();
 			this.activeSubGame = this.SubGames[0];
 			this.activeSubGame.gameObject.SetActive(true);
 			this.activeSubGame.StartSubGame();

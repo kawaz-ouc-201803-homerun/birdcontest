@@ -67,5 +67,12 @@ public abstract class PhaseBase {
 	/// </summary>
 	/// <returns>次のフェーズのインスタンス</returns>
 	public abstract PhaseBase GetNextPhase();
-	
+
+	/// <summary>
+	/// このフェーズのBGMファイル名を返します。
+	/// Resourceフォルダー以下のもので返すようにして下さい。
+	/// </summary>
+	/// <returns>BGMファイル名</returns>
+	public abstract string GetBGMFileName();
+
 }

@@ -276,15 +276,23 @@ public abstract class NetworkConnector {
 	/// すべてのTCP/UDPコネクションを破棄します。
 	/// </summary>
 	public void CloseConnectionsAll() {
-		// 受信用TCPリスナー
-		foreach(var tcp in this.tcpReceiveListeners) {
-			tcp.Value.Resource.Server.Close();
+		try {
+			// 受信用TCPリスナー
+			foreach(var tcp in this.tcpReceiveListeners) {
+				tcp.Value.Resource.Server.Close();
+			}
+		} catch {
+			Debug.LogWarning("受信用TCPリスナーを正しく閉じられませんでした。");
 		}
 		this.tcpReceiveListeners.Clear();
 
 		// 受信用UDPクライアント
-		foreach(var udp in this.udpReceiveClients) {
-			udp.Value.Resource.Close();
+		try {
+			foreach(var udp in this.udpReceiveClients) {
+				udp.Value.Resource.Close();
+			}
+		} catch {
+			Debug.LogWarning("受信用UDPクライアントを正しく閉じられませんでした。");
 		}
 		this.udpReceiveClients.Clear();
 	}
