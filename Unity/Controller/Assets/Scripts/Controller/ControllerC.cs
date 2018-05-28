@@ -79,6 +79,7 @@ namespace ControllerC {
 					Quaternion.identity,
 					this.transform
 				).GetComponent<SubGame.SubGameWairo>();
+			this.SubGames[(int)Option.Wairo].GetComponent<SubGame.SubGameWairo>().SEPlayer = this.SEPlayer;
 
 			// 画面初期化
 			this.transform.Find("Options").gameObject.SetActive(true);

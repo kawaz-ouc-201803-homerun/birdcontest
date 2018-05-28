@@ -156,7 +156,7 @@ public class DataContainer : MonoBehaviour {
 		// 端末A
 		switch(this.OptionA) {
 			case (int)PhaseControllers.OptionA.Bomb:
-				this.ParamA = (int)(1000f + this.ParamA / (float)PhaseControllers.ControllerLimitSeconds * 2500f);
+				this.ParamA = (int)(1000f + this.ParamA / (PhaseControllers.ControllerLimitSeconds * 2.0f / 3.0f) * 2500f);
 				break;
 
 			case (int)PhaseControllers.OptionA.Human:
@@ -175,7 +175,7 @@ public class DataContainer : MonoBehaviour {
 		// 端末C
 		switch(this.OptionC) {
 			case (int)PhaseControllers.OptionC.Bomb:
-				this.ParamC = (int)(1f + this.ParamC / (float)PhaseControllers.ControllerLimitSeconds * 800f);
+				this.ParamC = (int)(1f + this.ParamC / (PhaseControllers.ControllerLimitSeconds * 2.0f / 2.0f) * 800f);
 				break;
 
 			case (int)PhaseControllers.OptionC.Human:

@@ -30,7 +30,7 @@ public class PhaseResult : PhaseBase {
 	/// <summary>
 	/// ニアピン賞を採用する最大誤差m数
 	/// </summary>
-	public const int AvailableNearpinMaxDelta = 20;
+	public const int AvailableNearpinMaxDelta = 10;
 
 	/// <summary>
 	/// ランキングの自動スクロールにかける秒数
