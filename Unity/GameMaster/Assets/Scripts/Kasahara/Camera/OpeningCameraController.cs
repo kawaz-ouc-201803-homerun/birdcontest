@@ -43,8 +43,9 @@ public class OpeningCameraController : MonoBehaviour {
 		this.previousCameraId = this.CameraSwitcher.CurrentCameraId;
 		this.CameraSwitcher.DisenabledCameraAll();
 
-		// オープニング用のカメラとアニメーションを有効にする
+		// オープニング用のカメラを有効にする
 		this.GetComponent<Camera>().enabled = true;
+		this.GetComponent<AudioListener>().enabled = true;
 		this.GetComponent<Animator>().enabled = true;
 
 		// 終了まで待つ
@@ -52,6 +53,7 @@ public class OpeningCameraController : MonoBehaviour {
 
 		// 飛行用のカメラワークを復元する
 		this.GetComponent<Camera>().enabled = false;
+		this.GetComponent<AudioListener>().enabled = false;
 		this.GetComponent<Animator>().enabled = false;
 		this.CameraSwitcher.ChangeCameraAngle((CameraSwitcher.CameraID)this.previousCameraId);
 

@@ -15,9 +15,9 @@ public class ControllerManager : MonoBehaviour {
 	/// 操作端末のフェーズ
 	/// </summary>
 	public enum ControllerPhase {
-		Idle,           // アイドル状態
-		Playing,        // ミニゲームプレイ中
-		Result,         // 結果画面
+		Idle,               // アイドル状態
+		Playing,            // ミニゲームプレイ中
+		Result,             // 結果画面
 	}
 
 	/// <summary>
@@ -26,9 +26,19 @@ public class ControllerManager : MonoBehaviour {
 	public const int DefaultLimitTimeSeconds = 30;
 
 	/// <summary>
+	/// ミニゲーム終了後の結果画面での待機秒数
+	/// </summary>
+	public const int ResultPhaseLimitTimeSeconds = 30;
+
+	/// <summary>
 	/// 完了報告に失敗したときにやり直す回数の上限
 	/// </summary>
 	public const int ConnectRetryMaxCount = 5;
+
+	/// <summary>
+	/// 完了報告に失敗したときのリトライ待機時間
+	/// </summary>
+	public const float TCPRetryWaitSeconds = 3.0f;
 
 	/// <summary>
 	/// 制限時間秒数
@@ -104,6 +114,11 @@ public class ControllerManager : MonoBehaviour {
 	private bool isControllerStarted;
 
 	/// <summary>
+	/// 別スレッドから完了報告のリトライが要求されているかどうか
+	/// </summary>
+	private bool isTCPRetryRequired;
+
+	/// <summary>
 	/// 完了報告として送信したデータ
 	/// </summary>
 	private Dictionary<string, string> completeProgressData;
@@ -124,6 +139,7 @@ public class ControllerManager : MonoBehaviour {
 	public void Start() {
 		this.readyForStart = false;
 		this.isControllerStarted = false;
+		this.isTCPRetryRequired = false;
 		this.emergencyText = "";
 		this.currentRetryCount = 0;
 		this.phase = ControllerPhase.Idle;
@@ -164,16 +180,6 @@ public class ControllerManager : MonoBehaviour {
 	/// 毎フレーム更新処理
 	/// </summary>
 	public void Update() {
-		if(Input.GetKeyDown(KeyCode.Escape) == true) {
-			// プログラムを閉じる
-			this.connector.CloseConnectionsAll();
-#if UNITY_EDITOR
-			UnityEditor.EditorApplication.isPlaying = false;
-#endif
-			Application.Quit();
-			return;
-		}
-
 		if(this.isControllerStarted == false) {
 			// 端末固有の動作開始前
 			if(Input.GetKeyDown(KeyCode.F10) == true) {
@@ -192,10 +198,11 @@ public class ControllerManager : MonoBehaviour {
 		}
 
 		if(this.EndScreen.activeInHierarchy == true) {
-			// 終了画面にいるとき、ユーザー入力（Enterキー）でアイドル画面に戻す
-			if(Input.GetKeyDown(KeyCode.Return) == true
+			// 終了画面にいるとき、ユーザー入力（Escapeキー）でアイドル画面に戻す
+			if(Input.GetKeyDown(KeyCode.Escape) == true
 			&& this.phase == ControllerPhase.Result) {
 				this.closeResult();
+				return;
 			}
 
 			// 障害発生時のテキスト
@@ -206,6 +213,12 @@ public class ControllerManager : MonoBehaviour {
 			} else {
 				// 障害発生時
 				this.EndScreen.transform.Find("Windows/WindowEnd/Text").GetComponent<Text>().text = "＜＜通信障害発生＞＞";
+			}
+
+			// 障害発生時にリトライする
+			if(this.isTCPRetryRequired == true) {
+				this.isTCPRetryRequired = false;
+				this.StartCoroutine(this.retrySendCompleteProgress());
 			}
 		}
 	}
@@ -275,18 +288,21 @@ public class ControllerManager : MonoBehaviour {
 			}),
 			new System.Action(() => {
 				// 送信失敗
-				Debug.LogError("完了報告に失敗");
-				this.currentRetryCount++;
+				if(this.phase != ControllerPhase.Result) {
+					// 既に結果フェーズからはなれている場合は何もしない
+					return;
+				}
 
-				if(this.currentRetryCount < ControllerManager.ConnectRetryMaxCount
-				&& this.phase == ControllerPhase.Result) {
-					// 再試行
-					this.currentRetryCount++;
-					this.sendCompleteProgress();
+				Debug.LogWarning("完了報告に失敗");
+				this.currentRetryCount++;
+				if(this.currentRetryCount <= ControllerManager.ConnectRetryMaxCount) {
+					// 再試行：リトライ回数が上限に達するまでは障害扱いにしない
+					this.isTCPRetryRequired = true;
 					return;
 				}
 
 				// ゲームマスター側でデータを直接入力できるようにするため、送ろうとしたデータの中身を表示する
+				Debug.LogError("完了報告に失敗：リトライ上限に達したため障害扱いとします");
 				using(var buf = new StringWriter()) {
 					bool wrote = false;
 
@@ -304,6 +320,15 @@ public class ControllerManager : MonoBehaviour {
 				}
 			})
 		);
+	}
+
+	/// <summary>
+	/// 一定時間後に、ゲームマスターへの完了報告をやり直します。
+	/// </summary>
+	private IEnumerator retrySendCompleteProgress() {
+		Debug.Log("GM完了報告リトライ待ち [" + this.currentRetryCount + " / " + ControllerManager.ConnectRetryMaxCount + "]");
+		yield return new WaitForSeconds(ControllerManager.TCPRetryWaitSeconds);
+		this.sendCompleteProgress();
 	}
 
 	/// <summary>
@@ -333,7 +358,7 @@ public class ControllerManager : MonoBehaviour {
 	/// 結果画面を自動的に閉じるコルーチン
 	/// </summary>
 	private IEnumerator autoResultCloser() {
-		yield return new WaitForSeconds(10.0f);
+		yield return new WaitForSeconds(ControllerManager.ResultPhaseLimitTimeSeconds);
 
 		// 障害が発生しているときは自動で遷移しないようにする
 		if(this.phase == ControllerPhase.Result

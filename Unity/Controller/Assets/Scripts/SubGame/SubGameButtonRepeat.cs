@@ -14,7 +14,7 @@ namespace SubGame {
 		/// <summary>
 		/// 最大スコアにする秒間ボタン押下回数
 		/// </summary>
-		public const int MaxScoreThreshold = 4;
+		public const int MaxScoreThreshold = 7;
 
 		/// <summary>
 		/// ボタンが押下状態であるかどうか
@@ -71,17 +71,15 @@ namespace SubGame {
 		/// </summary>
 		protected override void updateSubGame() {
 			// ボタン押下判定
-			if(Input.GetButtonDown("Click") == true) {
-				if(this.IsButtonDown == false) {
-					// ボタン押下開始
-					this.IsButtonDown = true;
-				} else {
-					// ボタン押下状態から離されたときに回数カウント
-					this.ButtonDownCount++;
-					this.IsButtonDown = false;
+			if(Input.GetButton("Click") == true) {
+				// ボタン押下開始
+				this.IsButtonDown = true;
+			} else if(this.IsButtonDown == true) {
+				// ボタン押下状態から離されたときに回数カウント
+				this.ButtonDownCount++;
+				this.IsButtonDown = false;
 
-					this.SEPlayer.PlaySE((int)SEPlayer.SEID.PushButton);
-				}
+				this.SEPlayer.PlaySE((int)SEPlayer.SEID.PushButton);
 			}
 
 			// 一定間隔で実行する処理
@@ -99,10 +97,11 @@ namespace SubGame {
 				);
 
 				// スコア計算＆加算
-				var score = (SubGameButtonRepeat.MaxScoreThreshold - Mathf.Abs(this.ButtonDownCount - SubGameButtonRepeat.MaxScoreThreshold)) / (float)SubGameButtonRepeat.MaxScoreThreshold;
+				var addScore = (SubGameButtonRepeat.MaxScoreThreshold - Mathf.Abs(this.ButtonDownCount - SubGameButtonRepeat.MaxScoreThreshold)) / (float)SubGameButtonRepeat.MaxScoreThreshold;
+				var score = Mathf.Max(0, addScore);
 				this.Score += score;
 
-				// Debug.Log("秒間ボタン押下回数 = " + this.ButtonDownCount);
+				Debug.Log("秒間ボタン押下回数 = " + this.ButtonDownCount);
 				this.LastButtonDownCount = this.ButtonDownCount;
 				this.TimeCounter = 0;
 				this.ButtonDownCount = 0;

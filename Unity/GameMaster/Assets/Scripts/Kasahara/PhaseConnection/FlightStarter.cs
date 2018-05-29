@@ -71,7 +71,7 @@ public class FlightStarter : MonoBehaviour {
 	public void Update() {
 #if UNITY_EDITOR
 		// デバッグ時のみ、Enterキーで開始する
-		if(Input.GetKeyDown(KeyCode.Return) == true && this.isStarted == false) {
+		if(this.GetComponent<DataContainerDebugger>().enabled == true && Input.GetKeyDown(KeyCode.Return) == true && this.isStarted == false) {
 			this.isStarted = true;
 			this.DoFlightStart();
 		}

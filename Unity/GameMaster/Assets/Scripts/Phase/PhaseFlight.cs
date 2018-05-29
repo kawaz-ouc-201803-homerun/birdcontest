@@ -539,7 +539,10 @@ public class PhaseFlight : PhaseBase {
 		yield return new WaitForSeconds(3.0f);
 
 		// 次のフェーズへ移行する
-		this.parent.ChangePhase(this.GetNextPhase());
+		if(this.parent.Phase == this) {
+			// 先にEnterキーで進められた場合はスキップ
+			this.parent.ChangePhase(this.GetNextPhase());
+		}
 	}
 
 	/// <summary>

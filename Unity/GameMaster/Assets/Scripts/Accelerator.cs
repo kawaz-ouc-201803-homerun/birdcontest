@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,8 +26,10 @@ public class Accelerator : MonoBehaviour {
 	/// クルマの操作状態
 	/// </summary>
 	public enum State {
-		ReadyForStart,  // 開始前のアクセル吹かし
+		BeforeStart,    // 開始前のアクセル吹かし
 		Racing,         // 発進に失敗してタイヤ空転中
+		Ready,          // 発進準備完了
+		Starting,		// 発進直後に牽引している飛行機の負荷がかかり回転数が落ちる状態
 		Running,        // 発進
 		Braking,        // ブレーキ
 	}
@@ -62,6 +65,11 @@ public class Accelerator : MonoBehaviour {
 	public const float RunningDecelFactor = 0.01f;
 
 	/// <summary>
+	/// 発進直後に牽引している飛行機の負荷がかかって落ちる回転数差分値
+	/// </summary>
+	public const float StatringDownRevFactor = 0.1f;
+
+	/// <summary>
 	/// 現在の操作状態
 	/// </summary>
 	public State CurrentState;
@@ -81,15 +89,15 @@ public class Accelerator : MonoBehaviour {
 	/// </summary>
 	public void Start() {
 		this.engineAudio = this.GetComponent<CarAudio>();
-		this.CurrentState = State.ReadyForStart;
+		this.CurrentState = State.BeforeStart;
 	}
 
 	/// <summary>
 	/// 毎フレーム更新
 	/// </summary>
 	public void Update() {
-		// 空転処理
 		if(this.CurrentState == State.Racing) {
+			// 空転処理
 			this.racingTimer -= Time.deltaTime;
 
 			// 回転数を自動で落とす
@@ -107,25 +115,31 @@ public class Accelerator : MonoBehaviour {
 			}
 		}
 
-		// クラッチを切っているとき、自動的に目標の回転数まで上げる
-		if(this.CurrentState == State.ReadyForStart && this.EngineRevs < this.TargetRevs) {
+		if(this.CurrentState == State.BeforeStart && this.EngineRevs < this.TargetRevs) {
+			// クラッチを切っているとき、自動的に目標の回転数まで上げる
 			this.ReadyForStart();
+		}
+
+		if(this.CurrentState == State.Ready) {
+			// 発進するとき、飛行機の重みで回転数が一瞬落ちる演出を行う
+			this.CurrentState = State.Starting;
+			this.StartCoroutine(this.startingDownEngine());
 		}
 
 		// デモンストレーションモード
 		if(this.DemoMode == true) {
 			// 1キーでクラッチ切る（初期状態へ）
 			if(Input.GetKey(KeyCode.Alpha1) == true) {
-				this.CurrentState = State.ReadyForStart;
+				this.CurrentState = State.BeforeStart;
 			}
 
 			// 2キーでクラッチ繋ぐ（発進）
-			if(Input.GetKey(KeyCode.Alpha2) == true && this.CurrentState == State.ReadyForStart) {
+			if(Input.GetKey(KeyCode.Alpha2) == true && this.CurrentState == State.BeforeStart) {
 				this.Run();
 			}
 
 			// クラッチ繋いでいるとき
-			if(this.CurrentState != State.ReadyForStart) {
+			if(this.CurrentState != State.BeforeStart) {
 				// 3キーでアクセル吹かす
 				if(Input.GetKey(KeyCode.Alpha3) == true && this.CurrentState == State.Running) {
 					this.AccelUpDown(false);
@@ -148,7 +162,7 @@ public class Accelerator : MonoBehaviour {
 	/// </summary>
 	public void ReadyForStart() {
 		// クラッチを切る
-		this.CurrentState = State.ReadyForStart;
+		this.CurrentState = State.BeforeStart;
 
 		this.engineAudio.Revs += Accelerator.DetachedClutchAccelFactor;
 		if(this.engineAudio.Revs > 1) {
@@ -175,6 +189,28 @@ public class Accelerator : MonoBehaviour {
 			this.GetComponent<AudioSource>().Play();
 			return;
 		}
+	}
+
+	/// <summary>
+	/// 発進するとき、飛行機の重みで回転数が一瞬落ちる演出を行います。
+	/// </summary>
+	private IEnumerator startingDownEngine() {
+		iTween.ValueTo(
+			this.gameObject,
+			iTween.Hash(
+				"from", this.EngineRevs,
+				"to", this.EngineRevs - Accelerator.StatringDownRevFactor,
+				"time", 0.5f,
+				"onupdate", new Action<object>((value) => {
+					this.engineAudio.Revs = (float)value;
+				})
+			)
+		);
+
+		yield return new WaitForSeconds(0.5f);
+
+		// 回転数を上げていくフェーズへ移行する
+		this.CurrentState = State.Running;
 	}
 
 	/// <summary>

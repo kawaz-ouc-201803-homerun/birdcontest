@@ -58,24 +58,12 @@ public class PhaseResult : PhaseBase {
 	private List<ModelAudiencePredict> ranking;
 
 	/// <summary>
-	/// マルチスレッドで使用するための乱数発生器
-	/// </summary>
-	private System.Random rand;
-
-	/// <summary>
-	/// オーディエンス投票データを取得できたかどうか
-	/// </summary>
-	private bool isPostDataCollected = false;
-
-	/// <summary>
 	/// コンストラクター
 	/// </summary>
 	/// <param name="parent">フェーズ管理クラスのインスタンス</param>
 	/// <param name="param">[0]=イベントID, [1]=飛距離</param>
 	public PhaseResult(PhaseManager parent, object[] parameters) : base(parent, parameters) {
 		this.connector = new NetworkGameMaster(PhaseControllers.ControllerIPAddresses);
-		this.rand = new System.Random();
-		this.isPostDataCollected = false;
 	}
 
 	/// <summary>
@@ -94,10 +82,6 @@ public class PhaseResult : PhaseBase {
 
 		// 非同期でオーディエンス投票データを取り出す
 		this.connector.GetAudiencePredicts((string)this.parameters[0], new System.Action<ModelAudiencePredictsResponse>((result) => {
-			if(this.isPostDataCollected == true) {
-				Debug.LogWarning("二重にオーディエンス投票データを取得しました。最初の１回目のみ有効です。");
-				return;
-			}
 			if(result == null) {
 				// 取得失敗
 				Debug.LogError("オーディエンス投票データ取得失敗: "
@@ -107,8 +91,9 @@ public class PhaseResult : PhaseBase {
 				return;
 			}
 
-			this.isPostDataCollected = true;
 			Debug.Log("オーディエンス投票データ取得OK");
+			float score = (float)this.parameters[1];
+			float nearpinDeltaAbs = 0;
 
 			// デバッグ用にダミーの投票データを仕込む
 			//for(int i = 0; i < 10; i++) {
@@ -120,23 +105,24 @@ public class PhaseResult : PhaseBase {
 			//}
 
 			// 順位データ整理：最も近い順、投稿早い順
-			float score = (float)this.parameters[1];
-			result.audiencePredicts.Sort((x, y) => {
-				if(Mathf.Abs(x.predict) != Mathf.Abs(y.predict)) {
-					// 結果値からの予想値の距離が双方で異なる場合は距離基準で見る
-					float x_delta = Mathf.Abs(x.predict - score);
-					float y_delta = Mathf.Abs(y.predict - score);
-					return ((int)Mathf.RoundToInt(x_delta)) - ((int)Mathf.Round(y_delta));
-				}
+			if(result.audiencePredicts.Count > 0) {
+				result.audiencePredicts.Sort((x, y) => {
+					if(Mathf.Abs(x.predict) != Mathf.Abs(y.predict)) {
+						// 結果値からの予想値の距離が双方で異なる場合は距離基準で見る
+						float x_delta = Mathf.Abs(x.predict - score);
+						float y_delta = Mathf.Abs(y.predict - score);
+						return ((int)Mathf.RoundToInt(x_delta)) - ((int)Mathf.Round(y_delta));
+					}
 
-				// 投稿時刻基準で見る
-				var x_time = DateTime.ParseExact(x.receiveTime, PhaseResult.DateTimeFormat, null);
-				var y_time = DateTime.ParseExact(y.receiveTime, PhaseResult.DateTimeFormat, null);
-				return DateTime.Compare(x_time, y_time);
-			});
+					// 投稿時刻基準で見る
+					var x_time = DateTime.ParseExact(x.receiveTime, PhaseResult.DateTimeFormat, null);
+					var y_time = DateTime.ParseExact(y.receiveTime, PhaseResult.DateTimeFormat, null);
+					return DateTime.Compare(x_time, y_time);
+				});
 
-			// ニアピン対象者の誤差を算出
-			var nearpinDeltaAbs = Mathf.Abs(result.audiencePredicts[0].predict - score);
+				// ニアピン対象者の誤差を算出
+				nearpinDeltaAbs = Mathf.Abs(result.audiencePredicts[0].predict - score);
+			}
 
 			if(result.audiencePredicts.Count >= PhaseResult.AvailableNearpinMinCount
 			&& nearpinDeltaAbs <= PhaseResult.AvailableNearpinMaxDelta) {

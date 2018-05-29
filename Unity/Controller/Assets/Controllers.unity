@@ -937,7 +937,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Enter/Return\u30AD\u30FC\u3067\u623B\u308A\u307E\u3059..."
+  m_Text: "Esc\u30AD\u30FC\u3067\u623B\u308A\u307E\u3059..."
 --- !u!222 &186313954
 CanvasRenderer:
   m_ObjectHideFlags: 0

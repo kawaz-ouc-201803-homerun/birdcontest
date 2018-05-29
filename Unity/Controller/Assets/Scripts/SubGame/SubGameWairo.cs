@@ -70,12 +70,12 @@ namespace SubGame {
 		/// <summary>
 		/// 対GM報告用：交渉により得たポイント
 		/// </summary>
-		private int wairoScore = 0;
+		private int wairoScore = 1;
 
 		/// <summary>
 		/// 交渉により得られるポイントの最大値
 		/// </summary>
-		public const int WairoScoreMax = 3;
+		public const int WairoScoreMax = 4;
 
 		/// <summary>
 		/// 対GM報告用：選択肢いま何問目？
@@ -124,7 +124,7 @@ namespace SubGame {
 			this.isTextable = false;
 			this.quizNum = 0;
 			this.wairoMultiFlag = 0;
-			this.wairoScore = 0;
+			this.wairoScore = 1;
 			this.wairoStep = 0;
 
 			// ウィンドウをアニメーションしながら表示する

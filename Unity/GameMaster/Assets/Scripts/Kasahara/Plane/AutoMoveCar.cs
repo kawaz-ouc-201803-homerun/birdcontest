@@ -144,7 +144,7 @@ public class AutoMoveCar : PlaneBehaviourParent, IFlightStarter {
 		}
 
 		// 移動開始
-		this.Accel.CurrentState = Accelerator.State.Running;
+		this.Accel.CurrentState = Accelerator.State.Ready;
 		this.enabled = true;
 		if(this.StartMoveEvent != null) {
 			// 移動を開始したときにイベントを発生させる

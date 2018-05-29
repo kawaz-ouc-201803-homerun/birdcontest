@@ -185,10 +185,6 @@ public class DataContainer : MonoBehaviour {
 			case (int)PhaseControllers.OptionC.Wairo:
 				// 賄賂スコアに応じてスコアの上げ幅をパーセント値で決定する
 				switch(this.ParamC) {
-					case 0:
-						this.ParamC = 100;
-						break;
-
 					case 1:
 						this.ParamC = 125;
 						break;
@@ -198,11 +194,15 @@ public class DataContainer : MonoBehaviour {
 						break;
 
 					case 3:
+						this.ParamC = 175;
+						break;
+
+					case 4:
 						this.ParamC = 200;
 						break;
 
 					default:
-						Debug.LogWarning("賄賂スコアが範囲外です。0～3までの間に設定して下さい。");
+						Debug.LogWarning("賄賂スコアが範囲外です。1～4までの間に設定して下さい。");
 						this.ParamC = 100;
 						break;
 				}

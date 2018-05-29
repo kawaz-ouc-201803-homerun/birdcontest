@@ -15,6 +15,16 @@ using UnityEngine;
 public class PhaseControllers : PhaseBase {
 
 	/// <summary>
+	/// 端末の開始状態
+	/// </summary>
+	public enum ControllerState {
+		Starting,           // 開始指示を出している
+		RequiredRestart,    // 開始指示に失敗したのでリトライが必要な状態
+		RetryToStart,       // 開始指示のリトライ中
+		Started,            // ミニゲームが開始した
+	}
+
+	/// <summary>
 	/// メーター順序
 	/// </summary>
 	public enum PowerMeter {
@@ -50,7 +60,7 @@ public class PhaseControllers : PhaseBase {
 	/// <summary>
 	/// 賄賂ミニゲームの最大スコア
 	/// </summary>
-	public const int WairoScoreMax = 3;
+	public const int WairoScoreMax = 4;
 
 	/// <summary>
 	/// 操作端末のIPアドレス
@@ -77,6 +87,11 @@ public class PhaseControllers : PhaseBase {
 	/// オーディエンス投票を締め切る直前の待機秒数
 	/// </summary>
 	public const int ClosingAudienceWaitSeconds = 30;
+
+	/// <summary>
+	/// 開始指示の接続に失敗したときのリトライ待機時間
+	/// </summary>
+	public const float TCPRetryWaitSeconds = 3.0f;
 
 	/// <summary>
 	/// 操作端末に与えられるゲーム時間
@@ -145,9 +160,9 @@ public class PhaseControllers : PhaseBase {
 	private bool[] isControllerCompleted;
 
 	/// <summary>
-	/// 各端末の通信でエラーが発生しているかどうか
+	/// 各端末の開始指示の通信状況
 	/// </summary>
-	private bool[] isControllerError;
+	private ControllerState[] controllerStates;
 
 	/// <summary>
 	/// バックドアによって端末の操作内容が変更されたかどうか
@@ -217,7 +232,7 @@ public class PhaseControllers : PhaseBase {
 
 		// ##### 操作端末周り #####
 		this.isControllerCompleted = new bool[PhaseControllers.ControllerIPAddresses.Length];
-		this.isControllerError = new bool[PhaseControllers.ControllerIPAddresses.Length];
+		this.controllerStates = new ControllerState[PhaseControllers.ControllerIPAddresses.Length];
 		for(int i = 0; i < PhaseControllers.ControllerIPAddresses.Length; i++) {
 			GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text = "";
 			GameObject.Find("Controller_CompleteCheck" + i).transform.localScale = new Vector3(0, 0, 1);
@@ -255,6 +270,12 @@ public class PhaseControllers : PhaseBase {
 		// 端末の進捗状況
 		this.controllerProgressRefreshTimer += Time.deltaTime;
 		for(int i = 0; i < PhaseControllers.ControllerIPAddresses.Length; i++) {
+			// 開始指示の障害対応
+			if(this.controllerStates[i] == ControllerState.RequiredRestart) {
+				this.controllerStates[i] = ControllerState.RetryToStart;
+				this.parent.StartCoroutine(this.retryStartController(i));
+			}
+
 			if(this.controllerProgressRefreshTimer >= PhaseControllers.ControllerProgressRefreshSeconds) {
 				// 一定間隔で実行する処理
 
@@ -262,7 +283,7 @@ public class PhaseControllers : PhaseBase {
 				GameObject.Find("Controller_Description" + i).GetComponent<UnityEngine.UI.Text>().text =
 					this.conrollerProgressToString(i, PhaseControllers.ControllerProgresses[i]);
 
-				if(PhaseControllers.BackDoorOperated == true || this.isControllerError[i] == false) {
+				if(PhaseControllers.BackDoorOperated == true || this.controllerStates[i] == ControllerState.Started) {
 					// 平常運転 or バックドアによって強制的に書き換えられたときのみ、各種メーター更新
 					this.setMetersByConrollerProgress(i, PhaseControllers.ControllerProgresses[i]);
 				}
@@ -275,8 +296,12 @@ public class PhaseControllers : PhaseBase {
 				checkBoxImage.enabled = this.isControllerCompleted[i];
 
 				// チェックマークをiTween表示
-				this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.ControllerEnd);
-				iTween.ScaleTo(checkBox, new Vector3(1, 1, 1), 1.0f);
+				if(checkBoxImage.enabled == true) {
+					this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.ControllerEnd);
+					iTween.ScaleTo(checkBox, new Vector3(1, 1, 1), 1.0f);
+				} else {
+					iTween.ScaleTo(checkBox, Vector3.zero, 1.0f);
+				}
 			}
 		}
 		if(this.controllerProgressRefreshTimer >= PhaseControllers.ControllerProgressRefreshSeconds) {
@@ -367,15 +392,39 @@ public class PhaseControllers : PhaseBase {
 			GameObject.Find("Controller_TopDescriptionText").GetComponent<UnityEngine.UI.Text>().text = PhaseControllers.TopDescriptionSourceError;
 		}
 
-		// バックドア：端末の操作を強制終了する
-		if(Input.GetKeyDown(KeyCode.Alpha1) == true) {
-			this.isControllerCompleted[0] = true;
+		// バックドア：端末の操作を強制終了する・Qキー押下で端末ごとにやり直しを命じる
+		if(Input.GetKey(KeyCode.Alpha1) == true) {
+			if(Input.GetKey(KeyCode.Q) == false) {
+				this.isControllerCompleted[(int)NetworkConnector.RoleIds.A_Prepare] = true;
+			} else {
+				this.isControllerCompleted[(int)NetworkConnector.RoleIds.A_Prepare] = false;
+				if(this.controllerStates[(int)NetworkConnector.RoleIds.A_Prepare] != ControllerState.RetryToStart) {
+					this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Cancel);
+					this.controllerStates[(int)NetworkConnector.RoleIds.A_Prepare] = ControllerState.RequiredRestart;
+				}
+			}
 		}
-		if(Input.GetKeyDown(KeyCode.Alpha2) == true) {
-			this.isControllerCompleted[1] = true;
+		if(Input.GetKey(KeyCode.Alpha2) == true) {
+			if(Input.GetKey(KeyCode.Q) == false) {
+				this.isControllerCompleted[(int)NetworkConnector.RoleIds.B_Flight] = true;
+			} else {
+				this.isControllerCompleted[(int)NetworkConnector.RoleIds.B_Flight] = false;
+				if(this.controllerStates[(int)NetworkConnector.RoleIds.B_Flight] != ControllerState.RetryToStart) {
+					this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Cancel);
+					this.controllerStates[(int)NetworkConnector.RoleIds.B_Flight] = ControllerState.RequiredRestart;
+				}
+			}
 		}
-		if(Input.GetKeyDown(KeyCode.Alpha3) == true) {
-			this.isControllerCompleted[2] = true;
+		if(Input.GetKey(KeyCode.Alpha3) == true) {
+			if(Input.GetKey(KeyCode.Q) == false) {
+				this.isControllerCompleted[(int)NetworkConnector.RoleIds.C_Assist] = true;
+			} else {
+				this.isControllerCompleted[(int)NetworkConnector.RoleIds.C_Assist] = false;
+				if(this.controllerStates[(int)NetworkConnector.RoleIds.C_Assist] != ControllerState.RetryToStart) {
+					this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Cancel);
+					this.controllerStates[(int)NetworkConnector.RoleIds.C_Assist] = ControllerState.RequiredRestart;
+				}
+			}
 		}
 	}
 
@@ -429,7 +478,7 @@ public class PhaseControllers : PhaseBase {
 			roleId,
 			new System.Action(() => {
 				Debug.Log("接続開始成功: 端末ID=" + roleId);
-				this.isControllerError[roleId] = false;
+				this.controllerStates[roleId] = ControllerState.Started;
 
 				// 進捗報告と完了報告を受け付ける
 				this.watcherControllerProgresses(roleId);
@@ -439,14 +488,19 @@ public class PhaseControllers : PhaseBase {
 				Debug.LogWarning("接続開始失敗: 端末ID=" + roleId);
 
 				// 当該端末をエラー状態に変更
-				this.isControllerError[roleId] = true;
-
-				if(this.parent.PhaseIndex == PhaseManager.PhaseIndexMap[this.GetType()]) {
-					// 現在のフェーズであるうちは自動でリトライを続ける
-					this.startController(roleId);
-				}
+				this.controllerStates[roleId] = ControllerState.RequiredRestart;
 			})
 		);
+	}
+
+	/// <summary>
+	/// 一定時間待機して、操作端末への開始指示をリトライします。
+	/// </summary>
+	/// <param name="roleId">役割ID</param>
+	private IEnumerator retryStartController(int roleId) {
+		Debug.Log("開始指示リトライ待ち: 端末ID=" + roleId + ", IPアドレス=" + PhaseControllers.ControllerIPAddresses[roleId]);
+		yield return new WaitForSeconds(PhaseControllers.TCPRetryWaitSeconds);
+		this.startController(roleId);
 	}
 
 	/// <summary>
@@ -558,12 +612,15 @@ public class PhaseControllers : PhaseBase {
 					buf.Write("援護－サファイアートちゃん\n");
 					break;
 			}
+
 			//if(PhaseControllers.BackDoorOperated == true) {
 			//	// バックドアによってデータが変更された
 			//	buf.Write("　＜＜データ改竄＞＞");
 			//	return buf.ToString();
 			//}
-			if(PhaseControllers.BackDoorOperated == false && this.isControllerError[roleId] == true) {
+
+			if(PhaseControllers.BackDoorOperated == false
+			&& this.controllerStates[roleId] == ControllerState.RetryToStart) {
 				// 障害発生中
 				buf.Write("　＜＜障害発生中＞＞");
 				return buf.ToString();
@@ -675,8 +732,9 @@ public class PhaseControllers : PhaseBase {
 							values[(int)PowerMeter.StartPower] =
 								0.3f + (
 									(int.Parse(progress["param"]) <= PhaseControllers.ControllerAMeterMax) ?
-										int.Parse(progress["param"]) / PhaseControllers.ControllerAMeterMax : 0
+										(int.Parse(progress["param"]) / (float)PhaseControllers.ControllerAMeterMax) : 0
 								) * 0.4f;
+							Debug.Log(values[(int)PowerMeter.StartPower]);
 							values[(int)PowerMeter.FlightPower] = 0;
 							values[(int)PowerMeter.LackPower] = 0.1f;
 							break;
