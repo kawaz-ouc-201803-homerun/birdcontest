@@ -70,7 +70,7 @@ public class Cheerup : CutInParent {
 	/// <param name="other">接したオブジェクトのコライダー</param>
 	public override void OnTriggerEnter(Collider other) {
 		base.OnTriggerEnter(other);
-		if(this.IsCutinEnabled == true && other.gameObject.tag == "Trigger") {
+		if(this.IsCutinEnabled == true && this.isCheerupDone == false && other.gameObject.tag == "Trigger") {
 			this.VoicePlayer.PlaySE(Random.Range(
 				(int)SapphiartChanVoicePlayer.SEID.Cheerup1,
 				(int)SapphiartChanVoicePlayer.SEID.Cheerup3 + 1

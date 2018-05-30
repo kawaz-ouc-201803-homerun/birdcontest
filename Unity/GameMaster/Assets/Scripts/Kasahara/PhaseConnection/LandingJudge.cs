@@ -14,11 +14,6 @@ public class LandingJudge : PlaneBehaviourParent {
 	public UnityEngine.Events.UnityEvent LandingEvent;
 
 	/// <summary>
-	/// 実況ステップ制御オブジェクト
-	/// </summary>
-	public StreamTextStepController StreamController;
-
-	/// <summary>
 	/// 毎フレーム更新処理
 	/// </summary>
 	public void Update() {
@@ -37,5 +32,4 @@ public class LandingJudge : PlaneBehaviourParent {
 			}
 		}
 	}
-
 }

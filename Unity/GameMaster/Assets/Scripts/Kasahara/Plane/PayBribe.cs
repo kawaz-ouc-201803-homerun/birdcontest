@@ -25,7 +25,7 @@ public class PayBribe : CutInParent {
 	public override void OnTriggerEnter(Collider other) {
 		// SE再生
 		base.OnTriggerEnter(other);
-		if(this.enabled == true) {
+		if(this.enabled == true && this.isCutinDone == false) {
 			// カットインが開始したときにSEを鳴らす
 			this.SEPlayer.PlaySE((int)SEPlayer.SEID.WairoCutIn);
 		}

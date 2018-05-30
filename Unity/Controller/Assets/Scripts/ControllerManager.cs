@@ -18,6 +18,7 @@ public class ControllerManager : MonoBehaviour {
 		Idle,               // アイドル状態
 		Playing,            // ミニゲームプレイ中
 		Result,             // 結果画面
+		RequiredAutoClose,  // 自動で結果画面を送る
 	}
 
 	/// <summary>
@@ -33,7 +34,7 @@ public class ControllerManager : MonoBehaviour {
 	/// <summary>
 	/// 完了報告に失敗したときにやり直す回数の上限
 	/// </summary>
-	public const int ConnectRetryMaxCount = 5;
+	public const int ConnectRetryMaxCount = 0;
 
 	/// <summary>
 	/// 完了報告に失敗したときのリトライ待機時間
@@ -199,8 +200,14 @@ public class ControllerManager : MonoBehaviour {
 
 		if(this.EndScreen.activeInHierarchy == true) {
 			// 終了画面にいるとき、ユーザー入力（Escapeキー）でアイドル画面に戻す
+			if(this.phase == ControllerPhase.RequiredAutoClose) {
+				// 一定時間経過後に自動でアイドル状態へ戻す
+				this.StartCoroutine(this.autoResultCloser());
+				this.phase = ControllerPhase.Result;
+			}
 			if(Input.GetKeyDown(KeyCode.Escape) == true
 			&& this.phase == ControllerPhase.Result) {
+				// 強制的にアイドル状態へ戻す
 				this.closeResult();
 				return;
 			}
@@ -269,9 +276,6 @@ public class ControllerManager : MonoBehaviour {
 			// ゲームマスターへ完了報告を出す
 			Debug.Log("GMへ完了報告を出します...");
 			this.sendCompleteProgress();
-
-			// 一定時間経過後に自動でアイドル状態へ戻す
-			this.StartCoroutine(this.autoResultCloser());
 		}));
 	}
 
@@ -285,6 +289,7 @@ public class ControllerManager : MonoBehaviour {
 				Debug.Log("完了報告OK");
 				this.emergencyText = "";
 				this.connector.CloseConnectionsAll();
+				this.phase = ControllerPhase.RequiredAutoClose;
 			}),
 			new System.Action(() => {
 				// 送信失敗
