@@ -211,6 +211,11 @@ public class ControllerManager : MonoBehaviour {
 				this.closeResult();
 				return;
 			}
+			if(Input.GetKeyDown(KeyCode.Q) == true
+			&& this.phase == ControllerPhase.Result) {
+				// 強制的に障害発生扱いにする
+				this.showEmergencyMessage();
+			}
 
 			// 障害発生時のテキスト
 			this.EndScreen.transform.Find("EmergencyText").GetComponent<Text>().text = this.emergencyText;
@@ -294,7 +299,7 @@ public class ControllerManager : MonoBehaviour {
 			new System.Action(() => {
 				// 送信失敗
 				if(this.phase != ControllerPhase.Result) {
-					// 既に結果フェーズからはなれている場合は何もしない
+					// 既に結果フェーズから離れている場合は何もしない
 					return;
 				}
 
@@ -308,21 +313,7 @@ public class ControllerManager : MonoBehaviour {
 
 				// ゲームマスター側でデータを直接入力できるようにするため、送ろうとしたデータの中身を表示する
 				Debug.LogError("完了報告に失敗：リトライ上限に達したため障害扱いとします");
-				using(var buf = new StringWriter()) {
-					bool wrote = false;
-
-					foreach(var key in this.completeProgressData) {
-						if(wrote == true) {
-							// ２回目以降は区切り記号を付ける
-							buf.Write(";");
-						}
-						buf.Write(key.Key + "=" + key.Value);
-						wrote = true;
-					}
-
-					this.emergencyText = buf.ToString();
-					this.connector.CloseConnectionsAll();
-				}
+				this.showEmergencyMessage();
 			})
 		);
 	}
@@ -369,6 +360,27 @@ public class ControllerManager : MonoBehaviour {
 		if(this.phase == ControllerPhase.Result
 		&& string.IsNullOrEmpty(this.emergencyText) == true) {
 			this.closeResult();
+		}
+	}
+
+	/// <summary>
+	/// 障害発生モードに切り替えます。
+	/// </summary>
+	private void showEmergencyMessage() {
+		using(var buf = new StringWriter()) {
+			bool wrote = false;
+
+			foreach(var key in this.completeProgressData) {
+				if(wrote == true) {
+					// ２回目以降は区切り記号を付ける
+					buf.Write(";");
+				}
+				buf.Write(key.Key + "=" + key.Value);
+				wrote = true;
+			}
+
+			this.emergencyText = buf.ToString();
+			this.connector.CloseConnectionsAll();
 		}
 	}
 
