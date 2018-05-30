@@ -170,7 +170,7 @@ public class DataContainer : MonoBehaviour {
 		}
 
 		// 端末B
-		this.ParamB = (int)(this.ParamB / (float)PhaseControllers.ControllerLimitSeconds * 500f);
+		this.ParamB = (int)(this.ParamB / (float)PhaseControllers.ControllerLimitSeconds * 900f);
 
 		// 端末C
 		switch(this.OptionC) {
@@ -179,7 +179,7 @@ public class DataContainer : MonoBehaviour {
 				break;
 
 			case (int)PhaseControllers.OptionC.Human:
-				this.ParamC = (int)(30f + this.ParamC / (float)PhaseControllers.ControllerLimitSeconds * 20f);
+				this.ParamC = (int)(30f + this.ParamC / (float)PhaseControllers.ControllerLimitSeconds * 15f);
 				break;
 
 			case (int)PhaseControllers.OptionC.Wairo:

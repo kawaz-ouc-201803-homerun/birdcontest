@@ -50,7 +50,8 @@ public class Cheerup : CutInParent {
 			// 減衰タイマー計算
 			if(Time.unscaledTime - this.upperStartTime >= 1.0f) {
 				// 減衰開始 or 減衰中
-				this.UpperPower -= this.upperPowerDecay * Time.fixedUnscaledDeltaTime;
+				//this.UpperPower -= this.upperPowerDecay * Time.fixedUnscaledDeltaTime;
+				this.UpperPower -= this.upperPowerDecay * Time.fixedDeltaTime;
 				if(this.UpperPower <= 0) {
 					// 上昇完了
 					this.isCheerupDone = true;

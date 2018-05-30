@@ -39,7 +39,7 @@ public class PompPedal : PlaneBehaviourParent {
 	public void FixedUpdate() {
 		if(this.PedalPower > 0) {
 			// 毎フレーム減衰させながら、前方に力を加える
-			this.PedalPower -= Time.deltaTime * 100f;
+			this.PedalPower -= Time.deltaTime * 80f;
 			this.PlaneRigidbody.AddForce(this.transform.forward * this.PedalPower, ForceMode.Force);
 
 			// NOTE: バランス調整のため、上方向に力を加えるのはあくまでも仕込み役とサポート役に限定させる

@@ -49,7 +49,7 @@ public class AutoMoveHuman : PlaneBehaviourParent, IFlightStarter {
 	public void OnTriggerEnter(Collider other) {
 		if(this.enabled == true && other.gameObject.tag == "Stopper") {
 			// 特に根拠がない上向きの力を加えて離陸させる
-			this.PlaneRigidbody.AddForce(this.PlaneRigidbody.transform.up * 500, ForceMode.Impulse);
+			this.PlaneRigidbody.AddForce(this.PlaneRigidbody.transform.up * 700, ForceMode.Impulse);
 			this.enabled = false;
 
 			// ボイス再生
