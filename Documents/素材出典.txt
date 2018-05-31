@@ -5,18 +5,60 @@
 #         利用規約のページURL
 #         利用規約の特記事項、利用規約を満たしているかどうかなど（破っている場合は何を破っているのかを明記のこと）
 
+============================================================================================================
+
+Unity\Controller\Assets\Images\鳥人コンテスト　ロゴ.png
+	しらたま（笠原外注）
+
+Unity\Controller\Assets\Images\Bomb.png
+Unity\Controller\Assets\Images\Coin.png
+	大友 啓暉
+
+Unity\GameMaster\Assets\Resources\Images\タコメーター針 (汎用).png ほか
+	里 知樹
+
+============================================================================================================
+
+KLで始まるMP3ファイル
+	効果音ラボ
+	https://soundeffect-lab.info/
+	https://soundeffect-lab.info/agreement/
+	表示不要、報告不要、加工OK
+
+MDで始まるMP3ファイル
+	https://maoudamashii.jokersounds.com
+	https://maoudamashii.jokersounds.com/music_rule.html
+	表示必須、報告不要、加工OK
+	「魔王魂」様
+
+ACで始まるMP3ファイル
+	http://amachamusic.chagasi.com/
+	http://amachamusic.chagasi.com/terms.html
+	表示任意、報告任意、加工OK
+
+TMで始まるWaveファイル
+	http://osabisi.sakura.ne.jp/m2/
+	http://osabisi.sakura.ne.jp/m2/material3.html
+	表示任意、報告不要、加工OK
+
+サファイアートちゃん系グラフィック
+	株式会社SapphiArt
+	http://sapphiart-chan.com/
+	http://sapphiart-chan.com/license_jp/
+	SCLロゴ、もしくはライセンス表記が必要 -> GMタイトル画面に表示
+	※肝心のサファイアートちゃんの3Dモデルは不使用
 
 Unity\GameMaster\Assets\UnityChan
 	ユニティ・テクノロジーズ・ジャパン合同会社
 	http://unity-chan.com/
 	http://unity-chan.com/contents/guideline/
-	UCLロゴ、もしくはライセンス表記が必要
+	UCLロゴ、もしくはライセンス表記が必要 -> GMタイトル画面に表示
 
 Unity\GameMaster\Assets\ZRNAssets
 	株式会社ゼンリン
 	http://www.zenrin.co.jp/product/service/3d/asset/
 	http://www.zenrin.co.jp/product/service/3d/asset/pdf/guideline.pdf
-	CCライセンス(BY)＝クレジット表示必須、改変＆再配布自由
+	CCライセンス(BY)＝クレジット表示必須、改変＆再配布自由 -> GMタイトル画面に表示
 
 Unity\GameMaster\Assets\Mobile Airplanes\Small Passenger Plane
 	Dollar Assets
@@ -27,25 +69,59 @@ Unity\GameMaster\Assets\Mobile Airplanes\Small Passenger Plane
 		↑の規約読んでも結局改変がOKなのかNGなのかハッキリしない
 		ソースコードの改変はアウトだが、素材の改変はアリなのか？
 
-MPlus Fonts
-	M+ FONTS PROJECT
-	https://mplus-fonts.osdn.jp/
-	https://mplus-fonts.osdn.jp/about.html
-	改変自由、再配布自由
-
-Unity\GameMaster\Assets\Images\KK【ウィンドウ枠】mes009_960_bk.png
-	空想曲線「こ・ぱんだ」様
-	http://kopacurve.blog33.fc2.com/blog-category-27.html
-	http://kopacurve.blog33.fc2.com/blog-entry-394.html
-	クレジット表記自由
+Unity\GameMaster\Assets\Plugins\Ball Pack
+	AssetStoreより
+	個別ライセンスなし
+	改変無し
 
 Unity\GameMaster\Assets\Images\NC【吹き出し】nc156268.png
 	ニコニコモンズ
 	インターネット全般公開OK、営利利用OK
-
 
 Unity\GameMaster\Assets\Images\IR【完了】アンケートや質問などのチェックマークのアイコン素材 1.png
 	Icon-rainbow
 	http://icon-rainbow.com/tag/%E3%83%81%E3%82%A7%E3%83%83%E3%82%AF%E3%83%9E%E3%83%BC%E3%82%AF/
 	http://icon-rainbow.com/license/
 	表示不要、報告不要
+
+Unity\Controller\Assets\Resources\manager1.png
+	SILHOUETTE DESIGN
+	http://kage-design.com/wp/?p=1249
+
+Unity\Controller\Assets\Fonts\mplus-1mn-bold.ttf
+Unity\Controller\Assets\Fonts\mplus-1mn-medium.ttf
+	MPlus Fonts
+	M+ FONTS PROJECT
+	https://mplus-fonts.osdn.jp/
+	https://mplus-fonts.osdn.jp/about.html
+	改変自由、再配布自由
+
+Unity\GameMaster\Assets\Images\KK【ウィンドウ枠】mes009_960_bk.png
+Unity\Controller\Assets\Images\KK【前面ウィンドウ】mes009_960_wt.png
+	空想曲線「こ・ぱんだ」様
+	http://kopacurve.blog33.fc2.com/blog-category-27.html
+	http://kopacurve.blog33.fc2.com/blog-entry-394.html
+	クレジット表記自由
+
+Unity\Controller\Assets\Images\MG【トランジション】t3.png ほか
+	http://nega.client.jp/m.htm
+	(C)morgue
+	表示不要、報告不要
+
+Unity\Controller\Assets\Images\car_coupe.png
+	いらすとや
+	https://www.irasutoya.com/
+	表示不要、報告不要
+
+Unity\Controller\Assets\Fonts\cinecaption2.26\cinecaption226.ttf
+	しねきゃぷしょん
+	http://fontfree.me/235
+	
+	このフォントのひらがな部分のデザインは「雑念の塊」氏が、カタカナ、漢字、英字、記号部分のデザイン及びフォント作成はchipheadが行いました。
+	ひらがなデザイン
+	【Copyright(C)2000 雑念の塊】
+	【http://member.nifty.ne.jp/zatsunen/jimaku/】
+
+	カタカナデザイン＆フォント作成
+	【Copyright(C)2003 chiphead 】
+	【http://chiphead.jp】
