@@ -116,7 +116,7 @@ namespace SubGame {
 		/// </summary>
 		/// <returns>ミニゲーム結果テキスト</returns>
 		public override string GetResultText() {
-			return "獲得スコア ＝ " + ((int)this.Score);
+			return "気合パワー ＝ " + ((int)this.Score);
 		}
 
 		/// <summary>

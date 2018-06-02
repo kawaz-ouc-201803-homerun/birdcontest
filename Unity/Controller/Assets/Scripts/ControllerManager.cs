@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -155,13 +156,15 @@ public class ControllerManager : MonoBehaviour {
 		// ゲームマスターからの接続待機
 		this.connector = new NetworkController(ControllerSelector.GameMasterIPAddress);
 		this.connector.ControllerWaitForStart(ControllerSelector.SelectedRoleId, new Action<ModelControllerStart>((result) => {
-			// 通信切断
+			// 開始指示を受け取ったときの処理
 			this.connector.CloseConnectionsAll();
 
-			// 開始指示を受け取ったときの処理
 			this.readyForStart = true;
 			this.isControllerStarted = true;
 			this.phase = ControllerPhase.Playing;
+
+			// キャライメージ画像を表示
+			GameObject.Find("CharPanels_Start").transform.Find("CharPanel_Role" + ControllerSelector.SelectedRoleId).gameObject.SetActive(true);
 
 			// データ取り出し
 			ControllerManager.LimitTimeSeconds = result.LimitTimeSecond;
@@ -175,6 +178,9 @@ public class ControllerManager : MonoBehaviour {
 		this.StartScreen.SetActive(false);
 		this.MainScreen.SetActive(false);
 		this.EndScreen.SetActive(false);
+
+		// キャライメージ画像を表示
+		GameObject.Find("CharPanels_Idle").transform.Find("CharPanel_Role" + ControllerSelector.SelectedRoleId).gameObject.SetActive(true);
 	}
 
 	/// <summary>
@@ -196,6 +202,15 @@ public class ControllerManager : MonoBehaviour {
 			this.connector.CloseConnectionsAll();
 			this.readyForStart = false;
 			this.startController();
+		}
+
+		if(this.StartScreen.activeInHierarchy == true || this.MainScreen.activeInHierarchy == true) {
+			// ミニゲーム画面にいるとき、ユーザー入力（Escapeキーで）でリセット
+			if(Input.GetKeyDown(KeyCode.Escape) == true) {
+				this.connector.CloseConnectionsAll();
+				SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+				return;
+			}
 		}
 
 		if(this.EndScreen.activeInHierarchy == true) {
@@ -260,6 +275,9 @@ public class ControllerManager : MonoBehaviour {
 		this.IdleScreen.SetActive(false);
 		this.StartScreen.SetActive(true);
 		this.StartScreen.transform.Find("Window/Text").GetComponent<Text>().text = this.getStartingMessage();
+
+		// キャライメージ画像を表示
+		GameObject.Find("CharPanels_Start").transform.Find("CharPanel_Role" + ControllerSelector.SelectedRoleId).gameObject.SetActive(true);
 
 		// タイマーゼロカウント時の処理を定義
 		this.TimerObject.SetActive(false);
@@ -342,11 +360,9 @@ public class ControllerManager : MonoBehaviour {
 			// GC実行
 			System.GC.Collect();
 
-			// フェードアウト後、再び開始指示待ち状態へ戻ってフェードイン
-			this.Start();
-			this.TimerObject.SetActive(false);
-			this.Controllers[ControllerSelector.SelectedRoleId].StartNewGame();
-			fader.FadeOut(2.0f);
+			// フェードアウト後、再び開始指示待ち状態へ戻る
+			this.connector.CloseConnectionsAll();
+			SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 		}));
 	}
 

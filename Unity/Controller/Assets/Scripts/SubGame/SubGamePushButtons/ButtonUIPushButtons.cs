@@ -31,17 +31,29 @@ namespace SubGame {
 		/// 毎フレーム更新処理
 		/// </summary>
 		void Update() {
-			// 左手のボタン（＝スティック）
-			this.TextButtons[0].text =
-				ButtonUIPushButtons.IsHidden ? "" : SubGamePushButtons.AxisName;
+			// 右手のボタン
+			this.TextButtons[2].text = ButtonUIPushButtons.IsHidden ? "" : ((int)SubGamePushButtons.AvailableKeys[0] - SubGamePushButtons.KeyCodeBase + 1).ToString();
+			if(Input.GetKey(SubGamePushButtons.AvailableKeys[1]) == true) {
+				this.TextButtons[2].color = Color.cyan;
+			} else {
+				this.TextButtons[2].color = Color.white;
+			}
 
 			// LRのボタン
-			this.TextButtons[1].text =
-				ButtonUIPushButtons.IsHidden ? "" : ((int)SubGamePushButtons.AvailableKeys[1] - SubGamePushButtons.KeyCodeBase + 1).ToString();
+			this.TextButtons[1].text = ButtonUIPushButtons.IsHidden ? "" : ((int)SubGamePushButtons.AvailableKeys[1] - SubGamePushButtons.KeyCodeBase + 1).ToString();
+			if(Input.GetAxis(SubGamePushButtons.AxisCodeName) * SubGamePushButtons.AxisDirection > SubGamePushButtons.StickPowerThreshold) {
+				this.TextButtons[2].color = Color.cyan;
+			} else {
+				this.TextButtons[2].color = Color.white;
+			}
 
-			// 右手のボタン
-			this.TextButtons[2].text =
-				ButtonUIPushButtons.IsHidden ? "" : ((int)SubGamePushButtons.AvailableKeys[0] - SubGamePushButtons.KeyCodeBase + 1).ToString();
+			// 左手のボタン（＝十字キーorスティック）
+			this.TextButtons[0].text = ButtonUIPushButtons.IsHidden ? "" : SubGamePushButtons.AxisName;
+			if(Input.GetKey(SubGamePushButtons.AvailableKeys[0]) == true) {
+				this.TextButtons[2].color = Color.cyan;
+			} else {
+				this.TextButtons[2].color = Color.white;
+			}
 		}
 
 	}

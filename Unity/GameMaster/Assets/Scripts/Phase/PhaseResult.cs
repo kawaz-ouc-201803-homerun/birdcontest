@@ -23,6 +23,11 @@ public class PhaseResult : PhaseBase {
 	public const string RankingScoreFormat = "+0.00;-0.00;";
 
 	/// <summary>
+	/// ニアピン賞を採用する要件を無効にするかどうか
+	/// </summary>
+	static public bool IsNearpinConditionDisabled = true;
+
+	/// <summary>
 	/// ニアピン賞を採用する最低参加人数
 	/// </summary>
 	public const int AvailableNearpinMinCount = 3;
@@ -81,7 +86,7 @@ public class PhaseResult : PhaseBase {
 		ranking.text = "";
 
 		// 非同期でオーディエンス投票データを取り出す
-		this.connector.GetAudiencePredicts((string)this.parameters[0], new System.Action<ModelAudiencePredictsResponse>((result) => {
+		this.connector.GetAudiencePredicts((string)this.parameters[0], new Action<ModelAudiencePredictsResponse>((result) => {
 			if(result == null) {
 				// 取得失敗
 				Debug.LogError("オーディエンス投票データ取得失敗: "
@@ -124,9 +129,11 @@ public class PhaseResult : PhaseBase {
 				nearpinDeltaAbs = Mathf.Abs(result.audiencePredicts[0].predict - score);
 			}
 
-			if(result.audiencePredicts.Count >= PhaseResult.AvailableNearpinMinCount
-			&& nearpinDeltaAbs <= PhaseResult.AvailableNearpinMaxDelta) {
-				// ニアピン賞を出すために必要な要件を満たしている場合のみ表示
+			if((PhaseResult.IsNearpinConditionDisabled == true
+			&& result.audiencePredicts.Count > 0)
+			|| (result.audiencePredicts.Count >= PhaseResult.AvailableNearpinMinCount
+			&& nearpinDeltaAbs <= PhaseResult.AvailableNearpinMaxDelta)) {
+				// ニアピン賞を出すために必要な要件が無効にされている or 要件を満たしている場合のみ表示
 				this.nearpinText = "ニアピン賞 ... "
 					+ result.audiencePredicts[0].nickname + " さん ("
 					+ (result.audiencePredicts[0].predict - score).ToString(PhaseResult.RankingScoreFormat)
@@ -135,11 +142,15 @@ public class PhaseResult : PhaseBase {
 				this.nearpinText = "ニアピン賞 ... 今回はありません";
 
 				// デバッグログに理由を書き出す
-				if(result.audiencePredicts.Count < PhaseResult.AvailableNearpinMinCount) {
-					Debug.Log("ニアピン賞なし：投票人数が " + PhaseResult.AvailableNearpinMinCount + " 人に達していません");
-				}
-				if(nearpinDeltaAbs > PhaseResult.AvailableNearpinMaxDelta) {
-					Debug.Log("ニアピン賞なし：トップの人の誤差が " + PhaseResult.AvailableNearpinMaxDelta + " m を超えています");
+				if(PhaseResult.IsNearpinConditionDisabled == true) {
+					Debug.Log("ニアピン賞なし：誰も投票していません");
+				} else {
+					if(result.audiencePredicts.Count < PhaseResult.AvailableNearpinMinCount) {
+						Debug.Log("ニアピン賞なし：投票人数が " + PhaseResult.AvailableNearpinMinCount + " 人に達していません");
+					}
+					if(nearpinDeltaAbs > PhaseResult.AvailableNearpinMaxDelta) {
+						Debug.Log("ニアピン賞なし：トップの人の誤差が " + PhaseResult.AvailableNearpinMaxDelta + " m を超えています");
+					}
 				}
 			}
 

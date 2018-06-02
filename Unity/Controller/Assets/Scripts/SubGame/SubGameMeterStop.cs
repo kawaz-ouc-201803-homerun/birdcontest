@@ -78,7 +78,7 @@ namespace SubGame {
 		/// </summary>
 		/// <returns>ミニゲーム結果テキスト</returns>
 		public override string GetResultText() {
-			return "アクセル開度 ＝ " + ((int)this.Score);
+			return "クルマのアクセル開度 ＝ " + ((int)this.Score);
 		}
 
 		/// <summary>

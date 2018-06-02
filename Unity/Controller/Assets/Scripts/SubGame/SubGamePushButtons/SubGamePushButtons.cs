@@ -43,7 +43,7 @@ namespace SubGame {
 		/// <summary>
 		/// スティックのコードネーム
 		/// </summary>
-		private string axisCodeName;
+		public static string AxisCodeName;
 
 		/// <summary>
 		/// スティックの倒している方向軸名
@@ -55,7 +55,7 @@ namespace SubGame {
 		/// スティックの軸基準で倒している方向
 		/// 正方向=プラス / 逆方向=マイナス
 		/// </summary>
-		private int axisDirection;
+		public static int AxisDirection;
 
 		/// <summary>
 		/// SE再生制御オブジェクト
@@ -97,20 +97,21 @@ namespace SubGame {
 			}
 			*/
 
+			// 2018.06.02 追記: 初見さんにとってはあまりにもシビアすぎたため、全部押しも認めることとしました。
 			// 入力すべきでないダミーボタンの押下判定
-			for(int i = SubGamePushButtons.KeyCount; i < SubGamePushButtons.AvailableKeys.Length; i++) {
-				if(Input.GetKey(SubGamePushButtons.AvailableKeys[i]) == true) {
-					// 入力されていたら判定中止
-					Debug.Log("入力すべきでないボタンが押されています: KeyCode=" + i);
-					return;
-				}
-			}
+			//for(int i = SubGamePushButtons.KeyCount; i < SubGamePushButtons.AvailableKeys.Length; i++) {
+			//	if(Input.GetKey(SubGamePushButtons.AvailableKeys[i]) == true) {
+			//		// 入力されていたら判定中止
+			//		Debug.Log("入力すべきでないボタンが押されています: KeyCode=" + i);
+			//		return;
+			//	}
+			//}
 
 			// 入力すべきボタンの押下判定
 			// NOTE: キーボードでは３キーを同時に入力できない環境が多いため、ゲームパッドによる入力に変更しました。
 			if(Input.GetKey(SubGamePushButtons.AvailableKeys[0]) == true
 			&& Input.GetKey(SubGamePushButtons.AvailableKeys[1]) == true
-			&& Input.GetAxis(this.axisCodeName) * this.axisDirection > SubGamePushButtons.StickPowerThreshold) {
+			&& Input.GetAxis(SubGamePushButtons.AxisCodeName) * SubGamePushButtons.AxisDirection > SubGamePushButtons.StickPowerThreshold) {
 
 				// 点数加算
 				ScoreUIPushButtons.Score++;
@@ -135,7 +136,7 @@ namespace SubGame {
 		/// </summary>
 		/// <returns>ミニゲーム結果テキスト</returns>
 		public override string GetResultText() {
-			return "獲得スコア ＝ " + ScoreUIPushButtons.Score;
+			return "積み上げたボムの数 ＝ " + ScoreUIPushButtons.Score;
 		}
 
 		/// <summary>
@@ -149,30 +150,30 @@ namespace SubGame {
 			// ゲームパッドのLR: 5~8 ボタンの中から選ぶ
 			SubGamePushButtons.AvailableKeys[1] = (KeyCode)Random.Range((int)KeyCode.Joystick1Button4, (int)KeyCode.Joystick1Button7 + 1);
 
-			// ゲームパッドの左手: スティックの方向を決める
+			// ゲームパッドの左手: 十字キーorスティックの方向を決める
 			int i = Random.Range(0, SubGamePushButtons.StickPatternCount);
 			switch(i) {
 				case 0:
-					this.axisCodeName = "Horizontal";
-					this.axisDirection = 1;
+					SubGamePushButtons.AxisCodeName = "Horizontal";
+					SubGamePushButtons.AxisDirection = 1;
 					SubGamePushButtons.AxisName = "→";
 					break;
 
 				case 1:
-					this.axisCodeName = "Horizontal";
-					this.axisDirection = -1;
+					SubGamePushButtons.AxisCodeName = "Horizontal";
+					SubGamePushButtons.AxisDirection = -1;
 					SubGamePushButtons.AxisName = "←";
 					break;
 
 				case 2:
-					this.axisCodeName = "Vertical";
-					this.axisDirection = -1;
+					SubGamePushButtons.AxisCodeName = "Vertical";
+					SubGamePushButtons.AxisDirection = -1;
 					SubGamePushButtons.AxisName = "↑";
 					break;
 
 				case 3:
-					this.axisCodeName = "Vertical";
-					this.axisDirection = 1;
+					SubGamePushButtons.AxisCodeName = "Vertical";
+					SubGamePushButtons.AxisDirection = 1;
 					SubGamePushButtons.AxisName = "↓";
 					break;
 			}

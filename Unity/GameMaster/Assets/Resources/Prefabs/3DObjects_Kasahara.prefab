@@ -193,6 +193,7 @@ GameObject:
   - component: {fileID: 4426277270580072}
   - component: {fileID: 33468139460755778}
   - component: {fileID: 23973919612411124}
+  - component: {fileID: 64037634801240666}
   m_Layer: 0
   m_Name: OuterGround
   m_TagString: Untagged
@@ -16648,7 +16649,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1251612349908912}
   m_LocalRotation: {x: 0.0006896869, y: -0.084979385, z: -0.008086305, w: 0.99634963}
-  m_LocalPosition: {x: -23957, y: 457, z: -4181}
+  m_LocalPosition: {x: -23957, y: 470.5, z: -4181}
   m_LocalScale: {x: 5000, y: 1, z: 5000}
   m_Children: []
   m_Father: {fileID: 4893218642703782}
@@ -23179,6 +23180,20 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!64 &64037634801240666
+MeshCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1017908215558264}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 0
+  m_CookingOptions: 14
+  m_SkinWidth: 0.01
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!64 &64044041266548208
 MeshCollider:
   m_ObjectHideFlags: 1
@@ -25260,11 +25275,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DataContainer: {fileID: 114696595658141018}
-  OptionA: 2
-  ParamA: 60
-  ParamB: 25
-  OptionC: 2
-  ParamC: 25
+  OptionA: 1
+  ParamA: 20
+  ParamB: 20
+  OptionC: 1
+  ParamC: 20
 --- !u!114 &114912329620796198
 MonoBehaviour:
   m_ObjectHideFlags: 1

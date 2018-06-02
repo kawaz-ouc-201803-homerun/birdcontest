@@ -21,6 +21,9 @@ public class BackDoorIPAddress : BackDoorBase {
 		for(int i = 0; i < this.IPAddresses.Length; i++) {
 			this.IPAddresses[i].text = PhaseControllers.ControllerIPAddresses[i];
 		}
+
+		// チェックボックスの状態を復元
+		GameObject.Find("Settings_DisableNearpinConditions").GetComponent<Toggle>().isOn = PhaseResult.IsNearpinConditionDisabled;
 	}
 
 	/// <summary>
@@ -61,6 +64,14 @@ public class BackDoorIPAddress : BackDoorBase {
 		this.IPAddresses[(int)NetworkConnector.RoleIds.A_Prepare].text = "127.0.0.1";
 		this.IPAddresses[(int)NetworkConnector.RoleIds.B_Flight].text = "127.0.0.1";
 		this.IPAddresses[(int)NetworkConnector.RoleIds.C_Assist].text = "127.0.0.1";
+	}
+
+	/// <summary>
+	/// ニアピン賞の条件を取っ払うかどうかのチェック切り替え
+	/// </summary>
+	public void OnNearpinConditionChecked() {
+		PhaseResult.IsNearpinConditionDisabled = GameObject.Find("Settings_DisableNearpinConditions").GetComponent<Toggle>().isOn;
+		Debug.Log("ニアピン賞の条件: " + PhaseResult.IsNearpinConditionDisabled);
 	}
 
 }

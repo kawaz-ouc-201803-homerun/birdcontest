@@ -86,7 +86,7 @@ public class PhaseControllers : PhaseBase {
 	/// <summary>
 	/// オーディエンス投票を締め切る直前の待機秒数
 	/// </summary>
-	public const int ClosingAudienceWaitSeconds = 30;
+	public const int ClosingAudienceWaitSeconds = 60;
 
 	/// <summary>
 	/// 開始指示の接続に失敗したときのリトライ待機時間
@@ -479,10 +479,6 @@ public class PhaseControllers : PhaseBase {
 			new System.Action(() => {
 				Debug.Log("接続開始成功: 端末ID=" + roleId);
 				this.controllerStates[roleId] = ControllerState.Started;
-
-				// 進捗報告と完了報告を受け付ける
-				this.watcherControllerProgresses(roleId);
-				this.watcherControllerCompletes(roleId);
 			}),
 			new System.Action(() => {
 				Debug.LogWarning("接続開始失敗: 端末ID=" + roleId);
@@ -491,6 +487,10 @@ public class PhaseControllers : PhaseBase {
 				this.controllerStates[roleId] = ControllerState.RequiredRestart;
 			})
 		);
+
+		// 進捗報告と完了報告の受け付けを開始する
+		this.watcherControllerProgresses(roleId);
+		this.watcherControllerCompletes(roleId);
 	}
 
 	/// <summary>
