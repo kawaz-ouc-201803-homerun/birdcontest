@@ -14,7 +14,7 @@ public class PhaseFlight : PhaseBase {
 	/// <summary>
 	/// 地点表示を行う時間秒数
 	/// </summary>
-	public const float MapAddressShowTimeSeconds = 3.0f;
+	public const float MapAddressShowTimeSeconds = 5.0f;
 
 	/// <summary>
 	/// 飛距離の滑らかな加算にかける時間秒数

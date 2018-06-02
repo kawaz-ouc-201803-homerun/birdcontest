@@ -163,9 +163,6 @@ public class ControllerManager : MonoBehaviour {
 			this.isControllerStarted = true;
 			this.phase = ControllerPhase.Playing;
 
-			// キャライメージ画像を表示
-			GameObject.Find("CharPanels_Start").transform.Find("CharPanel_Role" + ControllerSelector.SelectedRoleId).gameObject.SetActive(true);
-
 			// データ取り出し
 			ControllerManager.LimitTimeSeconds = result.LimitTimeSecond;
 			if(ControllerSelector.SelectedRoleId != result.RoleId) {

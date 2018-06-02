@@ -488,7 +488,7 @@ public class PhaseControllers : PhaseBase {
 			})
 		);
 
-		// 進捗報告と完了報告の受け付けを開始する
+		// 開始指示の通信成否に関わらず、進捗報告と完了報告の受け付けを開始する
 		this.watcherControllerProgresses(roleId);
 		this.watcherControllerCompletes(roleId);
 	}
@@ -504,7 +504,7 @@ public class PhaseControllers : PhaseBase {
 	}
 
 	/// <summary>
-	/// 操作端末の進捗報告を受け付けます。
+	/// 操作端末の定期的な進捗報告を受け付けます。
 	/// </summary>
 	/// <param name="roleId">役割ID</param>
 	private void watcherControllerProgresses(int roleId) {
@@ -529,6 +529,7 @@ public class PhaseControllers : PhaseBase {
 		this.connector.WaitForControllers(
 			roleId,
 			new System.Action<ModelDictionary<string, string>>((result) => {
+				this.controllerStates[roleId] = ControllerState.Started;
 				this.isControllerCompleted[roleId] = true;
 				PhaseControllers.ControllerProgresses[roleId] = result.GetDictionary();
 			}
