@@ -30,7 +30,7 @@ public abstract class NetworkConnector {
 	/// 操作端末は該当するポートを開放する必要があります。
 	/// ただし、同じLANの中にいる場合はポート開放の必要はありません。
 	/// </summary>
-	protected static readonly int[] StartingControllerPorts = new int[] {
+	public static readonly int[] StartingControllerPorts = new int[] {
 		30100,
 		30101,
 		30102,
@@ -41,7 +41,7 @@ public abstract class NetworkConnector {
 	/// ゲームマスターとなる端末は、これらすべてのポートを開放する必要があります。
 	/// ただし、同じLANの中にいる場合はポート開放の必要はありません。
 	/// </summary>
-	protected static readonly int[] ProgressToGameMasterPorts = new int[] {
+	public static readonly int[] ProgressToGameMasterPorts = new int[] {
 		30200,
 		30201,
 		30202,
@@ -50,28 +50,28 @@ public abstract class NetworkConnector {
 	/// <summary>
 	/// オーディエンス投票システムの基本URL
 	/// </summary>
-	protected const string AudienceSystemBaseURL = "http://tsownserver.dip.jp:8080/GameJamAudience/";
+	public const string AudienceSystemBaseURL = "http://tsownserver.dip.jp:8080/GameJamAudience/";
 
 	/// <summary>
 	/// ゲームマスターのIPアドレス
 	/// </summary>
-	protected string GameMasterIPAddress = "192.168.11.2";
+	public string GameMasterIPAddress = "192.168.11.2";
 
 	/// <summary>
 	/// 各種操作端末のIPアドレス
 	/// </summary>
-	protected string[] ControllerIPAddresses = new string[] {
+	public string[] ControllerIPAddresses = new string[] {
 		"192.168.11.10",
 		"192.168.11.11",
 		"192.168.11.12",
 	};
 
 	/// <summary>
-	/// 受信用のUDPクライアント
+	/// 送信用＆受信用のUDPクライアント
 	/// キーはポート番号
 	/// 受信は必ずしも成功しないため、前回実行時のオブジェクトを保持しておく必要があります。
 	/// </summary>
-	protected Dictionary<int, AsyncResource<UdpClient>> udpReceiveClients = new Dictionary<int, AsyncResource<UdpClient>>();
+	protected Dictionary<int, AsyncResource<UdpClient>> udpClients = new Dictionary<int, AsyncResource<UdpClient>>();
 
 	/// <summary>
 	/// 受信用のTCPリスナー
@@ -79,6 +79,13 @@ public abstract class NetworkConnector {
 	/// 受信は必ずしも成功しないため、前回実行時のオブジェクトを保持しておく必要があります。
 	/// </summary>
 	protected Dictionary<int, AsyncResource<TcpListener>> tcpReceiveListeners = new Dictionary<int, AsyncResource<TcpListener>>();
+
+	/// <summary>
+	/// 送信用のTCPクライアント
+	/// キーはポート番号
+	/// 送信が途中のときに切断するとき、現在どのポートが使われているのかを管理しておく必要があります。
+	/// </summary>
+	protected Dictionary<int, AsyncResource<TcpClient>> tcpSendClients = new Dictionary<int, AsyncResource<TcpClient>>();
 
 	/// <summary>
 	/// 非同期でストリーム受信するときに必要なバッファーオブジェクト
@@ -273,28 +280,72 @@ public abstract class NetworkConnector {
 	}
 
 	/// <summary>
+	/// 指定したTCP/UDPコネクションの指定したポートの接続を破棄します。
+	/// </summary>
+	/// <typeparam name="T">TCP/UDPコネクションクラスの型</typeparam>
+	/// <param name="port">ポート番号</param>
+	public void CloseConnection<T>(int port) {
+		if(typeof(T) == typeof(TcpClient)
+		&& this.tcpSendClients.ContainsKey(port) == true) {
+			this.tcpSendClients[port].Resource.Close();
+			this.tcpSendClients.Remove(port);
+			Debug.Log("TCPClient #" + port + " を閉じました。");
+		}
+		if(typeof(T) == typeof(TcpListener)
+		&& this.tcpReceiveListeners.ContainsKey(port) == true) {
+			this.tcpReceiveListeners[port].Resource.Server.Close();
+			this.tcpReceiveListeners.Remove(port);
+			Debug.Log("TCPListener #" + port + " を閉じました。");
+		}
+		if(typeof(T) == typeof(UdpClient)
+		&& this.udpClients.ContainsKey(port) == true) {
+			this.udpClients[port].Resource.Close();
+			this.udpClients.Remove(port);
+			Debug.Log("UDPClient #" + port + " を閉じました。");
+		}
+	}
+
+	/// <summary>
 	/// すべてのTCP/UDPコネクションを破棄します。
 	/// </summary>
 	public void CloseConnectionsAll() {
-		try {
-			// 受信用TCPリスナー
-			foreach(var tcp in this.tcpReceiveListeners) {
-				tcp.Value.Resource.Server.Close();
+		// 受信用TCPリスナー
+		lock(this.tcpReceiveListeners) {
+			foreach(var key in this.tcpReceiveListeners.Keys) {
+				try {
+					this.tcpReceiveListeners[key].Resource.Server.Close();
+				} catch(Exception e) {
+					Debug.LogWarning("受信用TCPリスナーを正しく閉じられませんでした: " + e.Message + "\n" + e.StackTrace);
+				}
 			}
-		} catch {
-			Debug.LogWarning("受信用TCPリスナーを正しく閉じられませんでした。");
+			this.tcpReceiveListeners.Clear();
 		}
-		this.tcpReceiveListeners.Clear();
 
-		// 受信用UDPクライアント
-		try {
-			foreach(var udp in this.udpReceiveClients) {
-				udp.Value.Resource.Close();
+		// 送信用用TCPクライアント
+		lock(this.tcpSendClients) {
+			foreach(var key in this.tcpSendClients.Keys) {
+				try {
+					this.tcpSendClients[key].Resource.Close();
+				} catch(Exception e) {
+					Debug.LogWarning("送信用TCPクライアントを正しく閉じられませんでした: " + e.Message + "\n" + e.StackTrace);
+				}
 			}
-		} catch {
-			Debug.LogWarning("受信用UDPクライアントを正しく閉じられませんでした。");
+			this.tcpSendClients.Clear();
 		}
-		this.udpReceiveClients.Clear();
+
+		// 受信＆送信用UDPクライアント
+		lock(this.udpClients) {
+			foreach(var key in this.udpClients.Keys) {
+				try {
+					this.udpClients[key].Resource.Close();
+				} catch(Exception e) {
+					Debug.LogWarning("受信＆送信用UDPクライアントを正しく閉じられませんでした: " + e.Message + "\n" + e.StackTrace);
+				}
+			}
+			this.udpClients.Clear();
+		}
+
+		Debug.Log("すべてのポートを閉じました。");
 	}
 
 	/// <summary>
@@ -319,7 +370,9 @@ public abstract class NetworkConnector {
 		this.tcpReceiveListeners[port].AsyncResult = this.tcpReceiveListeners[port].Resource.BeginAcceptSocket(
 			new AsyncCallback((asyncSocket) => {
 				// 待ち受けを終了する
-				this.tcpReceiveListeners.Remove(port);
+				lock(this.tcpReceiveListeners) {
+					this.tcpReceiveListeners.Remove(port);
+				}
 				var listener = (asyncSocket.AsyncState as AsyncResource<TcpListener>).Resource;
 				var tcpSocket = listener.EndAcceptSocket(asyncSocket);
 				Debug.Log("非同期TCP接続受け入れ: " + tcpSocket.RemoteEndPoint.ToString());
@@ -388,16 +441,27 @@ public abstract class NetworkConnector {
 	/// <param name="successCallback">送信が完了したときに呼び出されるコールバック関数</param>
 	/// <param name="failureCallBack">通信に失敗したときに呼び出されるコールバック関数</param>
 	protected void startTCPClient(string ipAddress, int port, object data, Action successCallback, Action failureCallBack) {
+		if(this.tcpSendClients.ContainsKey(port) == true) {
+			// 既に同じポートが使われている場合はスキップ
+			Debug.Log("既にTCPポート #" + port + " が使用中です。");
+			return;
+		}
+		this.tcpSendClients[port] = new AsyncResource<TcpClient>() {
+			Resource = new TcpClient()
+		};
+
 		// 非同期で接続開始
 		Debug.Log("非同期TCP接続待ち (Client): " + ipAddress + ":" + port);
-		var tcpClient = new TcpClient();
 
-		tcpClient.BeginConnect(
+		this.tcpSendClients[port].Resource.BeginConnect(
 			IPAddress.Parse(ipAddress),
 			port,
 			new AsyncCallback((async) => {
 				// 送信準備完了
-				var tcp = async.AsyncState as TcpClient;
+				lock(this.tcpSendClients) {
+					this.tcpSendClients.Remove(port);
+				}
+				var tcp = (async.AsyncState as AsyncResource<TcpClient>).Resource;
 
 				// 通信エラーチェック
 				if(tcp.Connected == false) {
@@ -449,7 +513,7 @@ public abstract class NetworkConnector {
 					}
 				}
 			}),
-			tcpClient
+			this.tcpSendClients[port]
 		);
 	}
 
@@ -462,20 +526,22 @@ public abstract class NetworkConnector {
 	/// <param name="callback">データ処理を行うコールバック関数</param>
 	protected void startUDPReceiver<T>(int port, Action<T> callback) where T : IJSONable<T> {
 		// 受信用のUDPクライアントを生成（localhost）
-		if(this.udpReceiveClients.ContainsKey(port) == true) {
+		if(this.udpClients.ContainsKey(port) == true) {
 			// 前回のUDPクライアントが残っている場合は処理をスキップ
 			Debug.Log("非同期UDPクライアント #" + port + " が使用中です。");
 			return;
 		}
-		this.udpReceiveClients[port] = new AsyncResource<UdpClient>() {
+		this.udpClients[port] = new AsyncResource<UdpClient>() {
 			Resource = new UdpClient(port)
 		};
 
 		// 非同期でデータ受信
 		Debug.Log("非同期UDPデータ受信待ち:  " + "any:" + port);
-		this.udpReceiveClients[port].AsyncResult = this.udpReceiveClients[port].Resource.BeginReceive(
+		this.udpClients[port].AsyncResult = this.udpClients[port].Resource.BeginReceive(
 			new AsyncCallback((async) => {
-				this.udpReceiveClients.Remove(port);
+				lock(this.udpClients) {
+					this.udpClients.Remove(port);
+				}
 				byte[] receivedData = null;
 				var receivedDataCollection = new List<byte>();
 
@@ -523,7 +589,7 @@ public abstract class NetworkConnector {
 					}
 				}
 			}),
-			this.udpReceiveClients[port]
+			this.udpClients[port]
 		);
 	}
 
@@ -537,22 +603,33 @@ public abstract class NetworkConnector {
 	/// <param name="callback">送信が完了したときに呼び出されるコールバック関数</param>
 	protected void startUDPSender(string ipAddress, int port, object data, Action callback) {
 		// 送信用のUDPクライアントを生成
+		if(this.udpClients.ContainsKey(port) == true) {
+			// 前回のUDPクライアントが残っている場合は処理をスキップ
+			Debug.Log("非同期UDPクライアント #" + port + " が使用中です。");
+			return;
+		}
+		this.udpClients[port] = new AsyncResource<UdpClient>() {
+			Resource = new UdpClient()
+		};
 		var endPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
-		var udpClient = new UdpClient();
 
 		// UDPは送信側のみソケット接続が必要となる
-		udpClient.Connect(endPoint);
+		this.udpClients[port].Resource.Connect(endPoint);
 
 		// データを通信用の形式に変換して送信
 		var dataBinary = this.createDataForTransport(data);
 
 		// 非同期でデータ送信
 		Debug.Log("非同期UDP接続送信待ち: " + ipAddress + ":" + port);
-		udpClient.BeginSend(
+		this.udpClients[port].Resource.BeginSend(
 			dataBinary,
 			dataBinary.Length,
 			new AsyncCallback((async) => {
-				using(var udp = async.AsyncState as UdpClient) {
+				lock(this.udpClients) {
+					this.udpClients.Remove(port);
+				}
+
+				using(var udp = (async.AsyncState as AsyncResource<UdpClient>).Resource) {
 					Debug.Log("非同期UDPデータ送信中: " + ipAddress + ":" + port);
 
 					try {
@@ -573,7 +650,7 @@ public abstract class NetworkConnector {
 					}
 				}
 			}),
-			udpClient
+			this.udpClients[port]
 		);
 	}
 

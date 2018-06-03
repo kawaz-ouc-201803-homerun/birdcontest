@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using UnityEngine;
 
 /// <summary>
@@ -155,6 +156,11 @@ public class PhaseControllers : PhaseBase {
 	public const string TopDescriptionSourceError = @"ただいま３名のプレイヤーがフライトの準備をしています。プレイ希望の方は次のゲームが始まるまでお待ち下さい（待ち時間はおよそ５分）。観客の皆さんには結果を予想をして頂きたいところなのですが、あいにくながらただいまネットワークの通信障害が発生しているため投票できません。ご迷惑をおかけして申し訳ありません。";
 
 	/// <summary>
+	/// 各端末の進捗報告の受付を開始したかどうか
+	/// </summary>
+	private bool[] isReportProgressStarted;
+
+	/// <summary>
 	/// 各端末の操作が完了したかどうか
 	/// </summary>
 	private bool[] isControllerCompleted;
@@ -231,6 +237,7 @@ public class PhaseControllers : PhaseBase {
 		this.startAudienceEvent();
 
 		// ##### 操作端末周り #####
+		this.isReportProgressStarted = new bool[PhaseControllers.ControllerIPAddresses.Length];
 		this.isControllerCompleted = new bool[PhaseControllers.ControllerIPAddresses.Length];
 		this.controllerStates = new ControllerState[PhaseControllers.ControllerIPAddresses.Length];
 		for(int i = 0; i < PhaseControllers.ControllerIPAddresses.Length; i++) {
@@ -393,37 +400,34 @@ public class PhaseControllers : PhaseBase {
 		}
 
 		// バックドア：端末の操作を強制終了する・Qキー押下で端末ごとにやり直しを命じる
-		if(Input.GetKey(KeyCode.Alpha1) == true) {
+		if(Input.GetKeyDown(KeyCode.Alpha1) == true) {
 			if(Input.GetKey(KeyCode.Q) == false) {
 				this.isControllerCompleted[(int)NetworkConnector.RoleIds.A_Prepare] = true;
 			} else {
 				this.isControllerCompleted[(int)NetworkConnector.RoleIds.A_Prepare] = false;
-				if(this.controllerStates[(int)NetworkConnector.RoleIds.A_Prepare] != ControllerState.RetryToStart) {
-					this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Cancel);
-					this.controllerStates[(int)NetworkConnector.RoleIds.A_Prepare] = ControllerState.RequiredRestart;
-				}
+				this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Cancel);
+				this.controllerStates[(int)NetworkConnector.RoleIds.A_Prepare] = ControllerState.RequiredRestart;
+				this.connector.CloseConnection<TcpClient>(NetworkConnector.StartingControllerPorts[(int)NetworkConnector.RoleIds.A_Prepare]);
 			}
 		}
-		if(Input.GetKey(KeyCode.Alpha2) == true) {
+		if(Input.GetKeyDown(KeyCode.Alpha2) == true) {
 			if(Input.GetKey(KeyCode.Q) == false) {
 				this.isControllerCompleted[(int)NetworkConnector.RoleIds.B_Flight] = true;
 			} else {
 				this.isControllerCompleted[(int)NetworkConnector.RoleIds.B_Flight] = false;
-				if(this.controllerStates[(int)NetworkConnector.RoleIds.B_Flight] != ControllerState.RetryToStart) {
-					this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Cancel);
-					this.controllerStates[(int)NetworkConnector.RoleIds.B_Flight] = ControllerState.RequiredRestart;
-				}
+				this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Cancel);
+				this.controllerStates[(int)NetworkConnector.RoleIds.B_Flight] = ControllerState.RequiredRestart;
+				this.connector.CloseConnection<TcpClient>(NetworkConnector.StartingControllerPorts[(int)NetworkConnector.RoleIds.B_Flight]);
 			}
 		}
-		if(Input.GetKey(KeyCode.Alpha3) == true) {
+		if(Input.GetKeyDown(KeyCode.Alpha3) == true) {
 			if(Input.GetKey(KeyCode.Q) == false) {
 				this.isControllerCompleted[(int)NetworkConnector.RoleIds.C_Assist] = true;
 			} else {
 				this.isControllerCompleted[(int)NetworkConnector.RoleIds.C_Assist] = false;
-				if(this.controllerStates[(int)NetworkConnector.RoleIds.C_Assist] != ControllerState.RetryToStart) {
-					this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Cancel);
-					this.controllerStates[(int)NetworkConnector.RoleIds.C_Assist] = ControllerState.RequiredRestart;
-				}
+				this.parent.SystemSEPlayer.PlaySE((int)SystemSEPlayer.SystemSEID.Cancel);
+				this.controllerStates[(int)NetworkConnector.RoleIds.C_Assist] = ControllerState.RequiredRestart;
+				this.connector.CloseConnection<TcpClient>(NetworkConnector.StartingControllerPorts[(int)NetworkConnector.RoleIds.C_Assist]);
 			}
 		}
 	}
@@ -468,6 +472,9 @@ public class PhaseControllers : PhaseBase {
 	/// </summary>
 	/// <param name="roleId">役割ID</param>
 	private void startController(int roleId) {
+		// 既にポートを開いていたら閉じる
+		this.connector.CloseConnection<TcpClient>(NetworkConnector.StartingControllerPorts[roleId]);
+
 		Debug.Log("開始指示: 端末ID=" + roleId + ", IPアドレス=" + PhaseControllers.ControllerIPAddresses[roleId]);
 
 		this.connector.StartController(
@@ -489,8 +496,11 @@ public class PhaseControllers : PhaseBase {
 		);
 
 		// 開始指示の通信成否に関わらず、進捗報告と完了報告の受け付けを開始する
-		this.watcherControllerProgresses(roleId);
-		this.watcherControllerCompletes(roleId);
+		if(this.isReportProgressStarted[roleId] == false) {
+			this.isReportProgressStarted[roleId] = true;
+			this.watcherControllerProgresses(roleId);
+			this.watcherControllerCompletes(roleId);
+		}
 	}
 
 	/// <summary>
@@ -735,7 +745,6 @@ public class PhaseControllers : PhaseBase {
 									(int.Parse(progress["param"]) <= PhaseControllers.ControllerAMeterMax) ?
 										(int.Parse(progress["param"]) / (float)PhaseControllers.ControllerAMeterMax) : 0
 								) * 0.4f;
-							Debug.Log(values[(int)PowerMeter.StartPower]);
 							values[(int)PowerMeter.FlightPower] = 0;
 							values[(int)PowerMeter.LackPower] = 0.1f;
 							break;
