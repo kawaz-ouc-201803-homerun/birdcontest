@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <display-name>APCrawlerWatcher</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+  <servlet>
+    <servlet-name>rpcServlet</servlet-name>
+    <servlet-class>net.arnx.jsonic.web.RPCServlet</servlet-class>
+    <init-param>
+      <param-name>config</param-name>
+      <param-value>
+		{
+			"debug": true,
+			"mappings": {
+				"/{package}/{class}.json": "${package}.${class}Handler"
+			},
+			"errors": {
+				"exception.UserException": 406,
+				"java.sql.SQLException": 500
+			}
+		}
+      </param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>rpcServlet</servlet-name>
+    <url-pattern>*.json</url-pattern>
+  </servlet-mapping>
+</web-app>
